@@ -1,0 +1,219 @@
+'use client';
+
+import * as React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { 
+  ChevronDown, 
+  Package, 
+  Users, 
+  Tags, 
+  Boxes, 
+  TrendingUp, 
+  ArrowUpDown,
+  BarChart3,
+  Home
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface SidebarItem {
+  id: string;
+  name: string;
+  href?: string;
+  icon: React.ReactNode;
+  children?: SidebarItem[];
+}
+
+const sidebarItems: SidebarItem[] = [
+  {
+    id: 'dashboard',
+    name: 'Dashboard',
+    href: '/',
+    icon: <Home className="w-5 h-5" />,
+  },
+  {
+    id: 'inventory',
+    name: 'Inventory',
+    icon: <Package className="w-5 h-5" />,
+    children: [
+      {
+        id: 'units',
+        name: 'Units',
+        href: '/units',
+        icon: <Tags className="w-4 h-4" />,
+      },
+      {
+        id: 'inventory-item-categories',
+        name: 'Categories',
+        href: '/inventory-item-categories',
+        icon: <Tags className="w-4 h-4" />,
+      },
+      {
+        id: 'inventory-items',
+        name: 'Inventory Items',
+        href: '/inventory-items',
+        icon: <Package className="w-4 h-4" />,
+      },
+      {
+        id: 'inventory-stocks',
+        name: 'Stock Management',
+        href: '/inventory-stocks',
+        icon: <Boxes className="w-4 h-4" />,
+      },
+      {
+        id: 'inventory-movements',
+        name: 'Stock Movements',
+        href: '/inventory-movements',
+        icon: <ArrowUpDown className="w-4 h-4" />,
+      },
+      {
+        id: 'suppliers',
+        name: 'Suppliers',
+        href: '/suppliers',
+        icon: <Users className="w-4 h-4" />,
+      },
+    ],
+  },
+  {
+    id: 'reports',
+    name: 'Reports',
+    icon: <BarChart3 className="w-5 h-5" />,
+    children: [
+      {
+        id: 'usage-report',
+        name: 'Usage Report',
+        href: '/reports/usage',
+        icon: <TrendingUp className="w-4 h-4" />,
+      },
+      {
+        id: 'forecasting-report',
+        name: 'Forecasting Report',
+        href: '/reports/forecasting',
+        icon: <BarChart3 className="w-4 h-4" />,
+      },
+    ],
+  },
+];
+
+interface SidebarProps {
+  className?: string;
+}
+
+const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
+  ({ className }, ref) => {
+    const pathname = usePathname();
+    const [expandedItems, setExpandedItems] = React.useState<string[]>(['inventory']);
+
+    const toggleExpanded = (itemId: string) => {
+      setExpandedItems(prev => 
+        prev.includes(itemId) 
+          ? prev.filter(id => id !== itemId)
+          : [...prev, itemId]
+      );
+    };
+
+    const isActive = (href?: string) => {
+      if (!href) return false;
+      return pathname === href || (href !== '/' && pathname.startsWith(href));
+    };
+
+    const isParentActive = (item: SidebarItem) => {
+      if (item.href && isActive(item.href)) return true;
+      return item.children?.some(child => isActive(child.href)) || false;
+    };
+
+    const renderSidebarItem = (item: SidebarItem, level: number = 0) => {
+      const hasChildren = item.children && item.children.length > 0;
+      const isExpanded = expandedItems.includes(item.id);
+      const itemIsActive = isActive(item.href);
+      const parentIsActive = isParentActive(item);
+
+      if (hasChildren) {
+        return (
+          <li key={item.id}>
+            <button
+              type="button"
+              onClick={() => toggleExpanded(item.id)}
+              className={cn(
+                'flex items-center w-full p-2 text-base transition duration-75 rounded-xl group hover:bg-accent hover:text-accent-foreground',
+                parentIsActive && 'bg-primary text-primary-foreground font-semibold',
+                level > 0 && 'ml-4'
+              )}
+            >
+              {item.icon}
+              <span className="flex-1 ml-3 text-left whitespace-nowrap">
+                {item.name}
+              </span>
+              <ChevronDown 
+                className={cn(
+                  'w-5 h-5 transition-transform duration-200',
+                  isExpanded && 'rotate-180'
+                )}
+              />
+            </button>
+            
+            {isExpanded && (
+              <ul className="py-2 space-y-2">
+                {item.children?.map(child => renderSidebarItem(child, level + 1))}
+              </ul>
+            )}
+          </li>
+        );
+      }
+
+      return (
+        <li key={item.id}>
+          <Link
+            href={item.href || '#'}
+            className={cn(
+              'flex items-center p-2 text-base transition duration-75 rounded-xl group hover:bg-accent hover:text-accent-foreground',
+              itemIsActive && 'bg-primary text-primary-foreground font-semibold',
+              level > 0 && 'ml-4'
+            )}
+          >
+            {item.icon}
+            <span className="ml-3 whitespace-nowrap">{item.name}</span>
+          </Link>
+        </li>
+      );
+    };
+
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'flex flex-col w-64 h-screen bg-background border-r border-border',
+          className
+        )}
+      >
+        {/* Logo/Brand */}
+        <div className="flex items-center justify-center h-16 px-4 border-b border-border">
+          <Link href="/" className="flex items-center space-x-2">
+            <Package className="w-8 h-8 text-primary" />
+            <span className="text-xl font-bold text-foreground">
+              Inventory
+            </span>
+          </Link>
+        </div>
+
+        {/* Navigation baby */}
+        <nav className="flex-1 px-3 py-4 overflow-y-auto">
+          <ul className="space-y-2">
+            {sidebarItems.map(item => renderSidebarItem(item))}
+          </ul>
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-border">
+          <div className="text-xs text-muted-foreground text-center">
+            Inventory Management v1.0
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+
+Sidebar.displayName = 'Sidebar';
+
+export { Sidebar };
