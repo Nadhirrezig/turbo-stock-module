@@ -5,7 +5,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { InventoryItem } from '@/lib/types';
 import { inventoryItemSchema, InventoryItemFormData } from '@/lib/schemas';
-import { mockCategories, mockUnits, mockSuppliers } from '@/lib/mock-data';
+import { mockCategories, mockUnits } from '@/lib/mock-data';
+// import { mockSuppliers } from '@/lib/mock-data'; // Removed - suppliers belong to transactions, not product definitions
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LoadingButton } from '@/components/shared/loading-button';
@@ -40,7 +41,6 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
       formState: { errors, isSubmitting },
       reset,
       setValue,
-      watch,
     } = useForm<InventoryItemFormData>({
       resolver: zodResolver(inventoryItemSchema),
       defaultValues: {
@@ -48,9 +48,8 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
         inventory_item_category_id: '',
         unit_id: '',
         threshold_quantity: 0,
-        preferred_supplier_id: '',
+        // preferred_supplier_id: '', // Removed - suppliers belong to transactions, not product definitions
         reorder_quantity: 0,
-        unit_purchase_price: 0,
       },
     });
 
@@ -62,18 +61,16 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
           setValue('inventory_item_category_id', inventoryItem.inventory_item_category_id);
           setValue('unit_id', inventoryItem.unit_id);
           setValue('threshold_quantity', inventoryItem.threshold_quantity);
-          setValue('preferred_supplier_id', inventoryItem.preferred_supplier_id);
+          // setValue('preferred_supplier_id', inventoryItem.preferred_supplier_id); // Removed - suppliers belong to transactions, not product definitions
           setValue('reorder_quantity', inventoryItem.reorder_quantity);
-          setValue('unit_purchase_price', inventoryItem.unit_purchase_price);
         } else {
           reset({
             name: '',
             inventory_item_category_id: '',
             unit_id: '',
             threshold_quantity: 0,
-            preferred_supplier_id: '',
+            // preferred_supplier_id: '', // Removed - suppliers belong to transactions, not product definitions
             reorder_quantity: 0,
-            unit_purchase_price: 0,
           });
         }
       }
@@ -151,7 +148,7 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
                             onValueChange={field.onChange}
                             placeholder="Select category..."
                             displayField="name"
-                            subField="description"
+                            // subField="description" // Temporarily hidden to save UI space
                             disabled={isLoading}
                             error={errors.inventory_item_category_id?.message}
                           />
@@ -242,7 +239,7 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
                     </div>
 
                     {/* Unit Purchase Price */}
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Label htmlFor="unit_purchase_price">
                         Unit Purchase Price <span className="text-destructive">*</span>
                       </Label>
@@ -264,10 +261,10 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
                       <p className="text-xs text-muted-foreground">
                         Cost per unit from supplier
                       </p>
-                    </div>
+                    </div> */}
 
-                    {/* Preferred Supplier */}
-                    <div className="space-y-2">
+                    {/* Preferred Supplier - Removed: suppliers belong to transactions, not product definitions */}
+                    {/* <div className="space-y-2">
                       <Label htmlFor="supplier">
                         Preferred Supplier <span className="text-destructive">*</span>
                       </Label>
@@ -287,7 +284,7 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
                           />
                         )}
                       />
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
@@ -307,8 +304,8 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
                         <ul className="list-disc list-inside space-y-1">
                           <li>Set appropriate threshold quantities to avoid stockouts</li>
                           <li>Reorder quantities should consider lead times and usage patterns</li>
-                          <li>Unit purchase prices help calculate inventory values</li>
-                          <li>Preferred suppliers streamline the ordering process</li>
+                          {/* <li>Unit purchase prices help calculate inventory values</li> */}
+                          {/* <li>Preferred suppliers streamline the ordering process</li> */}
                         </ul>
                       </div>
                     </div>

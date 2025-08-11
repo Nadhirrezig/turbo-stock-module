@@ -15,9 +15,10 @@ export const inventoryItemCategorySchema = z.object({
   name: z.string()
     .min(1, 'Category name is required')
     .max(255, 'Category name must not exceed 255 characters'),
-  description: z.string()
-    .max(500, 'Description must not exceed 500 characters')
-    .optional(),
+  // Description field temporarily hidden to save UI space
+  // description: z.string()
+  //   .max(500, 'Description must not exceed 500 characters')
+  //   .optional(),
 });
 
 // Supplier validation schema
@@ -35,9 +36,13 @@ export const supplierSchema = z.object({
   address: z.string()
     .max(500, 'Address must not exceed 500 characters')
     .optional(),
+  description: z.string()
+    .max(500, 'Description must not exceed 500 characters')
+    .optional()
+    .or(z.literal('')),
 });
 
-// Inventory Item validation schema - matches Laravel validation rules
+// Inventory Item validation schema -
 export const inventoryItemSchema = z.object({
   name: z.string()
     .min(1, 'Item name is required')
@@ -46,17 +51,11 @@ export const inventoryItemSchema = z.object({
     .min(1, 'Category is required'),
   unit_id: z.string()
     .min(1, 'Unit is required'),
-  threshold_quantity: z.number()
-    .min(0, 'Threshold quantity must be 0 or greater')
-    .or(z.string().transform((val) => parseFloat(val)).pipe(z.number().min(0))),
-  preferred_supplier_id: z.string()
-    .min(1, 'Preferred supplier is required'),
-  reorder_quantity: z.number()
-    .min(0, 'Reorder quantity must be 0 or greater')
-    .or(z.string().transform((val) => parseFloat(val)).pipe(z.number().min(0))),
-  unit_purchase_price: z.number()
-    .min(0, 'Unit purchase price must be 0 or greater')
-    .or(z.string().transform((val) => parseFloat(val)).pipe(z.number().min(0))),
+  threshold_quantity: z.number().min(0, 'Threshold quantity must be 0 or greater'),
+  // Preferred supplier removed - suppliers belong to transactions, not product definitions
+  // preferred_supplier_id: z.string()
+  //   .min(1, 'Preferred supplier is required'),
+  reorder_quantity: z.number().min(0, 'Reorder quantity must be 0 or greater'),
 });
 
 // Stock Entry validation schema
@@ -64,7 +63,7 @@ export const stockEntrySchema = z.object({
   inventory_item_id: z.string()
     .min(1, 'Inventory item is required'),
   transaction_type: z.enum(['IN', 'OUT', 'WASTE', 'TRANSFER'], {
-    required_error: 'Transaction type is required',
+    message: 'Transaction type is required',
   }),
   quantity: z.number()
     .min(0.01, 'Quantity must be greater than 0')

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { InventoryItem, TableColumn } from '@/lib/types';
 import { DataTable } from './data-table';
-import { formatDateTime, formatCurrency, formatNumber } from '@/lib/utils';
+import { formatDateTime, formatNumber } from '@/lib/utils';
 
 interface InventoryItemsTableProps {
   inventoryItems: InventoryItem[];
@@ -90,39 +90,30 @@ const InventoryItemsTable = React.forwardRef<HTMLDivElement, InventoryItemsTable
           </div>
         ),
       },
-      {
-        key: 'unit_purchase_price',
-        label: 'Unit Price',
-        sortable: true,
-        render: (value: number) => (
-          <div className="text-sm font-medium text-foreground">
-            {formatCurrency(value)}
-          </div>
-        ),
-      },
-      {
-        key: 'preferred_supplier',
-        label: 'Preferred Supplier',
-        sortable: false,
-        render: (value: any, item: InventoryItem) => (
-          <div className="text-sm">
-            {item.preferred_supplier ? (
-              <div>
-                <div className="font-medium text-foreground">
-                  {item.preferred_supplier.name}
-                </div>
-                {item.preferred_supplier.email && (
-                  <div className="text-xs text-muted-foreground">
-                    {item.preferred_supplier.email}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <span className="text-muted-foreground italic">No supplier</span>
-            )}
-          </div>
-        ),
-      },
+      // Preferred supplier column removed - suppliers belong to transactions, not product definitions
+      // {
+      //   key: 'preferred_supplier',
+      //   label: 'Preferred Supplier',
+      //   sortable: false,
+      //   render: (_value: unknown, item: InventoryItem) => (
+      //     <div className="text-sm">
+      //       {item.preferred_supplier ? (
+      //         <div>
+      //           <div className="font-medium text-foreground">
+      //             {item.preferred_supplier.name}
+      //           </div>
+      //           {item.preferred_supplier.email && (
+      //             <div className="text-xs text-muted-foreground">
+      //               {item.preferred_supplier.email}
+      //             </div>
+      //           )}
+      //         </div>
+      //       ) : (
+      //         <span className="text-muted-foreground italic">No supplier</span>
+      //       )}
+      //     </div>
+      //   ),
+      // },
       {
         key: 'created_at',
         label: 'Created',

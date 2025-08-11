@@ -3,9 +3,25 @@
 import * as React from 'react';
 import { useInventoryMovements } from '@/hooks/use-inventory-movements';
 import { mockCategories } from '@/lib/mock-data';
+import { InventoryMovement } from '@/lib/types';
+
+// Custom type for movement edit form
+type MovementEditFormData = {
+  inventory_item_id: string;
+  transaction_type: 'IN' | 'OUT' | 'WASTE' | 'TRANSFER';
+  quantity: number;
+  unit_purchase_price?: number;
+  supplier_id?: string;
+  destination_branch_id?: string;
+  waste_reason?: string;
+  notes?: string;
+  expiration_date?: string;
+};
 import { PageHeader } from '@/components/shared/page-header';
 import { MovementsTable } from '@/components/tables/movements-table';
 import { SearchableSelect } from '@/components/shared/searchable-select';
+import { MovementViewDrawer } from '@/components/forms/movement-view-drawer';
+import { MovementEditForm } from '@/components/forms/movement-edit-form';
 import { formatNumber } from '@/lib/utils';
 
 export function InventoryMovementsPageClient() {
@@ -16,7 +32,14 @@ export function InventoryMovementsPageClient() {
     filters,
     movementStats,
     updateFilters,
+    updateMovement,
   } = useInventoryMovements();
+
+  // State for view and edit drawers
+  const [viewDrawerOpen, setViewDrawerOpen] = React.useState(false);
+  const [editDrawerOpen, setEditDrawerOpen] = React.useState(false);
+  const [selectedMovement, setSelectedMovement] = React.useState<InventoryMovement | null>(null);
+  const [editLoading, setEditLoading] = React.useState(false);
 
   // Handle search
   const handleSearchChange = React.useCallback((search: string) => {
@@ -47,6 +70,35 @@ export function InventoryMovementsPageClient() {
   const handleDateRangeChange = React.useCallback((value: string) => {
     updateFilters({ date_range: value, page: 1 });
   }, [updateFilters]);
+
+  // Handle view movement
+  const handleViewMovement = React.useCallback((movement: InventoryMovement) => {
+    setSelectedMovement(movement);
+    setViewDrawerOpen(true);
+  }, []);
+
+  // Handle edit movement
+  const handleEditMovement = React.useCallback((movement: InventoryMovement) => {
+    setSelectedMovement(movement);
+    setEditDrawerOpen(true);
+  }, []);
+
+  // Handle edit form submission
+  const handleEditSubmit = React.useCallback(async (data: MovementEditFormData) => {
+    if (!selectedMovement) return;
+
+    setEditLoading(true);
+    try {
+      await updateMovement(selectedMovement.id, data);
+      setEditDrawerOpen(false);
+      setSelectedMovement(null);
+    } catch (error) {
+      console.error('Failed to update movement:', error);
+      throw error;
+    } finally {
+      setEditLoading(false);
+    }
+  }, [selectedMovement, updateMovement]);
 
   const transactionTypeOptions = [
     { id: '', name: 'All Types', description: 'Show all transaction types' },
@@ -188,9 +240,31 @@ export function InventoryMovementsPageClient() {
           onSort={handleSort}
           sortField={filters.sort_field}
           sortDirection={filters.sort_direction}
+          onView={handleViewMovement}
+          onEdit={handleEditMovement}
           loading={loading}
         />
       </div>
+
+      {/* View Movement Drawer */}
+      <MovementViewDrawer
+        open={viewDrawerOpen}
+        onOpenChange={setViewDrawerOpen}
+        movement={selectedMovement}
+        onEdit={(movement) => {
+          setViewDrawerOpen(false);
+          handleEditMovement(movement);
+        }}
+      />
+
+      {/* Edit Movement Form */}
+      <MovementEditForm
+        open={editDrawerOpen}
+        onOpenChange={setEditDrawerOpen}
+        movement={selectedMovement}
+        onSubmit={handleEditSubmit}
+        loading={editLoading}
+      />
     </div>
   );
 }

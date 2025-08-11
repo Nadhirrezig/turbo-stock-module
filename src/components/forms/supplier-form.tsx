@@ -44,6 +44,7 @@ const SupplierForm = React.forwardRef<HTMLDivElement, SupplierFormProps>(
         email: '',
         phone: '',
         address: '',
+        description: '',
       },
     });
 
@@ -55,12 +56,14 @@ const SupplierForm = React.forwardRef<HTMLDivElement, SupplierFormProps>(
           setValue('email', supplier.email || '');
           setValue('phone', supplier.phone || '');
           setValue('address', supplier.address || '');
+          setValue('description', supplier.description || '');
         } else {
           reset({
             name: '',
             email: '',
             phone: '',
             address: '',
+            description: '',
           });
         }
       }
@@ -193,6 +196,39 @@ const SupplierForm = React.forwardRef<HTMLDivElement, SupplierFormProps>(
                         </p>
                       )}
                     </div>
+                  </div>
+                </div>
+
+                {/* Brand/Description Section */}
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-foreground mb-4">
+                    Brand Information
+                  </h3>
+
+                  <div className="space-y-4">
+                    {/* Description */}
+                    <div className="space-y-2">
+                      <Label htmlFor="description">
+                        Description
+                      </Label>
+                      <textarea
+                        id="description"
+                        rows={3}
+                        placeholder="Brief description of this supplier/brand..."
+                        {...register('description')}
+                        className={`flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none ${
+                          errors.description ? 'border-destructive focus-visible:ring-destructive' : ''
+                        }`}
+                        disabled={isLoading}
+                      />
+                      {errors.description && (
+                        <p className="text-sm text-destructive">
+                          {errors.description.message}
+                        </p>
+                      )}
+                    </div>
+
+
                   </div>
                 </div>
 

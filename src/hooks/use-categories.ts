@@ -54,7 +54,7 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       const newCategory: InventoryItemCategory = {
         id: generateId(),
         name: data.name,
-        description: data.description,
+        // description: data.description,
         branch_id: 'branch-1', // Mock branch ID
         created_at: getCurrentTimestamp(),
         updated_at: getCurrentTimestamp(),
@@ -77,7 +77,7 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       const updatedCategory: InventoryItemCategory = {
         id,
         name: data.name,
-        description: data.description,
+        // description: data.description,
         branch_id: categories.find(c => c.id === id)?.branch_id || 'branch-1',
         created_at: categories.find(c => c.id === id)?.created_at || getCurrentTimestamp(),
         updated_at: getCurrentTimestamp(),

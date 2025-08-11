@@ -47,6 +47,7 @@ export const mockUnits: Unit[] = [
 ];
 
 // Mock Categories data
+// Note: Description fields are temporarily hidden from UI to save space, but preserved in data
 export const mockCategories: InventoryItemCategory[] = [
   {
     id: '1',
@@ -98,6 +99,7 @@ export const mockSuppliers: Supplier[] = [
     email: 'orders@coffeebeans.com',
     phone: '+1-555-0101',
     address: '123 Coffee Street, Bean City, BC 12345',
+    description: 'Premium coffee beans from sustainable farms worldwide',
     created_at: '2024-01-10T08:00:00Z',
     updated_at: '2024-01-10T08:00:00Z',
   },
@@ -107,6 +109,7 @@ export const mockSuppliers: Supplier[] = [
     email: 'supply@freshdairy.com',
     phone: '+1-555-0102',
     address: '456 Milk Avenue, Dairy Town, DT 67890',
+    description: 'Farm-fresh dairy products and ingredients',
     created_at: '2024-01-10T08:01:00Z',
     updated_at: '2024-01-10T08:01:00Z',
   },
@@ -116,6 +119,7 @@ export const mockSuppliers: Supplier[] = [
     email: 'info@bakerysupplies.com',
     phone: '+1-555-0103',
     address: '789 Flour Road, Bakery City, BC 11111',
+    description: 'Professional bakery ingredients and supplies',
     created_at: '2024-01-10T08:02:00Z',
     updated_at: '2024-01-10T08:02:00Z',
   },
@@ -125,6 +129,7 @@ export const mockSuppliers: Supplier[] = [
     email: 'sales@packagingsolutions.com',
     phone: '+1-555-0104',
     address: '321 Package Lane, Supply Town, ST 22222',
+    description: 'Eco-friendly packaging and container solutions',
     created_at: '2024-01-10T08:03:00Z',
     updated_at: '2024-01-10T08:03:00Z',
   },
@@ -134,12 +139,14 @@ export const mockSuppliers: Supplier[] = [
     email: 'orders@organicingredients.com',
     phone: '+1-555-0105',
     address: '654 Organic Way, Green Valley, GV 33333',
+    description: 'Certified organic ingredients and specialty products',
     created_at: '2024-01-10T08:04:00Z',
     updated_at: '2024-01-10T08:04:00Z',
   },
 ];
 
 // Mock Inventory Items data
+// Note: Preferred supplier fields removed - suppliers belong to transactions, not product definitions
 export const mockInventoryItems: InventoryItem[] = [
   {
     id: '1',
@@ -147,14 +154,13 @@ export const mockInventoryItems: InventoryItem[] = [
     inventory_item_category_id: '1',
     unit_id: '1',
     threshold_quantity: 5,
-    preferred_supplier_id: '1',
+    // preferred_supplier_id: '1', // Removed - suppliers belong to transactions, not product definitions
     reorder_quantity: 20,
-    unit_purchase_price: 12.50,
     created_at: '2024-01-20T10:00:00Z',
     updated_at: '2024-01-20T10:00:00Z',
     category: mockCategories[0],
     unit: mockUnits[0],
-    preferred_supplier: mockSuppliers[0],
+    // preferred_supplier: mockSuppliers[0], // Removed - suppliers belong to transactions, not product definitions
   },
   {
     id: '2',
@@ -162,14 +168,13 @@ export const mockInventoryItems: InventoryItem[] = [
     inventory_item_category_id: '2',
     unit_id: '2',
     threshold_quantity: 10,
-    preferred_supplier_id: '2',
+    // preferred_supplier_id: '2', // Removed - suppliers belong to transactions, not product definitions
     reorder_quantity: 50,
-    unit_purchase_price: 3.25,
     created_at: '2024-01-20T10:01:00Z',
     updated_at: '2024-01-20T10:01:00Z',
     category: mockCategories[1],
     unit: mockUnits[1],
-    preferred_supplier: mockSuppliers[1],
+    // preferred_supplier: mockSuppliers[1], // Removed - suppliers belong to transactions, not product definitions
   },
   {
     id: '3',
@@ -177,14 +182,13 @@ export const mockInventoryItems: InventoryItem[] = [
     inventory_item_category_id: '3',
     unit_id: '3',
     threshold_quantity: 20,
-    preferred_supplier_id: '3',
+    // preferred_supplier_id: '3', // Removed - suppliers belong to transactions, not product definitions
     reorder_quantity: 100,
-    unit_purchase_price: 1.75,
     created_at: '2024-01-20T10:02:00Z',
     updated_at: '2024-01-20T10:02:00Z',
     category: mockCategories[2],
     unit: mockUnits[2],
-    preferred_supplier: mockSuppliers[2],
+    // preferred_supplier: mockSuppliers[2], // Removed - suppliers belong to transactions, not product definitions
   },
   {
     id: '4',
@@ -192,14 +196,13 @@ export const mockInventoryItems: InventoryItem[] = [
     inventory_item_category_id: '4',
     unit_id: '1',
     threshold_quantity: 2,
-    preferred_supplier_id: '5',
+    // preferred_supplier_id: '5', // Removed - suppliers belong to transactions, not product definitions
     reorder_quantity: 10,
-    unit_purchase_price: 2.80,
     created_at: '2024-01-20T10:03:00Z',
     updated_at: '2024-01-20T10:03:00Z',
     category: mockCategories[3],
     unit: mockUnits[0],
-    preferred_supplier: mockSuppliers[4],
+    // preferred_supplier: mockSuppliers[4], // Removed - suppliers belong to transactions, not product definitions
   },
   {
     id: '5',
@@ -207,14 +210,13 @@ export const mockInventoryItems: InventoryItem[] = [
     inventory_item_category_id: '5',
     unit_id: '3',
     threshold_quantity: 100,
-    preferred_supplier_id: '4',
+    // preferred_supplier_id: '4', // Removed - suppliers belong to transactions, not product definitions
     reorder_quantity: 500,
-    unit_purchase_price: 0.15,
     created_at: '2024-01-20T10:04:00Z',
     updated_at: '2024-01-20T10:04:00Z',
     category: mockCategories[4],
     unit: mockUnits[2],
-    preferred_supplier: mockSuppliers[3],
+    // preferred_supplier: mockSuppliers[3], // Removed - suppliers belong to transactions, not product definitions
   },
 ];
 

@@ -41,7 +41,7 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
       resolver: zodResolver(inventoryItemCategorySchema),
       defaultValues: {
         name: '',
-        description: '',
+        // description: '', // Temporarily hidden
       },
     });
 
@@ -50,11 +50,11 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
       if (open) {
         if (category) {
           setValue('name', category.name);
-          setValue('description', category.description || '');
+          // setValue('description', category.description || ''); // Temporarily hidden
         } else {
           reset({
             name: '',
-            description: '',
+            // description: '', // Temporarily hidden
           });
         }
       }
@@ -117,8 +117,8 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                       )}
                     </div>
 
-                    {/* Description */}
-                    <div className="space-y-2">
+                    {/* Description - Temporarily hidden to save UI space */}
+                    {/* <div className="space-y-2">
                       <Label htmlFor="description">
                         Description
                       </Label>
@@ -137,7 +137,7 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                           {errors.description.message}
                         </p>
                       )}
-                    </div>
+                    </div> */}
                   </div>
                 </div>
 
@@ -157,7 +157,7 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                         <ul className="list-disc list-inside space-y-1">
                           <li>Use clear, descriptive names for categories</li>
                           <li>Categories help organize and filter inventory items</li>
-                          <li>Add descriptions to clarify what items belong in each category</li>
+                          {/* <li>Add descriptions to clarify what items belong in each category</li> */}
                         </ul>
                       </div>
                     </div>

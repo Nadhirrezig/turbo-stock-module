@@ -10,7 +10,7 @@ export interface Unit {
 export interface InventoryItemCategory {
   id: string;
   name: string;
-  description?: string;
+  description?: string; // Temporarily hidden from UI to save space, but kept in data model
   branch_id: string;
   created_at: string;
   updated_at: string;
@@ -22,6 +22,7 @@ export interface Supplier {
   email?: string;
   phone?: string;
   address?: string;
+  description?: string;
   created_at: string;
   updated_at: string;
 }
@@ -32,15 +33,14 @@ export interface InventoryItem {
   inventory_item_category_id: string;
   unit_id: string;
   threshold_quantity: number;
-  preferred_supplier_id: string;
+  // preferred_supplier_id: string; // Removed - suppliers belong to transactions, not product definitions
   reorder_quantity: number;
-  unit_purchase_price: number;
   created_at: string;
   updated_at: string;
   // Relations
   category?: InventoryItemCategory;
   unit?: Unit;
-  preferred_supplier?: Supplier;
+  // preferred_supplier?: Supplier; // Removed - suppliers belong to transactions, not product definitions
 }
 
 export interface InventoryStock {
@@ -83,7 +83,7 @@ export interface CreateUnitData {
 
 export interface CreateInventoryItemCategoryData {
   name: string;
-  description?: string;
+  // description?: string; // Temporarily hidden from UI to save space
 }
 
 export interface CreateSupplierData {
@@ -91,6 +91,7 @@ export interface CreateSupplierData {
   email?: string;
   phone?: string;
   address?: string;
+  description?: string;
 }
 
 export interface CreateInventoryItemData {
@@ -98,9 +99,9 @@ export interface CreateInventoryItemData {
   inventory_item_category_id: string;
   unit_id: string;
   threshold_quantity: number;
-  preferred_supplier_id: string;
+  // preferred_supplier_id: string; // Removed - suppliers belong to transactions, not product definitions
   reorder_quantity: number;
-  unit_purchase_price: number;
+  // unit_purchase_price: number; // Removed - prices belong to transactions, not product definitions
 }
 
 export interface CreateStockEntryData {

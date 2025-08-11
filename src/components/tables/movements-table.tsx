@@ -4,7 +4,8 @@ import * as React from 'react';
 import { InventoryMovement, TableColumn } from '@/lib/types';
 import { DataTable } from './data-table';
 import { formatDateTime, formatCurrency, formatNumber, getTransactionTypeLabel, getTransactionTypeColor } from '@/lib/utils';
-import { ArrowDown, ArrowUp, Trash2, ArrowRightLeft } from 'lucide-react';
+import { ArrowDown, ArrowUp, Trash2, ArrowRightLeft, Eye, Edit } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface MovementsTableProps {
   inventoryMovements: InventoryMovement[];
@@ -18,6 +19,8 @@ interface MovementsTableProps {
   onSort?: (field: string, direction: 'asc' | 'desc') => void;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
+  onView?: (movement: InventoryMovement) => void;
+  onEdit?: (movement: InventoryMovement) => void;
   loading?: boolean;
   className?: string;
 }
@@ -30,6 +33,8 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
     onSort,
     sortField,
     sortDirection,
+    onView,
+    onEdit,
     loading = false,
     className,
   }, ref) => {
@@ -121,27 +126,27 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
           </div>
         ),
       },
-      {
-        key: 'notes',
-        label: 'Notes',
-        sortable: false,
-        render: (value: string | undefined, movement: InventoryMovement) => (
-          <div className="text-sm text-muted-foreground max-w-xs">
-            {movement.waste_reason && (
-              <div className="text-destructive font-medium mb-1">
-                Reason: {movement.waste_reason}
-              </div>
-            )}
-            {value ? (
-              <div className="truncate" title={value}>
-                {value}
-              </div>
-            ) : (
-              <span className="italic">No notes</span>
-            )}
-          </div>
-        ),
-      },
+      // {
+      //   key: 'notes',
+      //   label: 'Notes',
+      //   sortable: false,
+      //   render: (value: string | undefined, movement: InventoryMovement) => (
+      //     <div className="text-sm text-muted-foreground max-w-xs">
+      //       {movement.waste_reason && (
+      //         <div className="text-destructive font-medium mb-1">
+      //           Reason: {movement.waste_reason}
+      //         </div>
+      //       )}
+      //       {value ? (
+      //         <div className="truncate" title={value}>
+      //           {value}
+      //         </div>
+      //       ) : (
+      //         <span className="italic">No notes</span>
+      //       )}
+      //     </div>
+      //   ),
+      // },
       {
         key: 'created_at',
         label: 'Date',
@@ -149,6 +154,31 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
         render: (value: string) => (
           <div className="text-sm text-muted-foreground">
             {formatDateTime(value)}
+          </div>
+        ),
+      },
+      {
+        key: 'actions',
+        label: 'Actions',
+        sortable: false,
+        render: (value: any, movement: InventoryMovement) => (
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onView?.(movement)}
+              title="View Details"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit?.(movement)}
+              title="Edit Movement"
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
           </div>
         ),
       },

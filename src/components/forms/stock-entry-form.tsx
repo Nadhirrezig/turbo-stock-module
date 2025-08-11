@@ -261,7 +261,27 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                         )}
                       </div>
                     )}
-
+                    {/* Waste Reason - Required for WASTE transactions */}
+                    {transactionType === 'TRANSFER' && (
+                      <div className="space-y-2 sm:col-span-2">
+                        <Label htmlFor="destination_branch_id">
+                          Destination <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          id="destination_branch_id"
+                          type="text"
+                          placeholder="e.g., Warehouse1, Warehouse2 .."
+                          {...register('destination_branch_id')}
+                          className={errors.destination_branch_id ? 'border-destructive focus-visible:ring-destructive' : ''}
+                          disabled={isLoading}
+                        />
+                        {errors.destination_branch_id && (
+                          <p className="text-sm text-destructive">
+                            {errors.destination_branch_id.message}
+                          </p>
+                        )}
+                      </div>
+                    )}
                     {/* Expiration Date - Optional for IN transactions */}
                     {transactionType === 'IN' && (
                       <div className="space-y-2">

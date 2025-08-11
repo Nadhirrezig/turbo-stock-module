@@ -3,7 +3,8 @@
 import * as React from 'react';
 import { InventoryItemCategory, TableColumn } from '@/lib/types';
 import { DataTable } from './data-table';
-import { formatDateTime, truncateText } from '@/lib/utils';
+import { formatDateTime } from '@/lib/utils';
+// import { truncateText } from '@/lib/utils'; // Temporarily unused - for description column
 
 interface CategoriesTableProps {
   categories: InventoryItemCategory[];
@@ -47,18 +48,19 @@ const CategoriesTable = React.forwardRef<HTMLDivElement, CategoriesTableProps>(
           </div>
         ),
       },
-      {
-        key: 'description',
-        label: 'Description',
-        sortable: false,
-        render: (value: string | undefined) => (
-          <div className="text-sm text-muted-foreground">
-            {value ? truncateText(value, 60) : (
-              <span className="italic">No description</span>
-            )}
-          </div>
-        ),
-      },
+      // Description column temporarily hidden to save UI space
+      // {
+      //   key: 'description',
+      //   label: 'Description',
+      //   sortable: false,
+      //   render: (value: string | undefined) => (
+      //     <div className="text-sm text-muted-foreground">
+      //       {value ? truncateText(value, 60) : (
+      //         <span className="italic">No description</span>
+      //       )}
+      //     </div>
+      //   ),
+      // },
       {
         key: 'created_at',
         label: 'Created',

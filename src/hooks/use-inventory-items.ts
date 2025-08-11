@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { InventoryItem, CreateInventoryItemData, BaseFilters } from '@/lib/types';
-import { mockInventoryItems, mockCategories, mockUnits, mockSuppliers, simulateApiDelay, generateId, getCurrentTimestamp } from '@/lib/mock-data';
+import { mockInventoryItems, mockCategories, mockUnits, simulateApiDelay, generateId, getCurrentTimestamp } from '@/lib/mock-data';
+// import { mockSuppliers } from '@/lib/mock-data'; // Removed - suppliers belong to transactions, not product definitions
 import { filterBySearch, sortItems, paginateItems } from '@/lib/utils';
 
 interface UseInventoryItemsOptions {
@@ -54,23 +55,23 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
       // Find related entities
       const category = mockCategories.find(c => c.id === data.inventory_item_category_id);
       const unit = mockUnits.find(u => u.id === data.unit_id);
-      const supplier = mockSuppliers.find(s => s.id === data.preferred_supplier_id);
-      
+      // const supplier = mockSuppliers.find(s => s.id === data.preferred_supplier_id); // Removed - suppliers belong to transactions
+
       const newItem: InventoryItem = {
         id: generateId(),
         name: data.name,
         inventory_item_category_id: data.inventory_item_category_id,
         unit_id: data.unit_id,
         threshold_quantity: data.threshold_quantity,
-        preferred_supplier_id: data.preferred_supplier_id,
+        // preferred_supplier_id: data.preferred_supplier_id, // Removed - suppliers belong to transactions
         reorder_quantity: data.reorder_quantity,
-        unit_purchase_price: data.unit_purchase_price,
+        // unit_purchase_price: data.unit_purchase_price, // Removed - prices belong to transactions
         created_at: getCurrentTimestamp(),
         updated_at: getCurrentTimestamp(),
         // Include relations
         category,
         unit,
-        preferred_supplier: supplier,
+        // preferred_supplier: supplier, // Removed - suppliers belong to transactions
       };
 
       setInventoryItems(prev => [newItem, ...prev]);
@@ -90,23 +91,23 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
       // Find related entities
       const category = mockCategories.find(c => c.id === data.inventory_item_category_id);
       const unit = mockUnits.find(u => u.id === data.unit_id);
-      const supplier = mockSuppliers.find(s => s.id === data.preferred_supplier_id);
-      
+      // const supplier = mockSuppliers.find(s => s.id === data.preferred_supplier_id); // Removed - suppliers belong to transactions
+
       const updatedItem: InventoryItem = {
         id,
         name: data.name,
         inventory_item_category_id: data.inventory_item_category_id,
         unit_id: data.unit_id,
         threshold_quantity: data.threshold_quantity,
-        preferred_supplier_id: data.preferred_supplier_id,
+        // preferred_supplier_id: data.preferred_supplier_id, // Removed - suppliers belong to transactions
         reorder_quantity: data.reorder_quantity,
-        unit_purchase_price: data.unit_purchase_price,
+        // unit_purchase_price: data.unit_purchase_price, // Removed - prices belong to transactions
         created_at: inventoryItems.find(i => i.id === id)?.created_at || getCurrentTimestamp(),
         updated_at: getCurrentTimestamp(),
         // Include relations
         category,
         unit,
-        preferred_supplier: supplier,
+        // preferred_supplier: supplier, // Removed - suppliers belong to transactions
       };
 
       setInventoryItems(prev => prev.map(item => 

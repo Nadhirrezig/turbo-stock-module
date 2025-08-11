@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Supplier, TableColumn } from '@/lib/types';
 import { DataTable } from './data-table';
 import { formatDateTime, truncateText } from '@/lib/utils';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin, Building2 } from 'lucide-react';
 
 interface SuppliersTableProps {
   suppliers: Supplier[];
@@ -39,6 +39,16 @@ const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
   }, ref) => {
     const columns: TableColumn<Supplier>[] = [
       {
+        key: 'icon',
+        label: 'Type',
+        sortable: false,
+        render: () => (
+          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted">
+            <Building2 className="w-5 h-5 text-muted-foreground" />
+          </div>
+        ),
+      },
+      {
         key: 'name',
         label: 'Supplier Name',
         sortable: true,
@@ -52,7 +62,7 @@ const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
         key: 'email',
         label: 'Contact Information',
         sortable: false,
-        render: (value: string | undefined, supplier: Supplier) => (
+        render: (_value: string | undefined, supplier: Supplier) => (
           <div className="space-y-1">
             {supplier.email && (
               <div className="flex items-center text-sm text-muted-foreground">
@@ -87,6 +97,20 @@ const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
               </div>
             ) : (
               <span className="italic">No address</span>
+            )}
+          </div>
+        ),
+      },
+      {
+        key: 'description',
+        label: 'Description',
+        sortable: false,
+        render: (value: string | undefined) => (
+          <div className="text-sm text-muted-foreground max-w-xs">
+            {value ? (
+              <span className="line-clamp-2">{value}</span>
+            ) : (
+              <span className="italic">No description</span>
             )}
           </div>
         ),

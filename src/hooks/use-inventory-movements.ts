@@ -5,6 +5,19 @@ import { InventoryMovement, InventoryMovementFilters, MovementStats } from '@/li
 import { mockInventoryMovements, simulateApiDelay } from '@/lib/mock-data';
 import { filterBySearch, sortItems, paginateItems } from '@/lib/utils';
 
+// Custom type for movement updates
+type MovementUpdateData = {
+  inventory_item_id: string;
+  transaction_type: 'IN' | 'OUT' | 'WASTE' | 'TRANSFER';
+  quantity: number;
+  unit_purchase_price?: number;
+  supplier_id?: string;
+  destination_branch_id?: string;
+  waste_reason?: string;
+  notes?: string;
+  expiration_date?: string;
+};
+
 interface UseInventoryMovementsOptions {
   initialFilters?: InventoryMovementFilters;
 }
@@ -128,6 +141,33 @@ export function useInventoryMovements(options: UseInventoryMovementsOptions = {}
       .slice(0, limit);
   }, [inventoryMovements]);
 
+  // Update movement
+  const updateMovement = useCallback(async (movementId: string, data: MovementUpdateData) => {
+    setLoading(true);
+    try {
+      await simulateApiDelay(800); // Simulate API call
+
+      setInventoryMovements(prev => prev.map(movement => {
+        if (movement.id === movementId) {
+          return {
+            ...movement,
+            quantity: data.quantity,
+            unit_purchase_price: data.unit_purchase_price,
+            supplier_id: data.supplier_id,
+            destination_branch_id: data.destination_branch_id,
+            waste_reason: data.waste_reason,
+            notes: data.notes,
+            expiration_date: data.expiration_date,
+            updated_at: new Date().toISOString(),
+          };
+        }
+        return movement;
+      }));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Refresh movements
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -153,6 +193,7 @@ export function useInventoryMovements(options: UseInventoryMovementsOptions = {}
     // Actions
     getMovementsByItemId,
     getRecentMovements,
+    updateMovement,
     refresh,
     updateFilters,
   };
