@@ -62,11 +62,19 @@ function DataTable<T extends { id: string }>({
 
   const renderCell = (item: T, column: TableColumn<T>) => {
     if (column.render) {
-      const value = column.key === 'actions' ? item : (item as any)[column.key];
-      return column.render(value, item);
+      if (column.key === 'actions') {
+        // For actions column, pass the entire item
+        // Type assertion is safe here because we know the conditional type resolves to T for 'actions'
+        return (column.render as (value: T, item: T) => React.ReactNode)(item, item);
+      } else {
+        // For entity properties, pass the specific property value
+        const value = item[column.key as keyof T];
+        // Type assertion is safe here because we know the conditional type resolves to T[K] for property keys
+        return (column.render as (value: unknown, item: T) => React.ReactNode)(value, item);
+      }
     }
-    
-    return (item as any)[column.key];
+
+    return item[column.key as keyof T] as React.ReactNode;
   };
 
   const renderPagination = () => {
@@ -78,7 +86,7 @@ function DataTable<T extends { id: string }>({
     // Calculate page range to show
     const maxPages = 5;
     let startPage = Math.max(1, current_page - Math.floor(maxPages / 2));
-    let endPage = Math.min(last_page, startPage + maxPages - 1);
+    const endPage = Math.min(last_page, startPage + maxPages - 1);
     
     if (endPage - startPage + 1 < maxPages) {
       startPage = Math.max(1, endPage - maxPages + 1);

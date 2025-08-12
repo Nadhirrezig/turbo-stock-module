@@ -38,7 +38,7 @@ const StockTable = React.forwardRef<HTMLDivElement, StockTableProps>(
         key: 'inventory_item',
         label: 'Item',
         sortable: false,
-        render: (value: any, stock: InventoryStock) => (
+        render: (_value: unknown, stock: InventoryStock) => (
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <Package className="h-8 w-8 text-muted-foreground" />
@@ -60,9 +60,9 @@ const StockTable = React.forwardRef<HTMLDivElement, StockTableProps>(
         key: 'quantity',
         label: 'Current Stock',
         sortable: true,
-        render: (value: number, stock: InventoryStock) => {
-          const isLowStock = stock.inventory_item && value <= stock.inventory_item.threshold_quantity;
-          const isOutOfStock = value <= 0;
+        render: (quantity: number, stock: InventoryStock) => {
+          const isLowStock = stock.inventory_item && quantity <= stock.inventory_item.threshold_quantity;
+          const isOutOfStock = quantity <= 0;
           
           return (
             <div className="flex items-center space-x-2">
@@ -71,7 +71,7 @@ const StockTable = React.forwardRef<HTMLDivElement, StockTableProps>(
               )}
               <div>
                 <div className={`font-medium ${isOutOfStock ? 'text-destructive' : isLowStock ? 'text-yellow-600' : 'text-foreground'}`}>
-                  {formatNumber(value)} {stock.inventory_item?.unit?.symbol || ''}
+                  {formatNumber(quantity)} {stock.inventory_item?.unit?.symbol || ''}
                 </div>
                 {stock.inventory_item?.threshold_quantity && (
                   <div className="text-xs text-muted-foreground">
@@ -87,17 +87,17 @@ const StockTable = React.forwardRef<HTMLDivElement, StockTableProps>(
         key: 'unit_purchase_price',
         label: 'Unit Price',
         sortable: true,
-        render: (value: number) => (
+        render: (price: number) => (
           <div className="text-sm font-medium text-foreground">
-            {formatCurrency(value)}
+            {formatCurrency(price)}
           </div>
         ),
       },
       {
-        key: 'total_value',
+        key: 'actions',
         label: 'Total Value',
         sortable: false,
-        render: (value: any, stock: InventoryStock) => (
+        render: (stock: InventoryStock) => (
           <div className="text-sm font-medium text-foreground">
             {formatCurrency(stock.quantity * stock.unit_purchase_price)}
           </div>
@@ -107,8 +107,8 @@ const StockTable = React.forwardRef<HTMLDivElement, StockTableProps>(
         key: 'expiration_date',
         label: 'Expiration',
         sortable: true,
-        render: (value: string | undefined) => {
-          if (!value) {
+        render: (dateValue: string | undefined) => {
+          if (!dateValue) {
             return (
               <span className="text-sm text-muted-foreground italic">
                 No expiration
@@ -116,7 +116,7 @@ const StockTable = React.forwardRef<HTMLDivElement, StockTableProps>(
             );
           }
           
-          const expirationDate = new Date(value);
+          const expirationDate = new Date(dateValue);
           const today = new Date();
           const daysUntilExpiration = Math.ceil((expirationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           
@@ -146,9 +146,9 @@ const StockTable = React.forwardRef<HTMLDivElement, StockTableProps>(
         key: 'updated_at',
         label: 'Last Updated',
         sortable: true,
-        render: (value: string) => (
+        render: (dateString: string) => (
           <div className="text-sm text-muted-foreground">
-            {formatDateTime(value)}
+            {formatDateTime(dateString)}
           </div>
         ),
       },

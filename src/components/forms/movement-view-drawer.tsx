@@ -45,12 +45,12 @@ const MovementViewDrawer = React.forwardRef<HTMLDivElement, MovementViewDrawerPr
     return (
       <RightDrawer open={open} onOpenChange={onOpenChange}>
         <RightDrawerContent ref={ref} maxWidth="lg">
-          <RightDrawerHeader>
-            <div className="flex items-center justify-between w-full">
-              <RightDrawerTitle>
-                View Movement
-              </RightDrawerTitle>
-              <div className="flex items-center gap-2">
+          <RightDrawerHeader className="pb-4">
+            <div className="flex items-start justify-between w-full pr-8">
+              <div className="flex-1 min-w-0">
+                <RightDrawerTitle className="text-lg font-semibold mb-3">
+                  View Movement
+                </RightDrawerTitle>
                 {onEdit && (
                   <Button
                     variant="outline"
@@ -62,9 +62,9 @@ const MovementViewDrawer = React.forwardRef<HTMLDivElement, MovementViewDrawerPr
                     Update
                   </Button>
                 )}
-                <RightDrawerCloseButton />
               </div>
             </div>
+            <RightDrawerCloseButton />
           </RightDrawerHeader>
 
           <RightDrawerBody>

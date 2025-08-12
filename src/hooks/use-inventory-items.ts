@@ -1,18 +1,26 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { InventoryItem, CreateInventoryItemData, BaseFilters } from '@/lib/types';
-import { mockInventoryItems, mockCategories, mockUnits, simulateApiDelay, generateId, getCurrentTimestamp } from '@/lib/mock-data';
-// import { mockSuppliers } from '@/lib/mock-data'; // Removed - suppliers belong to transactions, not product definitions
-import { filterBySearch, sortItems, paginateItems } from '@/lib/utils';
+import { useState, useCallback, useEffect } from 'react';
+import { InventoryItem, CreateInventoryItemData, BaseFilters, PaginatedResponse } from '@/lib/types';
+import { inventoryItemsService, ServiceError } from '@/lib/api';
 
 interface UseInventoryItemsOptions {
   initialFilters?: BaseFilters;
 }
 
 export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
-  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>(mockInventoryItems);
+  const [paginatedInventoryItems, setPaginatedInventoryItems] = useState<PaginatedResponse<InventoryItem>>({
+    data: [],
+    pagination: {
+      current_page: 1,
+      per_page: 10,
+      total: 0,
+      last_page: 0,
+    },
+  });
+  const [allInventoryItems, setAllInventoryItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BaseFilters>({
     search: '',
     page: 1,
@@ -22,23 +30,37 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
     ...options.initialFilters,
   });
 
-  // Get filtered and paginated inventory items
-  const paginatedInventoryItems = useMemo(() => {
-    let filteredItems = [...inventoryItems];
+  // Fetch inventory items from service
+  const fetchInventoryItems = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-    // Apply search filter
-    if (filters.search) {
-      filteredItems = filterBySearch(filteredItems, filters.search, ['name']);
+    try {
+      const response = await inventoryItemsService.getAll(filters);
+      setPaginatedInventoryItems(response);
+
+      // Also fetch all items for local operations - TODO: REMOVE IN PRODUCTION - PERFORMANCE ISSUE!
+      if (filters.page === 1 && !filters.search) {
+        const allResponse = await inventoryItemsService.getAll({
+          ...filters,
+          page: 1,
+          per_page: 1000 // TODO: REMOVE - This fetches 1000 records unnecessarily!
+        });
+        setAllInventoryItems(allResponse.data);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof ServiceError ? err.message : 'Failed to fetch inventory items';
+      setError(errorMessage);
+      console.error('Error fetching inventory items:', err);
+    } finally {
+      setLoading(false);
     }
+  }, [filters]);
 
-    // Apply sorting
-    if (filters.sort_field && filters.sort_direction) {
-      filteredItems = sortItems(filteredItems, filters.sort_field as keyof InventoryItem, filters.sort_direction);
-    }
-
-    // Apply pagination
-    return paginateItems(filteredItems, filters.page || 1, filters.per_page || 10);
-  }, [inventoryItems, filters]);
+  // Initial fetch and refetch when filters change
+  useEffect(() => {
+    fetchInventoryItems();
+  }, [fetchInventoryItems]);
 
   // Update filters
   const updateFilters = useCallback((newFilters: Partial<BaseFilters>) => {
@@ -48,122 +70,109 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
   // Create inventory item
   const createInventoryItem = useCallback(async (data: CreateInventoryItemData): Promise<InventoryItem> => {
     setLoading(true);
-    
+    setError(null);
+
     try {
-      await simulateApiDelay(800);
-      
-      // Find related entities
-      const category = mockCategories.find(c => c.id === data.inventory_item_category_id);
-      const unit = mockUnits.find(u => u.id === data.unit_id);
-      // const supplier = mockSuppliers.find(s => s.id === data.preferred_supplier_id); // Removed - suppliers belong to transactions
+      const newItem = await inventoryItemsService.create(data);
 
-      const newItem: InventoryItem = {
-        id: generateId(),
-        name: data.name,
-        inventory_item_category_id: data.inventory_item_category_id,
-        unit_id: data.unit_id,
-        threshold_quantity: data.threshold_quantity,
-        // preferred_supplier_id: data.preferred_supplier_id, // Removed - suppliers belong to transactions
-        reorder_quantity: data.reorder_quantity,
-        // unit_purchase_price: data.unit_purchase_price, // Removed - prices belong to transactions
-        created_at: getCurrentTimestamp(),
-        updated_at: getCurrentTimestamp(),
-        // Include relations
-        category,
-        unit,
-        // preferred_supplier: supplier, // Removed - suppliers belong to transactions
-      };
+      // Refresh the list to show the new item
+      await fetchInventoryItems();
 
-      setInventoryItems(prev => [newItem, ...prev]);
       return newItem;
+    } catch (err) {
+      const errorMessage = err instanceof ServiceError ? err.message : 'Failed to create inventory item';
+      setError(errorMessage);
+      throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchInventoryItems]);
 
   // Update inventory item
   const updateInventoryItem = useCallback(async (id: string, data: CreateInventoryItemData): Promise<InventoryItem> => {
     setLoading(true);
-    
+    setError(null);
+
     try {
-      await simulateApiDelay(800);
-      
-      // Find related entities
-      const category = mockCategories.find(c => c.id === data.inventory_item_category_id);
-      const unit = mockUnits.find(u => u.id === data.unit_id);
-      // const supplier = mockSuppliers.find(s => s.id === data.preferred_supplier_id); // Removed - suppliers belong to transactions
+      const updatedItem = await inventoryItemsService.update(id, data);
 
-      const updatedItem: InventoryItem = {
-        id,
-        name: data.name,
-        inventory_item_category_id: data.inventory_item_category_id,
-        unit_id: data.unit_id,
-        threshold_quantity: data.threshold_quantity,
-        // preferred_supplier_id: data.preferred_supplier_id, // Removed - suppliers belong to transactions
-        reorder_quantity: data.reorder_quantity,
-        // unit_purchase_price: data.unit_purchase_price, // Removed - prices belong to transactions
-        created_at: inventoryItems.find(i => i.id === id)?.created_at || getCurrentTimestamp(),
-        updated_at: getCurrentTimestamp(),
-        // Include relations
-        category,
-        unit,
-        // preferred_supplier: supplier, // Removed - suppliers belong to transactions
-      };
+      // Refresh the list to show the updated item
+      await fetchInventoryItems();
 
-      setInventoryItems(prev => prev.map(item => 
-        item.id === id ? updatedItem : item
-      ));
-      
       return updatedItem;
+    } catch (err) {
+      const errorMessage = err instanceof ServiceError ? err.message : 'Failed to update inventory item';
+      setError(errorMessage);
+      throw err;
     } finally {
       setLoading(false);
     }
-  }, [inventoryItems]);
+  }, [fetchInventoryItems]);
 
   // Delete inventory item
   const deleteInventoryItem = useCallback(async (id: string): Promise<void> => {
     setLoading(true);
-    
+    setError(null);
+
     try {
-      await simulateApiDelay(600);
-      setInventoryItems(prev => prev.filter(item => item.id !== id));
+      await inventoryItemsService.delete(id);
+
+      // Refresh the list to remove the deleted item
+      await fetchInventoryItems();
+    } catch (err) {
+      const errorMessage = err instanceof ServiceError ? err.message : 'Failed to delete inventory item';
+      setError(errorMessage);
+      throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchInventoryItems]);
 
   // Get inventory item by ID
-  const getInventoryItem = useCallback((id: string): InventoryItem | undefined => {
-    return inventoryItems.find(item => item.id === id);
-  }, [inventoryItems]);
+  const getInventoryItem = useCallback(async (id: string): Promise<InventoryItem | null> => {
+    try {
+      return await inventoryItemsService.getById(id);
+    } catch (err) {
+      // Fallback to local data if available
+      const localItem = allInventoryItems.find(item => item.id === id);
+      if (localItem) {
+        return localItem;
+      }
+
+      console.error('Error fetching inventory item by ID:', err);
+      return null;
+    }
+  }, [allInventoryItems]);
+
+  // Get inventory item by ID (synchronous version for backward compatibility)
+  const getInventoryItemSync = useCallback((id: string): InventoryItem | undefined => {
+    return allInventoryItems.find(item => item.id === id);
+  }, [allInventoryItems]);
 
   // Refresh inventory items
   const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      await simulateApiDelay(500);
-      setInventoryItems(mockInventoryItems);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    await fetchInventoryItems();
+  }, [fetchInventoryItems]);
 
   return {
     // Data
     inventoryItems: paginatedInventoryItems.data,
     pagination: paginatedInventoryItems.pagination,
-    allInventoryItems: inventoryItems,
-    
+    allInventoryItems,
+
     // State
     loading,
+    error,
     filters,
-    
+
     // Actions
     createInventoryItem,
     updateInventoryItem,
     deleteInventoryItem,
     getInventoryItem,
+    getInventoryItemSync, // For backward compatibility
     refresh,
     updateFilters,
   };
 }
+

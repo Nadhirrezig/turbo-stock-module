@@ -4,12 +4,17 @@ import * as React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { stockEntrySchema, StockEntryFormData } from '@/lib/schemas';
+
+
 import { mockInventoryItems, mockSuppliers } from '@/lib/mock-data';
+import { SearchableSelectOption, InventoryItem, Supplier } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LoadingButton } from '@/components/shared/loading-button';
 import { Button } from '@/components/ui/button';
 import { SearchableSelect } from '@/components/shared/searchable-select';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowDown, ArrowUp, Trash2, ArrowRightLeft } from 'lucide-react';
 import {
   RightDrawer,
   RightDrawerContent,
@@ -19,6 +24,29 @@ import {
   RightDrawerFooter,
   RightDrawerCloseButton,
 } from '@/components/modals/right-drawer';
+
+// Adapter functions to convert entity types to SearchableSelectOption
+const inventoryItemToOption = (item: InventoryItem): SearchableSelectOption => ({
+  id: item.id,
+  name: item.name,
+  category: item.category,
+  unit: item.unit,
+  threshold_quantity: item.threshold_quantity,
+  reorder_quantity: item.reorder_quantity,
+  created_at: item.created_at,
+  updated_at: item.updated_at,
+});
+
+const supplierToOption = (supplier: Supplier): SearchableSelectOption => ({
+  id: supplier.id,
+  name: supplier.name,
+  email: supplier.email,
+  phone: supplier.phone,
+  address: supplier.address,
+  description: supplier.description,
+  created_at: supplier.created_at,
+  updated_at: supplier.updated_at,
+});
 
 interface StockEntryFormProps {
   open: boolean;
@@ -87,16 +115,41 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
 
     const isLoading = loading || isSubmitting;
 
+    // Transaction type options with icons and colors
     const transactionTypeOptions = [
-      { id: 'IN', name: 'Stock In', description: 'Add inventory from supplier' },
-      { id: 'OUT', name: 'Stock Out', description: 'Remove inventory for use' },
-      { id: 'WASTE', name: 'Waste', description: 'Remove damaged/expired items' },
-      { id: 'TRANSFER', name: 'Transfer', description: 'Move to another location' },
+      {
+        id: 'IN',
+        name: 'Stock In',
+        description: 'Add inventory from supplier',
+        icon: ArrowDown,
+        colorClass: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300 border-green-200 dark:border-green-800 hover:bg-green-200 dark:hover:bg-green-900/70'
+      },
+      {
+        id: 'OUT',
+        name: 'Stock Out',
+        description: 'Remove inventory for use',
+        icon: ArrowUp,
+        colorClass: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300 border-red-200 dark:border-red-800 hover:bg-red-200 dark:hover:bg-red-900/70'
+      },
+      {
+        id: 'WASTE',
+        name: 'Waste',
+        description: 'Remove damaged/expired items',
+        icon: Trash2,
+        colorClass: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800 hover:bg-yellow-200 dark:hover:bg-yellow-900/70'
+      },
+      {
+        id: 'TRANSFER',
+        name: 'Transfer',
+        description: 'Move to another location',
+        icon: ArrowRightLeft,
+        colorClass: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/70'
+      },
     ];
 
     return (
       <RightDrawer open={open} onOpenChange={onOpenChange}>
-        <RightDrawerContent ref={ref} maxWidth="lg">
+        <RightDrawerContent ref={ref} maxWidth="2xl">
           <RightDrawerHeader>
             <RightDrawerTitle>
               Add Stock Entry
@@ -113,9 +166,9 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                     Transaction Details
                   </h3>
                   
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-6">
                     {/* Inventory Item */}
-                    <div className="space-y-2 sm:col-span-2">
+                    <div className="space-y-3">
                       <Label htmlFor="inventory_item">
                         Inventory Item <span className="text-destructive">*</span>
                       </Label>
@@ -124,7 +177,7 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                         control={control}
                         render={({ field }) => (
                           <SearchableSelect
-                            options={mockInventoryItems}
+                            options={mockInventoryItems.map(inventoryItemToOption)}
                             value={field.value}
                             onValueChange={field.onChange}
                             placeholder="Select inventory item..."
@@ -137,8 +190,8 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                       />
                     </div>
 
-                    {/* Transaction Type */}
-                    <div className="space-y-2">
+                    {/* Transaction Type - Icon-based buttons */}
+                    <div className="space-y-3 sm:col-span-2">
                       <Label htmlFor="transaction_type">
                         Transaction Type <span className="text-destructive">*</span>
                       </Label>
@@ -146,22 +199,49 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                         name="transaction_type"
                         control={control}
                         render={({ field }) => (
-                          <SearchableSelect
-                            options={transactionTypeOptions}
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            placeholder="Select transaction type..."
-                            displayField="name"
-                            subField="description"
-                            disabled={isLoading}
-                            error={errors.transaction_type?.message}
-                          />
+                          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                            {transactionTypeOptions.map((option) => {
+                              const IconComponent = option.icon;
+                              const isSelected = field.value === option.id;
+                              return (
+                                <button
+                                  key={option.id}
+                                  type="button"
+                                  onClick={() => field.onChange(option.id)}
+                                  disabled={isLoading}
+                                  className={`
+                                    relative flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed
+                                    ${isSelected
+                                      ? option.colorClass + ' border-current shadow-md'
+                                      : 'border-border bg-background hover:bg-muted/50'
+                                    }
+                                  `}
+                                >
+                                  <IconComponent className={`w-6 h-6 mb-2 ${isSelected ? 'text-current' : 'text-muted-foreground'}`} />
+                                  <span className={`text-sm font-medium ${isSelected ? 'text-current' : 'text-foreground'}`}>
+                                    {option.name}
+                                  </span>
+                                  <span className={`text-xs mt-1 text-center leading-tight ${isSelected ? 'text-current opacity-80' : 'text-muted-foreground'}`}>
+                                    {option.description}
+                                  </span>
+                                  {isSelected && (
+                                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-current rounded-full" />
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
                         )}
                       />
+                      {errors.transaction_type && (
+                        <p className="text-sm text-destructive">
+                          {errors.transaction_type.message}
+                        </p>
+                      )}
                     </div>
 
                     {/* Quantity */}
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <Label htmlFor="quantity">
                         Quantity <span className="text-destructive">*</span>
                       </Label>
@@ -170,9 +250,9 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                         type="number"
                         step="0.01"
                         min="0.01"
-                        placeholder="0"
+                        placeholder="Enter quantity"
                         {...register('quantity', { valueAsNumber: true })}
-                        className={errors.quantity ? 'border-destructive focus-visible:ring-destructive' : ''}
+                        className={`text-lg ${errors.quantity ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                         disabled={isLoading}
                       />
                       {errors.quantity && (
@@ -190,10 +270,10 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                     Additional Information
                   </h3>
 
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                     {/* Unit Purchase Price - Required for IN transactions */}
                     {transactionType === 'IN' && (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <Label htmlFor="unit_purchase_price">
                           Unit Purchase Price <span className="text-destructive">*</span>
                         </Label>
@@ -204,7 +284,7 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                           min="0"
                           placeholder="0.00"
                           {...register('unit_purchase_price', { valueAsNumber: true })}
-                          className={errors.unit_purchase_price ? 'border-destructive focus-visible:ring-destructive' : ''}
+                          className={`text-lg ${errors.unit_purchase_price ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                           disabled={isLoading}
                         />
                         {errors.unit_purchase_price && (
@@ -217,7 +297,7 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
 
                     {/* Supplier - Required for IN transactions */}
                     {transactionType === 'IN' && (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <Label htmlFor="supplier">
                           Supplier <span className="text-destructive">*</span>
                         </Label>
@@ -226,7 +306,7 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                           control={control}
                           render={({ field }) => (
                             <SearchableSelect
-                              options={mockSuppliers}
+                              options={mockSuppliers.map(supplierToOption)}
                               value={field.value}
                               onValueChange={field.onChange}
                               placeholder="Select supplier..."
@@ -242,7 +322,7 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
 
                     {/* Waste Reason - Required for WASTE transactions */}
                     {transactionType === 'WASTE' && (
-                      <div className="space-y-2 sm:col-span-2">
+                      <div className="space-y-3 lg:col-span-2">
                         <Label htmlFor="waste_reason">
                           Waste Reason <span className="text-destructive">*</span>
                         </Label>
@@ -251,7 +331,7 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                           type="text"
                           placeholder="e.g., Expired, Damaged, Contaminated"
                           {...register('waste_reason')}
-                          className={errors.waste_reason ? 'border-destructive focus-visible:ring-destructive' : ''}
+                          className={`text-lg ${errors.waste_reason ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                           disabled={isLoading}
                         />
                         {errors.waste_reason && (
@@ -261,18 +341,19 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                         )}
                       </div>
                     )}
-                    {/* Waste Reason - Required for WASTE transactions */}
+
+                    {/* Destination Branch - Required for TRANSFER transactions */}
                     {transactionType === 'TRANSFER' && (
-                      <div className="space-y-2 sm:col-span-2">
+                      <div className="space-y-3 lg:col-span-2">
                         <Label htmlFor="destination_branch_id">
-                          Destination <span className="text-destructive">*</span>
+                          Destination Branch <span className="text-destructive">*</span>
                         </Label>
                         <Input
                           id="destination_branch_id"
                           type="text"
-                          placeholder="e.g., Warehouse1, Warehouse2 .."
+                          placeholder="e.g., Warehouse 1, Downtown Branch"
                           {...register('destination_branch_id')}
-                          className={errors.destination_branch_id ? 'border-destructive focus-visible:ring-destructive' : ''}
+                          className={`text-lg ${errors.destination_branch_id ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                           disabled={isLoading}
                         />
                         {errors.destination_branch_id && (
@@ -282,9 +363,10 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                         )}
                       </div>
                     )}
+
                     {/* Expiration Date - Optional for IN transactions */}
                     {transactionType === 'IN' && (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <Label htmlFor="expiration_date">
                           Expiration Date
                         </Label>
@@ -292,7 +374,7 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                           id="expiration_date"
                           type="date"
                           {...register('expiration_date')}
-                          className={errors.expiration_date ? 'border-destructive focus-visible:ring-destructive' : ''}
+                          className={`text-lg ${errors.expiration_date ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                           disabled={isLoading}
                         />
                         {errors.expiration_date && (
@@ -304,18 +386,16 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                     )}
 
                     {/* Notes */}
-                    <div className="space-y-2 sm:col-span-2">
+                    <div className="space-y-3 lg:col-span-2">
                       <Label htmlFor="notes">
                         Notes
                       </Label>
-                      <textarea
+                      <Textarea
                         id="notes"
-                        rows={3}
+                        rows={4}
                         placeholder="Additional notes about this transaction..."
                         {...register('notes')}
-                        className={`flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none ${
-                          errors.notes ? 'border-destructive focus-visible:ring-destructive' : ''
-                        }`}
+                        className={`text-base ${errors.notes ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                         disabled={isLoading}
                       />
                       {errors.notes && (
@@ -327,25 +407,43 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                   </div>
                 </div>
 
-                {/* Help Text */}
-                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <div className="flex">
+                {/* Help Text - Enhanced with transaction type colors */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+                  <div className="flex items-start">
                     <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                      <svg className="h-6 w-6 text-blue-500 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                    <div className="ml-4 flex-1">
+                      <h3 className="text-base font-semibold text-blue-800 dark:text-blue-200 mb-3">
                         Transaction Guidelines
                       </h3>
-                      <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                        <ul className="list-disc list-inside space-y-1">
-                          <li><strong>Stock In:</strong> Requires supplier and purchase price</li>
-                          <li><strong>Stock Out:</strong> Records usage or sales</li>
-                          <li><strong>Waste:</strong> Requires reason for disposal</li>
-                          <li><strong>Transfer:</strong> Moves stock between locations</li>
-                        </ul>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div className="flex items-center gap-2">
+                          <ArrowDown className="w-4 h-4 text-green-600 dark:text-green-400" />
+                          <span className="text-blue-700 dark:text-blue-300">
+                            <strong className="text-green-700 dark:text-green-300">Stock In:</strong> Requires supplier and purchase price
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <ArrowUp className="w-4 h-4 text-red-600 dark:text-red-400" />
+                          <span className="text-blue-700 dark:text-blue-300">
+                            <strong className="text-red-700 dark:text-red-300">Stock Out:</strong> Records usage or sales
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Trash2 className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                          <span className="text-blue-700 dark:text-blue-300">
+                            <strong className="text-yellow-700 dark:text-yellow-300">Waste:</strong> Requires reason for disposal
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <ArrowRightLeft className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          <span className="text-blue-700 dark:text-blue-300">
+                            <strong className="text-blue-700 dark:text-blue-300">Transfer:</strong> Moves stock between locations
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -353,12 +451,13 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
               </div>
             </RightDrawerBody>
 
-            <RightDrawerFooter>
+            <RightDrawerFooter className="flex gap-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
                 disabled={isLoading}
+                className="flex-1 sm:flex-none"
               >
                 Cancel
               </Button>
@@ -366,6 +465,7 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                 type="submit"
                 loading={isLoading}
                 loadingText="Processing..."
+                className="flex-1 sm:flex-none"
               >
                 Add Stock Entry
               </LoadingButton>

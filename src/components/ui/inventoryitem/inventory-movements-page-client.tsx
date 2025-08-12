@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useInventoryMovements } from '@/hooks/use-inventory-movements';
 import { mockCategories } from '@/lib/mock-data';
-import { InventoryMovement } from '@/lib/types';
+import { InventoryMovement, SearchableSelectOption, InventoryItemCategory } from '@/lib/types';
 
 // Custom type for movement edit form
 type MovementEditFormData = {
@@ -17,6 +17,14 @@ type MovementEditFormData = {
   notes?: string;
   expiration_date?: string;
 };
+
+// Adapter function to convert category to SearchableSelectOption
+const categoryToOption = (category: InventoryItemCategory): SearchableSelectOption => ({
+  id: category.id,
+  name: category.name,
+  created_at: category.created_at,
+  updated_at: category.updated_at,
+});
 import { PageHeader } from '@/components/shared/page-header';
 import { MovementsTable } from '@/components/tables/movements-table';
 import { SearchableSelect } from '@/components/shared/searchable-select';
@@ -115,9 +123,9 @@ export function InventoryMovementsPageClient() {
     { id: 'month', name: 'This Month', description: 'Movements from last 30 days' },
   ];
 
-  const categoryOptions = [
+  const categoryOptions: SearchableSelectOption[] = [
     { id: '', name: 'All Categories', description: 'Show all categories' },
-    ...mockCategories,
+    ...mockCategories.map(categoryToOption),
   ];
 
   return (

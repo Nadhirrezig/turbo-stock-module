@@ -17,6 +17,7 @@ type MovementEditFormData = {
   expiration_date?: string;
 };
 import { mockSuppliers } from '@/lib/mock-data';
+import { SearchableSelectOption, Supplier } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LoadingButton } from '@/components/shared/loading-button';
@@ -34,6 +35,18 @@ import {
   RightDrawerFooter,
   RightDrawerCloseButton,
 } from '@/components/modals/right-drawer';
+
+// Adapter function to convert supplier to SearchableSelectOption
+const supplierToOption = (supplier: Supplier): SearchableSelectOption => ({
+  id: supplier.id,
+  name: supplier.name,
+  email: supplier.email,
+  phone: supplier.phone,
+  address: supplier.address,
+  description: supplier.description,
+  created_at: supplier.created_at,
+  updated_at: supplier.updated_at,
+});
 
 interface MovementEditFormProps {
   open: boolean;
@@ -216,7 +229,7 @@ const MovementEditForm = React.forwardRef<HTMLDivElement, MovementEditFormProps>
                           control={control}
                           render={({ field }) => (
                             <SearchableSelect
-                              options={mockSuppliers}
+                              options={mockSuppliers.map(supplierToOption)}
                               value={field.value}
                               onValueChange={field.onChange}
                               placeholder="Select supplier..."

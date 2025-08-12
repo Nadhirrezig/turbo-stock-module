@@ -35,12 +35,15 @@ const SearchableSelect = React.forwardRef<HTMLDivElement, SearchableSelectProps>
     const [selectedOption, setSelectedOption] = React.useState<SearchableSelectOption | null>(null);
     const containerRef = React.useRef<HTMLDivElement>(null);
 
+    // Merge the forwarded ref with our internal ref
+    React.useImperativeHandle(ref, () => containerRef.current!, []);
+
     // Find selected option when value changes
     React.useEffect(() => {
       if (value) {
         const option = options.find(opt => opt.id === value);
         setSelectedOption(option || null);
-        setSearch(option ? option[displayField] : '');
+        setSearch(option ? String(option[displayField] || '') : '');
       } else {
         setSelectedOption(null);
         setSearch('');
@@ -53,16 +56,18 @@ const SearchableSelect = React.forwardRef<HTMLDivElement, SearchableSelectProps>
       
       const searchLower = search.toLowerCase();
       return options.filter(option => {
-        const mainField = option[displayField]?.toLowerCase() || '';
-        const subFieldValue = subField ? option[subField]?.toLowerCase() || '' : '';
-        return mainField.includes(searchLower) || subFieldValue.includes(searchLower);
+        const mainFieldValue = option[displayField];
+        const mainField = typeof mainFieldValue === 'string' ? mainFieldValue.toLowerCase() : '';
+        const subFieldValue = subField ? option[subField] : '';
+        const subFieldString = typeof subFieldValue === 'string' ? subFieldValue.toLowerCase() : '';
+        return mainField.includes(searchLower) || subFieldString.includes(searchLower);
       }).slice(0, 5);
     }, [options, search, displayField, subField]);
 
     // Handle option selection
     const handleSelectOption = (option: SearchableSelectOption) => {
       setSelectedOption(option);
-      setSearch(option[displayField]);
+      setSearch(String(option[displayField] || ''));
       setIsOpen(false);
       onValueChange?.(option.id);
     };
@@ -83,9 +88,13 @@ const SearchableSelect = React.forwardRef<HTMLDivElement, SearchableSelectProps>
       setIsOpen(true);
       
       // If search doesn't match selected option, clear selection
-      if (selectedOption && !selectedOption[displayField].toLowerCase().includes(newSearch.toLowerCase())) {
-        setSelectedOption(null);
-        onValueChange?.('');
+      if (selectedOption) {
+        const selectedFieldValue = selectedOption[displayField];
+        const selectedFieldString = typeof selectedFieldValue === 'string' ? selectedFieldValue : '';
+        if (!selectedFieldString.toLowerCase().includes(newSearch.toLowerCase())) {
+          setSelectedOption(null);
+          onValueChange?.('');
+        }
       }
     };
 
@@ -160,13 +169,13 @@ const SearchableSelect = React.forwardRef<HTMLDivElement, SearchableSelectProps>
                   >
                     <div className="flex justify-between items-center">
                       <span className="text-sm">
-                        {option[displayField]}
+                        {String(option[displayField] || '')}
                       </span>
-                      {subField && option[subField] && (
+                      {subField && option[subField] ? (
                         <span className="text-xs text-muted-foreground">
-                          {option[subField]}
+                          {String(option[subField])}
                         </span>
-                      )}
+                      ) : null}
                       {selectedOption?.id === option.id && (
                         <Check className="h-4 w-4 text-primary" />
                       )}

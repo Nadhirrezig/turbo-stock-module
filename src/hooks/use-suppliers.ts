@@ -10,7 +10,7 @@ interface UseSuppliersOptions {
 }
 
 export function useSuppliers(options: UseSuppliersOptions = {}) {
-  const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
+  const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers); // TODO: Remove mock data in production
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<BaseFilters>({
     search: '',
@@ -142,3 +142,5 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
     updateFilters,
   };
 }
+
+

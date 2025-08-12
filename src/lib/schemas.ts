@@ -65,13 +65,8 @@ export const stockEntrySchema = z.object({
   transaction_type: z.enum(['IN', 'OUT', 'WASTE', 'TRANSFER'], {
     message: 'Transaction type is required',
   }),
-  quantity: z.number()
-    .min(0.01, 'Quantity must be greater than 0')
-    .or(z.string().transform((val) => parseFloat(val)).pipe(z.number().min(0.01))),
-  unit_purchase_price: z.number()
-    .min(0, 'Unit purchase price must be 0 or greater')
-    .optional()
-    .or(z.string().transform((val) => parseFloat(val)).pipe(z.number().min(0)).optional()),
+  quantity: z.number().min(0.01, 'Quantity must be greater than 0'),
+  unit_purchase_price: z.number().min(0, 'Unit purchase price must be 0 or greater').optional(),
   supplier_id: z.string().optional(),
   destination_branch_id: z.string().optional(),
   waste_reason: z.string()

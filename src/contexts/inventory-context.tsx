@@ -53,7 +53,7 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
     inventoryItems: false,
   });
 
-  // Simulate API delay
+  // Simulate API delay - TODO: REMOVE IN PRODUCTION - Only for development testing!
   const simulateDelay = (ms: number = 500) => new Promise(resolve => setTimeout(resolve, ms));
 
   // Refresh functions
@@ -199,3 +199,4 @@ export function useInventoryItemsContext() {
   const { inventoryItems, loading, refreshInventoryItems, getInventoryItemById } = useInventoryContext();
   return { inventoryItems, loading: loading.inventoryItems, refreshInventoryItems, getInventoryItemById };
 }
+

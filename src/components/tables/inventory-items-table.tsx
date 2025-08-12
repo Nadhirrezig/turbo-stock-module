@@ -41,24 +41,27 @@ const InventoryItemsTable = React.forwardRef<HTMLDivElement, InventoryItemsTable
         key: 'name',
         label: 'Item Name',
         sortable: true,
-        render: (value: string, item: InventoryItem) => (
-          <div>
-            <div className="font-medium text-foreground">
-              {value}
-            </div>
-            {item.category && (
-              <div className="text-xs text-muted-foreground">
-                {item.category.name}
+        render: (value: unknown, item: InventoryItem) => {
+          const name = value as string;
+          return (
+            <div>
+              <div className="font-medium text-foreground">
+                {name}
               </div>
-            )}
-          </div>
-        ),
+              {item.category && (
+                <div className="text-xs text-muted-foreground">
+                  {item.category.name}
+                </div>
+              )}
+            </div>
+          );
+        },
       },
       {
         key: 'unit',
         label: 'Unit',
         sortable: false,
-        render: (value: any, item: InventoryItem) => (
+        render: (_value: unknown, item: InventoryItem) => (
           <div className="text-sm">
             {item.unit ? (
               <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
@@ -74,21 +77,27 @@ const InventoryItemsTable = React.forwardRef<HTMLDivElement, InventoryItemsTable
         key: 'threshold_quantity',
         label: 'Threshold Qty',
         sortable: true,
-        render: (value: number) => (
-          <div className="text-sm text-muted-foreground">
-            {formatNumber(value)}
-          </div>
-        ),
+        render: (value: unknown) => {
+          const quantity = value as number;
+          return (
+            <div className="text-sm text-muted-foreground">
+              {formatNumber(quantity)}
+            </div>
+          );
+        },
       },
       {
         key: 'reorder_quantity',
         label: 'Reorder Qty',
         sortable: true,
-        render: (value: number) => (
-          <div className="text-sm text-muted-foreground">
-            {formatNumber(value)}
-          </div>
-        ),
+        render: (value: unknown) => {
+          const quantity = value as number;
+          return (
+            <div className="text-sm text-muted-foreground">
+              {formatNumber(quantity)}
+            </div>
+          );
+        },
       },
       // Preferred supplier column removed - suppliers belong to transactions, not product definitions
       // {
@@ -118,11 +127,14 @@ const InventoryItemsTable = React.forwardRef<HTMLDivElement, InventoryItemsTable
         key: 'created_at',
         label: 'Created',
         sortable: true,
-        render: (value: string) => (
-          <div className="text-sm text-muted-foreground">
-            {formatDateTime(value)}
-          </div>
-        ),
+        render: (value: unknown) => {
+          const dateString = value as string;
+          return (
+            <div className="text-sm text-muted-foreground">
+              {formatDateTime(dateString)}
+            </div>
+          );
+        },
       },
     ];
 

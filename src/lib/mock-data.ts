@@ -52,7 +52,6 @@ export const mockCategories: InventoryItemCategory[] = [
   {
     id: '1',
     name: 'Beverages',
-    description: 'Coffee, tea, juices and other drinks',
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:00:00Z',
     updated_at: '2024-01-15T09:00:00Z',
@@ -60,7 +59,6 @@ export const mockCategories: InventoryItemCategory[] = [
   {
     id: '2',
     name: 'Dairy Products',
-    description: 'Milk, cheese, yogurt and dairy items',
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:01:00Z',
     updated_at: '2024-01-15T09:01:00Z',
@@ -68,7 +66,6 @@ export const mockCategories: InventoryItemCategory[] = [
   {
     id: '3',
     name: 'Bakery Items',
-    description: 'Bread, pastries, croissants and baked goods',
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:02:00Z',
     updated_at: '2024-01-15T09:02:00Z',
@@ -76,7 +73,6 @@ export const mockCategories: InventoryItemCategory[] = [
   {
     id: '4',
     name: 'Ingredients',
-    description: 'Flour, sugar, spices and cooking ingredients',
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:03:00Z',
     updated_at: '2024-01-15T09:03:00Z',
@@ -84,7 +80,6 @@ export const mockCategories: InventoryItemCategory[] = [
   {
     id: '5',
     name: 'Packaging',
-    description: 'Cups, napkins, bags and packaging materials',
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:04:00Z',
     updated_at: '2024-01-15T09:04:00Z',
@@ -220,7 +215,7 @@ export const mockInventoryItems: InventoryItem[] = [
   },
 ];
 
-// Generate more mock data for pagination testing
+// Generate more mock data for pagination testing - TODO: Remove in production
 export const generateMockUnits = (count: number): Unit[] => {
   const additionalUnits = [];
   for (let i = mockUnits.length + 1; i <= mockUnits.length + count; i++) {
@@ -421,3 +416,4 @@ export const mockInventoryMovements: InventoryMovement[] = [
     inventory_item: mockInventoryItems[4],
   },
 ];
+

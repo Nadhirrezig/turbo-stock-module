@@ -42,11 +42,14 @@ const CategoriesTable = React.forwardRef<HTMLDivElement, CategoriesTableProps>(
         key: 'name',
         label: 'Category Name',
         sortable: true,
-        render: (value: string) => (
-          <div className="font-medium text-foreground">
-            {value}
-          </div>
-        ),
+        render: (value: unknown) => {
+          const name = value as string;
+          return (
+            <div className="font-medium text-foreground">
+              {name}
+            </div>
+          );
+        },
       },
       // Description column temporarily hidden to save UI space
       // {
@@ -65,21 +68,27 @@ const CategoriesTable = React.forwardRef<HTMLDivElement, CategoriesTableProps>(
         key: 'created_at',
         label: 'Created',
         sortable: true,
-        render: (value: string) => (
-          <div className="text-sm text-muted-foreground">
-            {formatDateTime(value)}
-          </div>
-        ),
+        render: (value: unknown) => {
+          const dateString = value as string;
+          return (
+            <div className="text-sm text-muted-foreground">
+              {formatDateTime(dateString)}
+            </div>
+          );
+        },
       },
       {
         key: 'updated_at',
         label: 'Last Updated',
         sortable: true,
-        render: (value: string) => (
-          <div className="text-sm text-muted-foreground">
-            {formatDateTime(value)}
-          </div>
-        ),
+        render: (value: unknown) => {
+          const dateString = value as string;
+          return (
+            <div className="text-sm text-muted-foreground">
+              {formatDateTime(dateString)}
+            </div>
+          );
+        },
       },
     ];
 

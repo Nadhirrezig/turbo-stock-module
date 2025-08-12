@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { InventoryMovement, TableColumn } from '@/lib/types';
+import { InventoryMovement, InventoryItem, TableColumn } from '@/lib/types';
 import { DataTable } from './data-table';
 import { formatDateTime, formatCurrency, formatNumber, getTransactionTypeLabel, getTransactionTypeColor } from '@/lib/utils';
 import { ArrowDown, ArrowUp, Trash2, ArrowRightLeft, Eye, Edit } from 'lucide-react';
@@ -58,14 +58,14 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
         key: 'inventory_item',
         label: 'Item',
         sortable: false,
-        render: (value: any, movement: InventoryMovement) => (
+        render: (inventoryItem: InventoryItem | undefined) => (
           <div>
             <div className="font-medium text-foreground">
-              {movement.inventory_item?.name || 'Unknown Item'}
+              {inventoryItem?.name || 'Unknown Item'}
             </div>
-            {movement.inventory_item?.category && (
+            {inventoryItem?.category && (
               <div className="text-xs text-muted-foreground">
-                {movement.inventory_item.category.name}
+                {inventoryItem.category.name}
               </div>
             )}
           </div>
@@ -75,10 +75,10 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
         key: 'transaction_type',
         label: 'Type',
         sortable: true,
-        render: (value: string) => (
-          <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTransactionTypeColor(value)}`}>
-            {getTransactionIcon(value)}
-            <span className="ml-1">{getTransactionTypeLabel(value)}</span>
+        render: (transactionType: 'IN' | 'OUT' | 'WASTE' | 'TRANSFER') => (
+          <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTransactionTypeColor(transactionType)}`}>
+            {getTransactionIcon(transactionType)}
+            <span className="ml-1">{getTransactionTypeLabel(transactionType)}</span>
           </div>
         ),
       },
@@ -86,10 +86,10 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
         key: 'quantity',
         label: 'Quantity',
         sortable: true,
-        render: (value: number, movement: InventoryMovement) => (
+        render: (quantity: number, movement: InventoryMovement) => (
           <div className="text-sm font-medium text-foreground">
             {movement.transaction_type === 'OUT' || movement.transaction_type === 'WASTE' ? '-' : '+'}
-            {formatNumber(value)} {movement.inventory_item?.unit?.symbol || ''}
+            {formatNumber(quantity)} {movement.inventory_item?.unit?.symbol || ''}
           </div>
         ),
       },
@@ -97,9 +97,9 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
         key: 'unit_purchase_price',
         label: 'Unit Price',
         sortable: true,
-        render: (value: number | undefined) => (
+        render: (price: number | undefined) => (
           <div className="text-sm text-muted-foreground">
-            {value ? formatCurrency(value) : 'N/A'}
+            {price ? formatCurrency(price) : 'N/A'}
           </div>
         ),
       },
@@ -107,7 +107,7 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
         key: 'supplier',
         label: 'Supplier',
         sortable: false,
-        render: (value: any, movement: InventoryMovement) => (
+        render: (_value: unknown, movement: InventoryMovement) => (
           <div className="text-sm">
             {movement.supplier ? (
               <div>
@@ -151,9 +151,9 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
         key: 'created_at',
         label: 'Date',
         sortable: true,
-        render: (value: string) => (
+        render: (dateString: string) => (
           <div className="text-sm text-muted-foreground">
-            {formatDateTime(value)}
+            {formatDateTime(dateString)}
           </div>
         ),
       },
@@ -161,7 +161,7 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
         key: 'actions',
         label: 'Actions',
         sortable: false,
-        render: (value: any, movement: InventoryMovement) => (
+        render: (movement: InventoryMovement) => (
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { InventoryItem } from '@/lib/types';
+import { InventoryItem, SearchableSelectOption, InventoryItemCategory, Unit } from '@/lib/types';
 import { inventoryItemSchema, InventoryItemFormData } from '@/lib/schemas';
 import { mockCategories, mockUnits } from '@/lib/mock-data';
 // import { mockSuppliers } from '@/lib/mock-data'; // Removed - suppliers belong to transactions, not product definitions
@@ -21,6 +21,22 @@ import {
   RightDrawerFooter,
   RightDrawerCloseButton,
 } from '@/components/modals/right-drawer';
+
+// Adapter functions to convert entity types to SearchableSelectOption
+const categoryToOption = (category: InventoryItemCategory): SearchableSelectOption => ({
+  id: category.id,
+  name: category.name,
+  created_at: category.created_at,
+  updated_at: category.updated_at,
+});
+
+const unitToOption = (unit: Unit): SearchableSelectOption => ({
+  id: unit.id,
+  name: unit.name,
+  symbol: unit.symbol,
+  created_at: unit.created_at,
+  updated_at: unit.updated_at,
+});
 
 interface InventoryItemFormProps {
   open: boolean;
@@ -143,7 +159,7 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
                         control={control}
                         render={({ field }) => (
                           <SearchableSelect
-                            options={mockCategories}
+                            options={mockCategories.map(categoryToOption)}
                             value={field.value}
                             onValueChange={field.onChange}
                             placeholder="Select category..."
@@ -166,7 +182,7 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
                         control={control}
                         render={({ field }) => (
                           <SearchableSelect
-                            options={mockUnits}
+                            options={mockUnits.map(unitToOption)}
                             value={field.value}
                             onValueChange={field.onChange}
                             placeholder="Select unit..."

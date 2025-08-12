@@ -10,8 +10,8 @@ export interface Unit {
 export interface InventoryItemCategory {
   id: string;
   name: string;
-  description?: string; // Temporarily hidden from UI to save space, but kept in data model
-  branch_id: string;
+  // description?: string; // Temporarily hidden from UI to save space, but kept in data model
+  branch_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -76,17 +76,17 @@ export interface InventoryMovement {
 }
 
 // Form types for create/edit operations
-export interface CreateUnitData {
+export interface CreateUnitData extends Record<string, unknown> {
   name: string;
   symbol: string;
 }
 
-export interface CreateInventoryItemCategoryData {
+export interface CreateInventoryItemCategoryData extends Record<string, unknown> {
   name: string;
   // description?: string; // Temporarily hidden from UI to save space
 }
 
-export interface CreateSupplierData {
+export interface CreateSupplierData extends Record<string, unknown> {
   name: string;
   email?: string;
   phone?: string;
@@ -94,7 +94,7 @@ export interface CreateSupplierData {
   description?: string;
 }
 
-export interface CreateInventoryItemData {
+export interface CreateInventoryItemData extends Record<string, unknown> {
   name: string;
   inventory_item_category_id: string;
   unit_id: string;
@@ -116,13 +116,33 @@ export interface CreateStockEntryData {
   expiration_date?: string;
 }
 
-// UI component types
-export interface TableColumn<T> {
-  key: keyof T | string;
+// Enhanced conditional typing system for table columns
+export type TableColumnKey<T> = keyof T | 'actions';
+
+// Advanced conditional type that maps column keys to their expected value types
+export type ColumnValueType<T, K extends TableColumnKey<T>> =
+  K extends 'actions'
+    ? T  // For actions column, pass the entire item
+    : K extends keyof T
+      ? T[K]  // For entity properties, use the actual property type
+      : never;
+
+
+
+// Consolidated TableColumn interface with conditional typing
+export interface TableColumn<T, K extends TableColumnKey<T> = TableColumnKey<T>> {
+  key: K;
   label: string;
   sortable?: boolean;
-  render?: (value: any, item: T) => React.ReactNode;
+  render?: K extends 'actions'
+    ? (value: T, item: T) => React.ReactNode
+    : K extends keyof T
+      ? (value: T[K], item: T) => React.ReactNode
+      : never;
 }
+
+// Type-safe column array for table definitions
+export type TableColumns<T> = Array<TableColumn<T, keyof T | 'actions'>>;
 
 export interface PaginationInfo {
   current_page: number;
@@ -134,7 +154,7 @@ export interface PaginationInfo {
 export interface SearchableSelectOption {
   id: string;
   name: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // API response types

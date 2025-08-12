@@ -2,8 +2,8 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { InventoryMovement, InventoryMovementFilters, MovementStats } from '@/lib/types';
-import { mockInventoryMovements, simulateApiDelay } from '@/lib/mock-data';
-import { filterBySearch, sortItems, paginateItems } from '@/lib/utils';
+import { mockInventoryMovements, simulateApiDelay } from '@/lib/mock-data'; // TODO: REMOVE IN PRODUCTION - Mock imports only!
+import { sortItems, paginateItems } from '@/lib/utils';
 
 // Custom type for movement updates
 type MovementUpdateData = {
@@ -198,3 +198,5 @@ export function useInventoryMovements(options: UseInventoryMovementsOptions = {}
     updateFilters,
   };
 }
+
+

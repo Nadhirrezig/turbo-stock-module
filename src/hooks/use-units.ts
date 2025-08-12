@@ -1,17 +1,26 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Unit, CreateUnitData, PaginatedResponse, BaseFilters } from '@/lib/types';
-import { mockUnits, simulateApiDelay, generateId, getCurrentTimestamp } from '@/lib/mock-data';
-import { filterBySearch, sortItems, paginateItems } from '@/lib/utils';
+import { unitsService, ServiceError } from '@/lib/api';
 
 interface UseUnitsOptions {
   initialFilters?: BaseFilters;
 }
 
 export function useUnits(options: UseUnitsOptions = {}) {
-  const [units, setUnits] = useState<Unit[]>(mockUnits);
+  const [paginatedUnits, setPaginatedUnits] = useState<PaginatedResponse<Unit>>({
+    data: [],
+    pagination: {
+      current_page: 1,
+      per_page: 10,
+      total: 0,
+      last_page: 0,
+    },
+  });
+  const [allUnits, setAllUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BaseFilters>({
     search: '',
     page: 1,
@@ -21,23 +30,37 @@ export function useUnits(options: UseUnitsOptions = {}) {
     ...options.initialFilters,
   });
 
-  // Get filtered and paginated units
-  const paginatedUnits = useMemo(() => {
-    let filteredUnits = [...units];
+  // Fetch units from service
+  const fetchUnits = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-    // Apply search filter
-    if (filters.search) {
-      filteredUnits = filterBySearch(filteredUnits, filters.search, ['name', 'symbol']);
+    try {
+      const response = await unitsService.getAll(filters);
+      setPaginatedUnits(response);
+
+      // Also fetch all units for local operations (like getUnit) - TODO: REMOVE IN PRODUCTION - PERFORMANCE ISSUE!
+      if (filters.page === 1 && !filters.search) {
+        const allResponse = await unitsService.getAll({
+          ...filters,
+          page: 1,
+          per_page: 1000 // TODO: REMOVE - This fetches 1000 records unnecessarily!
+        });
+        setAllUnits(allResponse.data);
+      }
+    } catch (err) {
+      const errorMessage = err instanceof ServiceError ? err.message : 'Failed to fetch units';
+      setError(errorMessage);
+      console.error('Error fetching units:', err);
+    } finally {
+      setLoading(false);
     }
+  }, [filters]);
 
-    // Apply sorting
-    if (filters.sort_field && filters.sort_direction) {
-      filteredUnits = sortItems(filteredUnits, filters.sort_field as keyof Unit, filters.sort_direction);
-    }
-
-    // Apply pagination
-    return paginateItems(filteredUnits, filters.page || 1, filters.per_page || 10);
-  }, [units, filters]);
+  // Initial fetch and refetch when filters change
+  useEffect(() => {
+    fetchUnits();
+  }, [fetchUnits]);
 
   // Update filters
   const updateFilters = useCallback((newFilters: Partial<BaseFilters>) => {
@@ -47,96 +70,109 @@ export function useUnits(options: UseUnitsOptions = {}) {
   // Create unit
   const createUnit = useCallback(async (data: CreateUnitData): Promise<Unit> => {
     setLoading(true);
-    
-    try {
-      await simulateApiDelay(800);
-      
-      const newUnit: Unit = {
-        id: generateId(),
-        name: data.name,
-        symbol: data.symbol,
-        created_at: getCurrentTimestamp(),
-        updated_at: getCurrentTimestamp(),
-      };
+    setError(null);
 
-      setUnits(prev => [newUnit, ...prev]);
+    try {
+      const newUnit = await unitsService.create(data);
+
+      // Refresh the list to show the new unit
+      await fetchUnits();
+
       return newUnit;
+    } catch (err) {
+      const errorMessage = err instanceof ServiceError ? err.message : 'Failed to create unit';
+      setError(errorMessage);
+      throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchUnits]);
 
   // Update unit
   const updateUnit = useCallback(async (id: string, data: CreateUnitData): Promise<Unit> => {
     setLoading(true);
-    
-    try {
-      await simulateApiDelay(800);
-      
-      const updatedUnit: Unit = {
-        id,
-        name: data.name,
-        symbol: data.symbol,
-        created_at: units.find(u => u.id === id)?.created_at || getCurrentTimestamp(),
-        updated_at: getCurrentTimestamp(),
-      };
+    setError(null);
 
-      setUnits(prev => prev.map(unit => 
-        unit.id === id ? updatedUnit : unit
-      ));
-      
+    try {
+      const updatedUnit = await unitsService.update(id, data);
+
+      // Refresh the list to show the updated unit
+      await fetchUnits();
+
       return updatedUnit;
+    } catch (err) {
+      const errorMessage = err instanceof ServiceError ? err.message : 'Failed to update unit';
+      setError(errorMessage);
+      throw err;
     } finally {
       setLoading(false);
     }
-  }, [units]);
+  }, [fetchUnits]);
 
   // Delete unit
   const deleteUnit = useCallback(async (id: string): Promise<void> => {
     setLoading(true);
-    
+    setError(null);
+
     try {
-      await simulateApiDelay(600);
-      setUnits(prev => prev.filter(unit => unit.id !== id));
+      await unitsService.delete(id);
+
+      // Refresh the list to remove the deleted unit
+      await fetchUnits();
+    } catch (err) {
+      const errorMessage = err instanceof ServiceError ? err.message : 'Failed to delete unit';
+      setError(errorMessage);
+      throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchUnits]);
 
   // Get unit by ID
-  const getUnit = useCallback((id: string): Unit | undefined => {
-    return units.find(unit => unit.id === id);
-  }, [units]);
-
-  // Refresh units (simulate refetch)
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const getUnit = useCallback(async (id: string): Promise<Unit | null> => {
     try {
-      await simulateApiDelay(500);
-      // In a real app, this would refetch from the API
-      // For now, we'll just reset to mock data
-      setUnits(mockUnits);
-    } finally {
-      setLoading(false);
+      return await unitsService.getById(id);
+    } catch (err) {
+      // Fallback to local data if available
+      const localUnit = allUnits.find(unit => unit.id === id);
+      if (localUnit) {
+        return localUnit;
+      }
+
+      console.error('Error fetching unit by ID:', err);
+      return null;
     }
-  }, []);
+  }, [allUnits]);
+
+  // Get unit by ID (synchronous version for backward compatibility)
+  const getUnitSync = useCallback((id: string): Unit | undefined => {
+    return allUnits.find(unit => unit.id === id);
+  }, [allUnits]);
+
+  // Refresh units
+  const refresh = useCallback(async () => {
+    await fetchUnits();
+  }, [fetchUnits]);
 
   return {
     // Data
     units: paginatedUnits.data,
     pagination: paginatedUnits.pagination,
-    allUnits: units,
-    
+    allUnits,
+
     // State
     loading,
+    error,
     filters,
-    
+
     // Actions
     createUnit,
     updateUnit,
     deleteUnit,
     getUnit,
+    getUnitSync, // For backward compatibility
     refresh,
     updateFilters,
   };
 }
+

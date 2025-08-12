@@ -41,9 +41,9 @@ const UnitsTable = React.forwardRef<HTMLDivElement, UnitsTableProps>(
         key: 'name',
         label: 'Unit Name',
         sortable: true,
-        render: (value: string) => (
+        render: (name: string) => (
           <div className="font-medium text-foreground">
-            {value}
+            {name}
           </div>
         ),
       },
@@ -51,9 +51,9 @@ const UnitsTable = React.forwardRef<HTMLDivElement, UnitsTableProps>(
         key: 'symbol',
         label: 'Symbol',
         sortable: true,
-        render: (value: string) => (
+        render: (symbol: string) => (
           <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-            {value}
+            {symbol}
           </div>
         ),
       },
@@ -61,9 +61,9 @@ const UnitsTable = React.forwardRef<HTMLDivElement, UnitsTableProps>(
         key: 'created_at',
         label: 'Created',
         sortable: true,
-        render: (value: string) => (
+        render: (dateString: string) => (
           <div className="text-sm text-muted-foreground">
-            {formatDateTime(value)}
+            {formatDateTime(dateString)}
           </div>
         ),
       },
@@ -71,9 +71,9 @@ const UnitsTable = React.forwardRef<HTMLDivElement, UnitsTableProps>(
         key: 'updated_at',
         label: 'Last Updated',
         sortable: true,
-        render: (value: string) => (
+        render: (dateString: string) => (
           <div className="text-sm text-muted-foreground">
-            {formatDateTime(value)}
+            {formatDateTime(dateString)}
           </div>
         ),
       },

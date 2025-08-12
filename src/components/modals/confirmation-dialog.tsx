@@ -13,7 +13,6 @@ const ConfirmationDialogTrigger = DialogPrimitive.Trigger;
 
 const ConfirmationDialogPortal = DialogPrimitive.Portal;
 
-const ConfirmationDialogClose = DialogPrimitive.Close;
 
 const ConfirmationDialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,

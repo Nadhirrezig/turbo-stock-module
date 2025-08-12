@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { InventoryStock, CreateStockEntryData, BaseFilters, StockStats } from '@/lib/types';
 import { mockInventoryStock, mockInventoryItems, simulateApiDelay, generateId, getCurrentTimestamp } from '@/lib/mock-data';
-import { filterBySearch, sortItems, paginateItems } from '@/lib/utils';
+import { sortItems, paginateItems } from '@/lib/utils';
 
 interface UseInventoryStockOptions {
   initialFilters?: BaseFilters;
@@ -31,7 +31,6 @@ export function useInventoryStock(options: UseInventoryStockOptions = {}) {
         stock.inventory_item?.name.toLowerCase().includes(filters.search!.toLowerCase())
       );
     }
-
     // Apply sorting
     if (filters.sort_field && filters.sort_direction) {
       filteredStock = sortItems(filteredStock, filters.sort_field as keyof InventoryStock, filters.sort_direction);
