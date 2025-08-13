@@ -32,7 +32,7 @@ This document details the HTTP endpoints and data contracts for the core invento
   "data": [], // Array of entities
   "pagination": {
     "current_page": 1,
-    "per_page": 10,
+    "per_page": 5,
     "total": 50,
     "last_page": 5
   }
@@ -97,7 +97,7 @@ Get all units with filtering and pagination.
 **Query Parameters:**
 - `search` (string, optional) - Search in name and symbol fields
 - `page` (integer, optional, default: 1) - Page number
-- `per_page` (integer, optional, default: 10) - Items per page
+- `per_page` (integer, optional, default: 5) - Items per page
 - `sort_field` (string, optional, default: "created_at") - Field to sort by
 - `sort_direction` (string, optional, default: "desc") - Sort direction (asc/desc)
 
@@ -120,7 +120,7 @@ GET /api/units?search=kg&page=1&per_page=10&sort_field=name&sort_direction=asc
   ],
   "pagination": {
     "current_page": 1,
-    "per_page": 10,
+    "per_page": 5,
     "total": 1,
     "last_page": 1
   }
@@ -285,7 +285,7 @@ Get all categories with filtering and pagination.
 
 **Example Request:**
 ```
-GET /api/categories?search=meat&page=1&per_page=10
+GET /api/categories?search=meat&page=1&per_page=5
 ```
 
 **Example Response (200):**
@@ -302,7 +302,7 @@ GET /api/categories?search=meat&page=1&per_page=10
   ],
   "pagination": {
     "current_page": 1,
-    "per_page": 10,
+    "per_page": 5,
     "total": 1,
     "last_page": 1
   }
@@ -404,7 +404,7 @@ Get all inventory items with filtering and pagination.
 
 **Example Request:**
 ```
-GET /api/inventory-items?search=chicken&page=1&per_page=10&sort_field=name&sort_direction=asc
+GET /api/inventory-items?search=chicken&page=1&per_page=5&sort_field=name&sort_direction=asc
 ```
 
 **Example Response (200):**
@@ -437,7 +437,7 @@ GET /api/inventory-items?search=chicken&page=1&per_page=10&sort_field=name&sort_
   ],
   "pagination": {
     "current_page": 1,
-    "per_page": 10,
+    "per_page": 5,
     "total": 1,
     "last_page": 1
   }
@@ -659,7 +659,7 @@ Inventory Items (1) ←→ (Many) Inventory Movements
 
 **Default Values:**
 - `page`: 1
-- `per_page`: 10
+- `per_page`: 5
 
 **Limits:**
 - Maximum `per_page`: 100
@@ -716,7 +716,7 @@ public class UnitsController {
     public ResponseEntity<PaginatedResponse<Unit>> getAllUnits(
         @RequestParam(required = false) String search,
         @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "10") int per_page,
+        @RequestParam(defaultValue = "5") int per_page,
         @RequestParam(defaultValue = "created_at") String sort_field,
         @RequestParam(defaultValue = "desc") String sort_direction
     ) {

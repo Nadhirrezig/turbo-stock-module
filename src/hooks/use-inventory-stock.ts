@@ -15,7 +15,7 @@ export function useInventoryStock(options: UseInventoryStockOptions = {}) {
   const [filters, setFilters] = useState<BaseFilters>({
     search: '',
     page: 1,
-    per_page: 10,
+    per_page: 5,
     sort_field: 'updated_at',
     sort_direction: 'desc',
     ...options.initialFilters,

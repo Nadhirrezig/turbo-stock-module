@@ -13,7 +13,7 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
     data: [],
     pagination: {
       current_page: 1,
-      per_page: 10,
+      per_page: 5,
       total: 0,
       last_page: 0,
     },
@@ -24,7 +24,7 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
   const [filters, setFilters] = useState<BaseFilters>({
     search: '',
     page: 1,
-    per_page: 10,
+    per_page: 5,
     sort_field: 'created_at',
     sort_direction: 'desc',
     ...options.initialFilters,
