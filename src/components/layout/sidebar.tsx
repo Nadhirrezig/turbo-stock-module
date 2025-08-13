@@ -189,9 +189,13 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
         {/* Logo/Brand */}
         <div className="flex items-center justify-center h-16 px-4 border-b border-border">
           <Link href="/" className="flex items-center space-x-2">
-            <Package className="w-8 h-8 text-primary" />
+            <img
+              src="/logo1.png"
+              alt="Blink Logo"
+              className="w-8 h-8 object-contain"
+            />
             <span className="text-xl font-bold text-foreground">
-              Inventory
+              Blink Stock
             </span>
           </Link>
         </div>
