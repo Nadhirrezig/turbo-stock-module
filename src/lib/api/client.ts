@@ -86,7 +86,39 @@ class ApiClient {
           );
         }
 
-        const data: ApiResponse<T> = await response.json();
+        const rawData = await response.json();
+        console.log('Raw response data:', rawData);
+
+        // Handle both wrapped (ApiResponse<T>) and direct responses
+        // If the response has a 'data' property, it's wrapped
+        // If not, it's direct data from the backend
+        let data: ApiResponse<T>;
+
+        if (rawData && typeof rawData === 'object' && 'data' in rawData && 'pagination' in rawData) {
+          // Direct response from backend (PaginatedResponse format)
+          console.log('Detected direct backend response format');
+          data = {
+            data: rawData,
+            success: true,
+            message: 'Success',
+            timestamp: new Date().toISOString(),
+          } as ApiResponse<T>;
+        } else if (rawData && typeof rawData === 'object' && 'success' in rawData) {
+          // Already wrapped in ApiResponse format
+          console.log('Detected wrapped ApiResponse format');
+          data = rawData as ApiResponse<T>;
+        } else {
+          // Direct entity response (for single items)
+          console.log('Detected direct entity response');
+          data = {
+            data: rawData,
+            success: true,
+            message: 'Success',
+            timestamp: new Date().toISOString(),
+          } as ApiResponse<T>;
+        }
+
+        console.log('Processed response data:', data);
         return data;
 
       } catch (error) {

@@ -156,7 +156,7 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
 
   return {
     // Data
-    inventoryItems: paginatedInventoryItems.data,
+    inventoryItems: paginatedInventoryItems.data || [],
     pagination: paginatedInventoryItems.pagination,
     allInventoryItems,
 

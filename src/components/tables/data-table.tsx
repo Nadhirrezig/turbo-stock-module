@@ -178,7 +178,7 @@ function DataTable<T extends { id: string }>({
                   </div>
                 </td>
               </tr>
-            ) : data.length === 0 ? (
+            ) : !data || data.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length + (onEdit || onDelete ? 1 : 0)}
@@ -188,7 +188,7 @@ function DataTable<T extends { id: string }>({
                 </td>
               </tr>
             ) : (
-              data.map((item) => (
+              (data || []).map((item) => (
                 <tr key={item.id} className="hover:bg-muted/50">
                   {columns.map((column, index) => (
                     <td key={index} className="px-6 py-4 whitespace-nowrap text-sm">

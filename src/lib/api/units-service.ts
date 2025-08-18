@@ -23,10 +23,15 @@ class UnitsService {
       if (filters.sort_field) queryParams.append('sort_field', filters.sort_field);
       if (filters.sort_direction) queryParams.append('sort_direction', filters.sort_direction);
 
+      console.log('Fetching units with params:', queryParams.toString());
+
       const response = await apiClient.get<PaginatedResponse<Unit>>(
         `${this.endpoint}?${queryParams.toString()}`
       );
 
+      console.log('API response:', response);
+
+      // API client now handles both wrapped and direct responses
       return response.data;
     } catch (error) {
       throw new ServiceError(
@@ -45,6 +50,7 @@ class UnitsService {
 
     try {
       const response = await apiClient.get<Unit>(`${this.endpoint}/${id}`);
+      console.log('Get unit by ID response:', response);
       return response.data;
     } catch (error) {
       throw new ServiceError(
@@ -62,7 +68,10 @@ class UnitsService {
     }
 
     try {
+      console.log('Creating unit with data:', data);
+      console.log('Sending POST request to:', this.endpoint);
       const response = await apiClient.post<Unit>(this.endpoint, data);
+      console.log('Create unit response:', response);
       return response.data;
     } catch (error) {
       throw new ServiceError(
@@ -81,6 +90,7 @@ class UnitsService {
 
     try {
       const response = await apiClient.put<Unit>(`${this.endpoint}/${id}`, data);
+      console.log('Update unit response:', response);
       return response.data;
     } catch (error) {
       throw new ServiceError(

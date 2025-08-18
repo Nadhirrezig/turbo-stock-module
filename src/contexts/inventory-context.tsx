@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Unit, InventoryItemCategory, Supplier, InventoryItem } from '@/lib/types';
+import { unitsService, categoriesService, inventoryItemsService, API_CONFIG } from '@/lib/api';
 import { mockUnits, mockCategories, mockSuppliers, mockInventoryItems } from '@/lib/mock-data';
 
 interface InventoryContextType {
@@ -60,8 +61,16 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
   const refreshUnits = React.useCallback(async () => {
     setLoading(prev => ({ ...prev, units: true }));
     try {
-      await simulateDelay();
-      setUnits(mockUnits);
+      if (API_CONFIG.useMockData) {
+        await simulateDelay();
+        setUnits(mockUnits);
+      } else {
+        const response = await unitsService.getAll({ page: 1, per_page: 1000 });
+        setUnits(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error refreshing units:', error);
+      setUnits(mockUnits); // Fallback to mock data on error
     } finally {
       setLoading(prev => ({ ...prev, units: false }));
     }
@@ -70,8 +79,16 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
   const refreshCategories = React.useCallback(async () => {
     setLoading(prev => ({ ...prev, categories: true }));
     try {
-      await simulateDelay();
-      setCategories(mockCategories);
+      if (API_CONFIG.useMockData) {
+        await simulateDelay();
+        setCategories(mockCategories);
+      } else {
+        const response = await categoriesService.getAll({ page: 1, per_page: 1000 });
+        setCategories(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error refreshing categories:', error);
+      setCategories(mockCategories); // Fallback to mock data on error
     } finally {
       setLoading(prev => ({ ...prev, categories: false }));
     }
@@ -90,8 +107,16 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
   const refreshInventoryItems = React.useCallback(async () => {
     setLoading(prev => ({ ...prev, inventoryItems: true }));
     try {
-      await simulateDelay();
-      setInventoryItems(mockInventoryItems);
+      if (API_CONFIG.useMockData) {
+        await simulateDelay();
+        setInventoryItems(mockInventoryItems);
+      } else {
+        const response = await inventoryItemsService.getAll({ page: 1, per_page: 1000 });
+        setInventoryItems(response.data || []);
+      }
+    } catch (error) {
+      console.error('Error refreshing inventory items:', error);
+      setInventoryItems(mockInventoryItems); // Fallback to mock data on error
     } finally {
       setLoading(prev => ({ ...prev, inventoryItems: false }));
     }
@@ -105,6 +130,11 @@ export function InventoryProvider({ children }: InventoryProviderProps) {
       refreshInventoryItems(),
     ]);
   }, [refreshUnits, refreshCategories, refreshSuppliers, refreshInventoryItems]);
+
+  // Initial data load
+  React.useEffect(() => {
+    refreshAll();
+  }, [refreshAll]);
 
   // Getter functions
   const getUnitById = React.useCallback((id: string) => {

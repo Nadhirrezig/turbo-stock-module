@@ -39,19 +39,30 @@ export function useUnits(options: UseUnitsOptions = {}) {
       const response = await unitsService.getAll(filters);
       setPaginatedUnits(response);
 
-      // Also fetch all units for local operations (like getUnit) - TODO: REMOVE IN PRODUCTION - PERFORMANCE ISSUE!
+      // Also fetch all units for dropdowns and local operations
       if (filters.page === 1 && !filters.search) {
         const allResponse = await unitsService.getAll({
           ...filters,
           page: 1,
-          per_page: 1000 // TODO: REMOVE - This fetches 1000 records unnecessarily!
+          per_page: 1000 // Get all units for dropdowns
         });
-        setAllUnits(allResponse.data);
+        setAllUnits(allResponse.data || []);
       }
     } catch (err) {
       const errorMessage = err instanceof ServiceError ? err.message : 'Failed to fetch units';
       setError(errorMessage);
       console.error('Error fetching units:', err);
+
+      // Ensure data structure integrity on error
+      setPaginatedUnits({
+        data: [],
+        pagination: {
+          current_page: 1,
+          per_page: 5,
+          total: 0,
+          last_page: 0,
+        },
+      });
     } finally {
       setLoading(false);
     }
@@ -156,7 +167,7 @@ export function useUnits(options: UseUnitsOptions = {}) {
 
   return {
     // Data
-    units: paginatedUnits.data,
+    units: paginatedUnits.data || [],
     pagination: paginatedUnits.pagination,
     allUnits,
 

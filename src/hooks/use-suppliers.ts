@@ -10,7 +10,7 @@ interface UseSuppliersOptions {
 }
 
 export function useSuppliers(options: UseSuppliersOptions = {}) {
-  const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers); // TODO: Remove mock data in production
+  const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<BaseFilters>({
     search: '',
@@ -47,16 +47,17 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
   // Create supplier
   const createSupplier = useCallback(async (data: CreateSupplierData): Promise<Supplier> => {
     setLoading(true);
-    
+
     try {
       await simulateApiDelay(800);
-      
+
       const newSupplier: Supplier = {
         id: generateId(),
         name: data.name,
         email: data.email,
         phone: data.phone,
         address: data.address,
+        description: data.description,
         created_at: getCurrentTimestamp(),
         updated_at: getCurrentTimestamp(),
       };
@@ -71,24 +72,25 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
   // Update supplier
   const updateSupplier = useCallback(async (id: string, data: CreateSupplierData): Promise<Supplier> => {
     setLoading(true);
-    
+
     try {
       await simulateApiDelay(800);
-      
+
       const updatedSupplier: Supplier = {
         id,
         name: data.name,
         email: data.email,
         phone: data.phone,
         address: data.address,
+        description: data.description,
         created_at: suppliers.find(s => s.id === id)?.created_at || getCurrentTimestamp(),
         updated_at: getCurrentTimestamp(),
       };
 
-      setSuppliers(prev => prev.map(supplier => 
+      setSuppliers(prev => prev.map(supplier =>
         supplier.id === id ? updatedSupplier : supplier
       ));
-      
+
       return updatedSupplier;
     } finally {
       setLoading(false);
@@ -98,7 +100,7 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
   // Delete supplier
   const deleteSupplier = useCallback(async (id: string): Promise<void> => {
     setLoading(true);
-    
+
     try {
       await simulateApiDelay(600);
       setSuppliers(prev => prev.filter(supplier => supplier.id !== id));
@@ -125,14 +127,14 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
 
   return {
     // Data
-    suppliers: paginatedSuppliers.data,
+    suppliers: paginatedSuppliers.data || [],
     pagination: paginatedSuppliers.pagination,
     allSuppliers: suppliers,
-    
+
     // State
     loading,
     filters,
-    
+
     // Actions
     createSupplier,
     updateSupplier,

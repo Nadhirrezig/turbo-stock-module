@@ -46,7 +46,7 @@ export function useCategories(options: UseCategoriesOptions = {}) {
           page: 1,
           per_page: 1000 // Get all categories
         });
-        setAllCategories(allResponse.data);
+        setAllCategories(allResponse.data || []);
       }
     } catch (err) {
       const errorMessage = err instanceof ServiceError ? err.message : 'Failed to fetch categories';
@@ -156,7 +156,7 @@ export function useCategories(options: UseCategoriesOptions = {}) {
 
   return {
     // Data
-    categories: paginatedCategories.data,
+    categories: paginatedCategories.data || [],
     pagination: paginatedCategories.pagination,
     allCategories,
 

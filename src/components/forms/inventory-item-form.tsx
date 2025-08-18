@@ -5,7 +5,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { InventoryItem, SearchableSelectOption, InventoryItemCategory, Unit } from '@/lib/types';
 import { inventoryItemSchema, InventoryItemFormData } from '@/lib/schemas';
-import { mockCategories, mockUnits } from '@/lib/mock-data';
+import { useCategories } from '@/hooks/use-categories';
+import { useUnits } from '@/hooks/use-units';
 // import { mockSuppliers } from '@/lib/mock-data'; // Removed - suppliers belong to transactions, not product definitions
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -49,7 +50,11 @@ interface InventoryItemFormProps {
 const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProps>(
   ({ open, onOpenChange, inventoryItem, onSubmit, loading = false }, ref) => {
     const isEditing = Boolean(inventoryItem);
-    
+
+    // Fetch categories and units from API
+    const { allCategories, loading: categoriesLoading } = useCategories();
+    const { allUnits, loading: unitsLoading } = useUnits();
+
     const {
       register,
       handleSubmit,
@@ -159,13 +164,13 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
                         control={control}
                         render={({ field }) => (
                           <SearchableSelect
-                            options={mockCategories.map(categoryToOption)}
+                            options={allCategories.map(categoryToOption)}
                             value={field.value}
                             onValueChange={field.onChange}
-                            placeholder="Select category..."
+                            placeholder={categoriesLoading ? "Loading categories..." : "Select category..."}
                             displayField="name"
                             // subField="description" // Temporarily hidden to save UI space
-                            disabled={isLoading}
+                            disabled={isLoading || categoriesLoading}
                             error={errors.inventory_item_category_id?.message}
                           />
                         )}
@@ -182,13 +187,13 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
                         control={control}
                         render={({ field }) => (
                           <SearchableSelect
-                            options={mockUnits.map(unitToOption)}
+                            options={allUnits.map(unitToOption)}
                             value={field.value}
                             onValueChange={field.onChange}
-                            placeholder="Select unit..."
+                            placeholder={unitsLoading ? "Loading units..." : "Select unit..."}
                             displayField="name"
                             subField="symbol"
-                            disabled={isLoading}
+                            disabled={isLoading || unitsLoading}
                             error={errors.unit_id?.message}
                           />
                         )}
