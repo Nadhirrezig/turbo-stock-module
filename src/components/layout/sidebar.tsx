@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import { 
   ChevronDown, 
   Package, 
@@ -186,10 +187,9 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
           className
         )}
       >
-        {/* Logo/Brand */}
         <div className="flex items-center justify-center h-16 px-4 border-b border-border">
           <Link href="/" className="flex items-center space-x-2">
-            <img
+            <Image
               src="/logo1.png"
               alt="Blink Logo"
               className="w-8 h-8 object-contain"

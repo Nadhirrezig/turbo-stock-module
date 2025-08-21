@@ -2,6 +2,9 @@
 export { unitsService, UnitsService } from './units-service';
 export { categoriesService, CategoriesService } from './categories-service';
 export { inventoryItemsService, InventoryItemsService } from './inventory-items-service';
+export { suppliersService, SuppliersService } from './suppliers-service';
+export { inventoryMovementsService, InventoryMovementsService } from './inventory-movements-service';
+export { inventoryStockService, InventoryStockService } from './inventory-stock-service';
 
 // API Client and Configuration
 export { apiClient, ApiClient, ServiceError } from './client';

@@ -1,30 +1,28 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { InventoryMovement, InventoryMovementFilters, MovementStats } from '@/lib/types';
-import { mockInventoryMovements, simulateApiDelay } from '@/lib/mock-data'; // TODO: REMOVE IN PRODUCTION - Mock imports only!
-import { sortItems, paginateItems } from '@/lib/utils';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { InventoryMovement, InventoryMovementFilters, MovementStats, PaginatedResponse, CreateStockEntryData } from '@/lib/types';
+import { inventoryMovementsService, ServiceError } from '@/lib/api';
 
-// Custom type for movement updates
-type MovementUpdateData = {
-  inventory_item_id: string;
-  transaction_type: 'IN' | 'OUT' | 'WASTE' | 'TRANSFER';
-  quantity: number;
-  unit_purchase_price?: number;
-  supplier_id?: string;
-  destination_branch_id?: string;
-  waste_reason?: string;
-  notes?: string;
-  expiration_date?: string;
-};
+type MovementUpdateData = Partial<CreateStockEntryData>;
 
 interface UseInventoryMovementsOptions {
   initialFilters?: InventoryMovementFilters;
 }
 
 export function useInventoryMovements(options: UseInventoryMovementsOptions = {}) {
-  const [inventoryMovements, setInventoryMovements] = useState<InventoryMovement[]>(mockInventoryMovements);
+  const [paginatedMovements, setPaginatedMovements] = useState<PaginatedResponse<InventoryMovement>>({
+    data: [],
+    pagination: {
+      current_page: 1,
+      per_page: 5,
+      total: 0,
+      last_page: 0,
+    },
+  });
+  const [allInventoryMovements, setAllInventoryMovements] = useState<InventoryMovement[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<InventoryMovementFilters>({
     search: '',
     page: 1,
@@ -37,160 +35,87 @@ export function useInventoryMovements(options: UseInventoryMovementsOptions = {}
     ...options.initialFilters,
   });
 
-  // Get filtered and paginated movements
-  const paginatedMovements = useMemo(() => {
-    let filteredMovements = [...inventoryMovements];
+  const fetchMovements = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await inventoryMovementsService.getAll(filters);
+      setPaginatedMovements(response);
 
-    // Apply search filter
-    if (filters.search) {
-      filteredMovements = filteredMovements.filter(movement => 
-        movement.inventory_item?.name.toLowerCase().includes(filters.search!.toLowerCase()) ||
-        movement.notes?.toLowerCase().includes(filters.search!.toLowerCase()) ||
-        movement.supplier?.name.toLowerCase().includes(filters.search!.toLowerCase())
-      );
-    }
-
-    // Apply transaction type filter
-    if (filters.transaction_type) {
-      filteredMovements = filteredMovements.filter(movement => 
-        movement.transaction_type === filters.transaction_type
-      );
-    }
-
-    // Apply category filter
-    if (filters.category) {
-      filteredMovements = filteredMovements.filter(movement => 
-        movement.inventory_item?.inventory_item_category_id === filters.category
-      );
-    }
-
-    // Apply date range filter (simplified - in real app would parse date ranges)
-    if (filters.date_range) {
-      const today = new Date();
-      const filterDate = new Date(today);
-      
-      switch (filters.date_range) {
-        case 'today':
-          filterDate.setHours(0, 0, 0, 0);
-          break;
-        case 'week':
-          filterDate.setDate(today.getDate() - 7);
-          break;
-        case 'month':
-          filterDate.setMonth(today.getMonth() - 1);
-          break;
-        default:
-          filterDate.setFullYear(1970); // Show all
+      if (filters.page === 1 && !filters.search && !filters.transaction_type && !filters.category && !filters.date_range) {
+        const allResponse = await inventoryMovementsService.getAll({ ...filters, page: 1, per_page: 1000 });
+        setAllInventoryMovements(allResponse.data || []);
       }
-      
-      filteredMovements = filteredMovements.filter(movement => 
-        new Date(movement.created_at) >= filterDate
-      );
+    } catch (err) {
+      const message = err instanceof ServiceError ? err.message : 'Failed to fetch inventory movements';
+      setError(message);
+      setPaginatedMovements({
+        data: [],
+        pagination: {
+          current_page: 1,
+          per_page: filters.per_page || 5,
+          total: 0,
+          last_page: 0,
+        },
+      });
+    } finally {
+      setLoading(false);
     }
+  }, [filters]);
 
-    // Apply sorting
-    if (filters.sort_field && filters.sort_direction) {
-      filteredMovements = sortItems(filteredMovements, filters.sort_field as keyof InventoryMovement, filters.sort_direction);
-    }
+  useEffect(() => {
+    fetchMovements();
+  }, [fetchMovements]);
 
-    // Apply pagination
-    return paginateItems(filteredMovements, filters.page || 1, filters.per_page || 10);
-  }, [inventoryMovements, filters]);
-
-  // Calculate movement statistics
   const movementStats = useMemo((): MovementStats => {
-    const totalStockIn = inventoryMovements
-      .filter(m => m.transaction_type === 'IN')
-      .reduce((sum, m) => sum + m.quantity, 0);
-    
-    const totalStockOut = inventoryMovements
-      .filter(m => m.transaction_type === 'OUT')
-      .reduce((sum, m) => sum + m.quantity, 0);
-    
-    const totalWaste = inventoryMovements
-      .filter(m => m.transaction_type === 'WASTE')
-      .reduce((sum, m) => sum + m.quantity, 0);
-    
-    const totalTransfers = inventoryMovements
-      .filter(m => m.transaction_type === 'TRANSFER')
-      .reduce((sum, m) => sum + m.quantity, 0);
+    const totalStockIn = allInventoryMovements.filter(m => m.transaction_type === 'IN').reduce((sum, m) => sum + m.quantity, 0);
+    const totalStockOut = allInventoryMovements.filter(m => m.transaction_type === 'OUT').reduce((sum, m) => sum + m.quantity, 0);
+    const totalWaste = allInventoryMovements.filter(m => m.transaction_type === 'WASTE').reduce((sum, m) => sum + m.quantity, 0);
+    const totalTransfers = allInventoryMovements.filter(m => m.transaction_type === 'TRANSFER').reduce((sum, m) => sum + m.quantity, 0);
+    return { totalStockIn, totalStockOut, totalWaste, totalTransfers, totalMovements: allInventoryMovements.length };
+  }, [allInventoryMovements]);
 
-    return {
-      totalStockIn,
-      totalStockOut,
-      totalWaste,
-      totalTransfers,
-      totalMovements: inventoryMovements.length,
-    };
-  }, [inventoryMovements]);
-
-  // Update filters
   const updateFilters = useCallback((newFilters: Partial<InventoryMovementFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
   }, []);
 
-  // Get movements by item ID
   const getMovementsByItemId = useCallback((itemId: string) => {
-    return inventoryMovements.filter(movement => movement.inventory_item_id === itemId);
-  }, [inventoryMovements]);
+    return allInventoryMovements.filter(movement => movement.inventory_item_id === itemId);
+  }, [allInventoryMovements]);
 
-  // Get recent movements
   const getRecentMovements = useCallback((limit: number = 10) => {
-    return [...inventoryMovements]
+    return [...allInventoryMovements]
       .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, limit);
-  }, [inventoryMovements]);
+  }, [allInventoryMovements]);
 
-  // Update movement
   const updateMovement = useCallback(async (movementId: string, data: MovementUpdateData) => {
     setLoading(true);
+    setError(null);
     try {
-      await simulateApiDelay(800); // Simulate API call
-
-      setInventoryMovements(prev => prev.map(movement => {
-        if (movement.id === movementId) {
-          return {
-            ...movement,
-            quantity: data.quantity,
-            unit_purchase_price: data.unit_purchase_price,
-            supplier_id: data.supplier_id,
-            destination_branch_id: data.destination_branch_id,
-            waste_reason: data.waste_reason,
-            notes: data.notes,
-            expiration_date: data.expiration_date,
-            updated_at: new Date().toISOString(),
-          };
-        }
-        return movement;
-      }));
+      await inventoryMovementsService.update(movementId, data);
+      await fetchMovements();
+    } catch (err) {
+      const message = err instanceof ServiceError ? err.message : 'Failed to update inventory movement';
+      setError(message);
+      throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchMovements]);
 
-  // Refresh movements
   const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      await simulateApiDelay(500);
-      setInventoryMovements(mockInventoryMovements);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    await fetchMovements();
+  }, [fetchMovements]);
 
   return {
-    // Data
     inventoryMovements: paginatedMovements.data,
     pagination: paginatedMovements.pagination,
-    allInventoryMovements: inventoryMovements,
+    allInventoryMovements,
     movementStats,
-    
-    // State
     loading,
+    error,
     filters,
-    
-    // Actions
     getMovementsByItemId,
     getRecentMovements,
     updateMovement,

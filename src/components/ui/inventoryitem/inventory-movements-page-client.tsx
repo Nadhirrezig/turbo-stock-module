@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useInventoryMovements } from '@/hooks/use-inventory-movements';
-import { mockCategories } from '@/lib/mock-data';
+import { useCategories } from '@/hooks/use-categories';
 import { InventoryMovement, SearchableSelectOption, InventoryItemCategory } from '@/lib/types';
 
 // Custom type for movement edit form
@@ -42,6 +42,8 @@ export function InventoryMovementsPageClient() {
     updateFilters,
     updateMovement,
   } = useInventoryMovements();
+
+  const { allCategories } = useCategories({ initialFilters: { page: 1, per_page: 1000 } });
 
   // State for view and edit drawers
   const [viewDrawerOpen, setViewDrawerOpen] = React.useState(false);
@@ -123,10 +125,10 @@ export function InventoryMovementsPageClient() {
     { id: 'month', name: 'This Month', description: 'Movements from last 30 days' },
   ];
 
-  const categoryOptions: SearchableSelectOption[] = [
+  const categoryOptions: SearchableSelectOption[] = React.useMemo(() => [
     { id: '', name: 'All Categories', description: 'Show all categories' },
-    ...mockCategories.map(categoryToOption),
-  ];
+    ...allCategories.map(categoryToOption),
+  ], [allCategories]);
 
   return (
     <div className="space-y-6">

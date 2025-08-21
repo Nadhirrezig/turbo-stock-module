@@ -1,17 +1,26 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { Supplier, CreateSupplierData, BaseFilters } from '@/lib/types';
-import { mockSuppliers, simulateApiDelay, generateId, getCurrentTimestamp } from '@/lib/mock-data';
-import { filterBySearch, sortItems, paginateItems } from '@/lib/utils';
+import { useState, useCallback, useEffect } from 'react';
+import { Supplier, CreateSupplierData, BaseFilters, PaginatedResponse } from '@/lib/types';
+import { suppliersService, ServiceError } from '@/lib/api';
 
 interface UseSuppliersOptions {
   initialFilters?: BaseFilters;
 }
 
 export function useSuppliers(options: UseSuppliersOptions = {}) {
-  const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
+  const [paginatedSuppliers, setPaginatedSuppliers] = useState<PaginatedResponse<Supplier>>({
+    data: [],
+    pagination: {
+      current_page: 1,
+      per_page: 5,
+      total: 0,
+      last_page: 0,
+    },
+  });
+  const [allSuppliers, setAllSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BaseFilters>({
     search: '',
     page: 1,
@@ -21,128 +30,120 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
     ...options.initialFilters,
   });
 
-  // Get filtered and paginated suppliers
-  const paginatedSuppliers = useMemo(() => {
-    let filteredSuppliers = [...suppliers];
+  const fetchSuppliers = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await suppliersService.getAll(filters);
+      setPaginatedSuppliers(response);
 
-    // Apply search filter
-    if (filters.search) {
-      filteredSuppliers = filterBySearch(filteredSuppliers, filters.search, ['name', 'email', 'phone', 'address']);
+      if (filters.page === 1 && !filters.search) {
+        const allResponse = await suppliersService.getAll({ ...filters, page: 1, per_page: 1000 });
+        setAllSuppliers(allResponse.data || []);
+      }
+    } catch (error) {
+      const message = error instanceof ServiceError ? error.message : 'Failed to fetch suppliers';
+      setError(message);
+      setPaginatedSuppliers({
+        data: [],
+        pagination: {
+          current_page: 1,
+          per_page: filters.per_page || 5,
+          total: 0,
+          last_page: 0,
+        },
+      });
+    } finally {
+      setLoading(false);
     }
+  }, [filters]);
 
-    // Apply sorting
-    if (filters.sort_field && filters.sort_direction) {
-      filteredSuppliers = sortItems(filteredSuppliers, filters.sort_field as keyof Supplier, filters.sort_direction);
-    }
+  useEffect(() => {
+    fetchSuppliers();
+  }, [fetchSuppliers]);
 
-    // Apply pagination
-    return paginateItems(filteredSuppliers, filters.page || 1, filters.per_page || 10);
-  }, [suppliers, filters]);
-
-  // Update filters
   const updateFilters = useCallback((newFilters: Partial<BaseFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
   }, []);
 
-  // Create supplier
   const createSupplier = useCallback(async (data: CreateSupplierData): Promise<Supplier> => {
     setLoading(true);
-
+    setError(null);
     try {
-      await simulateApiDelay(800);
-
-      const newSupplier: Supplier = {
-        id: generateId(),
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        address: data.address,
-        description: data.description,
-        created_at: getCurrentTimestamp(),
-        updated_at: getCurrentTimestamp(),
-      };
-
-      setSuppliers(prev => [newSupplier, ...prev]);
-      return newSupplier;
+      const created = await suppliersService.create(data);
+      await fetchSuppliers();
+      return created;
+    } catch (error) {
+      const message = error instanceof ServiceError ? error.message : 'Failed to create supplier';
+      setError(message);
+      throw error;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchSuppliers]);
 
-  // Update supplier
   const updateSupplier = useCallback(async (id: string, data: CreateSupplierData): Promise<Supplier> => {
     setLoading(true);
-
+    setError(null);
     try {
-      await simulateApiDelay(800);
-
-      const updatedSupplier: Supplier = {
-        id,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        address: data.address,
-        description: data.description,
-        created_at: suppliers.find(s => s.id === id)?.created_at || getCurrentTimestamp(),
-        updated_at: getCurrentTimestamp(),
-      };
-
-      setSuppliers(prev => prev.map(supplier =>
-        supplier.id === id ? updatedSupplier : supplier
-      ));
-
-      return updatedSupplier;
+      const updated = await suppliersService.update(id, data);
+      await fetchSuppliers();
+      return updated;
+    } catch (error) {
+      const message = error instanceof ServiceError ? error.message : 'Failed to update supplier';
+      setError(message);
+      throw error;
     } finally {
       setLoading(false);
     }
-  }, [suppliers]);
+  }, [fetchSuppliers]);
 
-  // Delete supplier
   const deleteSupplier = useCallback(async (id: string): Promise<void> => {
     setLoading(true);
-
+    setError(null);
     try {
-      await simulateApiDelay(600);
-      setSuppliers(prev => prev.filter(supplier => supplier.id !== id));
+      await suppliersService.delete(id);
+      await fetchSuppliers();
+    } catch (error) {
+      const message = error instanceof ServiceError ? error.message : 'Failed to delete supplier';
+      setError(message);
+      throw error;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchSuppliers]);
 
-  // Get supplier by ID
-  const getSupplier = useCallback((id: string): Supplier | undefined => {
-    return suppliers.find(supplier => supplier.id === id);
-  }, [suppliers]);
+  const getSupplier = useCallback(async (id: string): Promise<Supplier | null> => {
+    try {
+      return await suppliersService.getById(id);
+    } catch {
+      const local = allSuppliers.find(s => s.id === id);
+      return local || null;
+    }
+  }, [allSuppliers]);
 
-  // Refresh suppliers
+  const getSupplierSync = useCallback((id: string): Supplier | undefined => {
+    return allSuppliers.find(s => s.id === id);
+  }, [allSuppliers]);
+
   const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      await simulateApiDelay(500);
-      setSuppliers(mockSuppliers);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    await fetchSuppliers();
+  }, [fetchSuppliers]);
 
   return {
-    // Data
     suppliers: paginatedSuppliers.data || [],
     pagination: paginatedSuppliers.pagination,
-    allSuppliers: suppliers,
-
-    // State
+    allSuppliers,
     loading,
+    error,
     filters,
-
-    // Actions
     createSupplier,
     updateSupplier,
     deleteSupplier,
     getSupplier,
+    getSupplierSync,
     refresh,
     updateFilters,
   };
 }
-
 

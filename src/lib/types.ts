@@ -104,7 +104,7 @@ export interface CreateInventoryItemData extends Record<string, unknown> {
   // unit_purchase_price: number; // Removed - prices belong to transactions, not product definitions
 }
 
-export interface CreateStockEntryData {
+export interface CreateStockEntryData extends Record<string, unknown> {
   inventory_item_id: string;
   transaction_type: 'IN' | 'OUT' | 'WASTE' | 'TRANSFER';
   quantity: number;
