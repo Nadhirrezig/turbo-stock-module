@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Unit, CreateUnitData, PaginatedResponse, BaseFilters } from '@/lib/types';
-import { unitsService, ServiceError } from '@/lib/api';
+import { unitsService } from '@/lib/api/units-service';
+import { ServiceError } from '@/lib/api/client';
 
 interface UseUnitsOptions {
   initialFilters?: BaseFilters;

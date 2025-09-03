@@ -7,6 +7,7 @@ import { useSuppliers } from '@/hooks/use-suppliers';
 import { PageHeader } from '@/components/shared/page-header';
 import { SuppliersTable } from '@/components/tables/suppliers-table';
 import { SupplierForm } from '@/components/forms/supplier-form';
+import { SupplierViewDrawer } from '@/components/forms/supplier-view-drawer';
 import { ConfirmationDialogComponent } from '@/components/modals/confirmation-dialog';
 
 export function SuppliersPageClient() {
@@ -25,6 +26,10 @@ export function SuppliersPageClient() {
   const [showForm, setShowForm] = React.useState(false);
   const [editingSupplier, setEditingSupplier] = React.useState<Supplier | null>(null);
   const [formLoading, setFormLoading] = React.useState(false);
+
+  // View drawer state
+  const [showViewDrawer, setShowViewDrawer] = React.useState(false);
+  const [viewingSupplier, setViewingSupplier] = React.useState<Supplier | null>(null);
 
   // Delete confirmation state
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
@@ -52,9 +57,16 @@ export function SuppliersPageClient() {
     setShowForm(true);
   }, []);
 
-  // Handle edit supplier
-  const handleEditSupplier = React.useCallback((supplier: Supplier) => {
+  // Handle view supplier
+  const handleViewSupplier = React.useCallback((supplier: Supplier) => {
+    setViewingSupplier(supplier);
+    setShowViewDrawer(true);
+  }, []);
+
+  // Handle edit supplier from view drawer
+  const handleEditFromView = React.useCallback((supplier: Supplier) => {
     setEditingSupplier(supplier);
+    setShowViewDrawer(false);
     setShowForm(true);
   }, []);
 
@@ -73,12 +85,16 @@ export function SuppliersPageClient() {
       } else {
         await createSupplier(data);
       }
+      setShowForm(false);
+      setEditingSupplier(null);
+    } catch (error) {
+      console.error('Failed to save supplier:', error);
     } finally {
       setFormLoading(false);
     }
-  }, [editingSupplier, updateSupplier, createSupplier]);
+  }, [editingSupplier, createSupplier, updateSupplier]);
 
-  // Handle delete confirmation
+  // Handle delete confirm
   const handleDeleteConfirm = React.useCallback(async () => {
     if (!supplierToDelete) return;
     
@@ -87,6 +103,8 @@ export function SuppliersPageClient() {
       await deleteSupplier(supplierToDelete.id);
       setShowDeleteDialog(false);
       setSupplierToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete supplier:', error);
     } finally {
       setDeleteLoading(false);
     }
@@ -121,11 +139,19 @@ export function SuppliersPageClient() {
           onSort={handleSort}
           sortField={filters.sort_field}
           sortDirection={filters.sort_direction}
-          onEdit={handleEditSupplier}
+          onView={handleViewSupplier}
           onDelete={handleDeleteSupplier}
           loading={loading}
         />
       </div>
+
+      {/* Supplier View Drawer */}
+      <SupplierViewDrawer
+        open={showViewDrawer}
+        onOpenChange={setShowViewDrawer}
+        supplier={viewingSupplier}
+        onEdit={handleEditFromView}
+      />
 
       {/* Supplier Form Modal */}
       <SupplierForm

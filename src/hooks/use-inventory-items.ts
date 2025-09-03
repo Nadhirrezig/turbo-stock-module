@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { InventoryItem, CreateInventoryItemData, BaseFilters, PaginatedResponse } from '@/lib/types';
-import { inventoryItemsService, ServiceError } from '@/lib/api';
+import { inventoryItemsService } from '@/lib/api/inventory-items-service';
+import { ServiceError } from '@/lib/api/client';
 
 interface UseInventoryItemsOptions {
   initialFilters?: BaseFilters;

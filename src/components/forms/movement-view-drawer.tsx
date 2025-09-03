@@ -13,6 +13,7 @@ import {
   RightDrawerBody,
   RightDrawerCloseButton,
 } from '@/components/modals/right-drawer';
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 
 interface MovementViewDrawerProps {
   open: boolean;
@@ -23,6 +24,11 @@ interface MovementViewDrawerProps {
 
 const MovementViewDrawer = React.forwardRef<HTMLDivElement, MovementViewDrawerProps>(
   ({ open, onOpenChange, movement, onEdit }, ref) => {
+    const { handleClose } = useUnsavedChanges({
+      onOpenChange,
+      isDirty: false,
+      onReset: () => {},
+    });
     const getTransactionIcon = (type: string) => {
       switch (type) {
         case 'IN':
@@ -64,7 +70,7 @@ const MovementViewDrawer = React.forwardRef<HTMLDivElement, MovementViewDrawerPr
                 )}
               </div>
             </div>
-            <RightDrawerCloseButton />
+            <RightDrawerCloseButton onClick={handleClose} />
           </RightDrawerHeader>
 
           <RightDrawerBody>

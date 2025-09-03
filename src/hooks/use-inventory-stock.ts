@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { InventoryStock, CreateStockEntryData, BaseFilters, StockStats, PaginatedResponse } from '@/lib/types';
-import { inventoryStockService, ServiceError } from '@/lib/api';
+import { inventoryStockService } from '@/lib/api/inventory-stock-service';
+import { ServiceError } from '@/lib/api/client';
 
 interface UseInventoryStockOptions {
   initialFilters?: BaseFilters;

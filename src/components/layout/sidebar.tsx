@@ -192,6 +192,8 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
             <Image
               src="/logo1.png"
               alt="Blink Logo"
+              width={32}
+              height={32}
               className="w-8 h-8 object-contain"
             />
             <span className="text-xl font-bold text-foreground">

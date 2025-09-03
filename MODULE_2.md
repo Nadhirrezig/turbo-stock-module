@@ -318,7 +318,26 @@ Examples
     "supplier_id": "1",
     "expiration_date": "2024-12-31"
   }
-
+- Stock entry (OUT):
+  {
+    "inventory_item_id": "1",
+    "transaction_type": "OUT",
+    "quantity": 20,
+  }
+  - Stock entry (WASTE):
+  {
+    "inventory_item_id": "1",
+    "transaction_type": "WASTE",
+    "quantity": 20,
+    "waste_reason": "Damaged packaging"
+  }
+  - Stock entry (TRANSFER):
+  {
+    "inventory_item_id": "1",
+    "transaction_type": "TRANSFER",
+    "quantity": 20,
+    "destination_branch_id": "branch-2"
+  }
 Example JSON responses:
 
 List (GET /api/inventory-movements):

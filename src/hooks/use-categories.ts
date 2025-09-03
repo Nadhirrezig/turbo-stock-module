@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { InventoryItemCategory, CreateInventoryItemCategoryData, BaseFilters, PaginatedResponse } from '@/lib/types';
-import { categoriesService, ServiceError } from '@/lib/api';
+import { categoriesService } from '@/lib/api/categories-service';
+import { ServiceError } from '@/lib/api/client';
 
 interface UseCategoriesOptions {
   initialFilters?: BaseFilters;

@@ -2,7 +2,10 @@
 
 import * as React from 'react';
 import { Unit, InventoryItemCategory, Supplier, InventoryItem } from '@/lib/types';
-import { unitsService, categoriesService, inventoryItemsService, API_CONFIG } from '@/lib/api';
+import { unitsService } from '@/lib/api/units-service';
+import { categoriesService } from '@/lib/api/categories-service';
+import { inventoryItemsService } from '@/lib/api/inventory-items-service';
+import { API_CONFIG } from '@/lib/api/config';
 import { mockUnits, mockCategories, mockSuppliers, mockInventoryItems } from '@/lib/mock-data';
 
 interface InventoryContextType {

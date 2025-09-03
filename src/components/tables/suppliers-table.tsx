@@ -4,7 +4,8 @@ import * as React from 'react';
 import { Supplier, TableColumn } from '@/lib/types';
 import { DataTable } from './data-table';
 import { formatDateTime, truncateText } from '@/lib/utils';
-import { Mail, Phone, MapPin, Building2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Building2, Eye, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface SuppliersTableProps {
   suppliers: Supplier[];
@@ -18,7 +19,7 @@ interface SuppliersTableProps {
   onSort?: (field: string, direction: 'asc' | 'desc') => void;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  onEdit?: (supplier: Supplier) => void;
+  onView?: (supplier: Supplier) => void;
   onDelete?: (supplier: Supplier) => void;
   loading?: boolean;
   className?: string;
@@ -32,7 +33,7 @@ const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
     onSort,
     sortField,
     sortDirection,
-    onEdit,
+    onView,
     onDelete,
     loading = false,
     className,
@@ -150,6 +151,32 @@ const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
           );
         },
       },
+      {
+        key: 'actions',
+        label: 'Actions',
+        sortable: false,
+        render: (_value: unknown, supplier: Supplier) => (
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onView?.(supplier)}
+              title="View Details"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDelete?.(supplier)}
+              title="Delete Supplier"
+              className="text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ),
+      },
     ];
 
     return (
@@ -162,8 +189,6 @@ const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
           onSort={onSort}
           sortField={sortField}
           sortDirection={sortDirection}
-          onEdit={onEdit}
-          onDelete={onDelete}
           loading={loading}
           emptyMessage="No suppliers found. Add suppliers to manage your inventory procurement."
         />

@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LoadingButton } from '@/components/shared/loading-button';
 import { Button } from '@/components/ui/button';
+import { UnsavedChangesDialogComponent } from '@/components/modals/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 import {
   RightDrawer,
   RightDrawerContent,
@@ -34,7 +36,7 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
     const {
       register,
       handleSubmit,
-      formState: { errors, isSubmitting },
+      formState: { errors, isSubmitting, isDirty },
       reset,
       setValue,
     } = useForm<InventoryItemCategoryFormData>({
@@ -43,6 +45,20 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
         name: '',
         // description: '', // Temporarily hidden
       },
+    });
+
+    // Use the reusable unsaved changes hook
+    const {
+      showUnsavedDialog,
+      handleClose,
+      handleDiscardChanges,
+      handleContinueEditing,
+      handleOpenChange,
+      setShowUnsavedDialog,
+    } = useUnsavedChanges({
+      isDirty,
+      onOpenChange,
+      onReset: reset,
     });
 
     // Reset form when category changes or modal opens/closes
@@ -60,6 +76,7 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
       }
     }, [open, category, setValue, reset]);
 
+    // Handle form submission
     const handleFormSubmit = async (data: InventoryItemCategoryFormData) => {
       try {
         await onSubmit(data);
@@ -70,122 +87,131 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
       }
     };
 
-    const handleClose = () => {
-      onOpenChange(false);
-      reset();
-    };
-
     const isLoading = loading || isSubmitting;
 
     return (
-      <RightDrawer open={open} onOpenChange={onOpenChange}>
-        <RightDrawerContent ref={ref} maxWidth="md">
-          <RightDrawerHeader>
-            <RightDrawerTitle>
-              {isEditing ? 'Edit Category' : 'Add New Category'}
-            </RightDrawerTitle>
-            <RightDrawerCloseButton />
-          </RightDrawerHeader>
+      <>
+        <RightDrawer open={open} onOpenChange={handleOpenChange}>
+          <RightDrawerContent ref={ref} maxWidth="md">
+            <RightDrawerHeader>
+              <RightDrawerTitle>
+                {isEditing ? 'Edit Category' : 'Add New Category'}
+              </RightDrawerTitle>
+              <RightDrawerCloseButton onClick={handleClose} />
+            </RightDrawerHeader>
 
-          <form onSubmit={handleSubmit(handleFormSubmit)}>
-            <RightDrawerBody>
-              <div className="space-y-6">
-                {/* Basic Information Section */}
-                <div className="bg-muted/50 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-foreground mb-4">
-                    Category Information
-                  </h3>
-                  
-                  <div className="space-y-4">
-                    {/* Category Name */}
-                    <div className="space-y-2">
-                      <Label htmlFor="name">
-                        Category Name <span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="name"
-                        type="text"
-                        placeholder="e.g., Beverages, Dairy Products, Bakery Items"
-                        {...register('name')}
-                        className={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
-                        disabled={isLoading}
-                      />
-                      {errors.name && (
-                        <p className="text-sm text-destructive">
-                          {errors.name.message}
-                        </p>
-                      )}
+            <form onSubmit={handleSubmit(handleFormSubmit)}>
+              <RightDrawerBody>
+                <div className="space-y-6">
+                  {/* Basic Information Section */}
+                  <div className="bg-muted/50 rounded-lg p-4">
+                    <h3 className="text-sm font-medium text-foreground mb-4">
+                      Category Information
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      {/* Category Name */}
+                      <div className="space-y-2">
+                        <Label htmlFor="name">
+                          Category Name <span className="text-destructive">*</span>
+                        </Label>
+                        <Input
+                          id="name"
+                          type="text"
+                          placeholder="e.g., Beverages, Dairy Products, Bakery Items"
+                          {...register('name')}
+                          className={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
+                          disabled={isLoading}
+                        />
+                        {errors.name && (
+                          <p className="text-sm text-destructive">
+                            {errors.name.message}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Description - Temporarily hidden to save UI space */}
+                      {/* <div className="space-y-2">
+                        <Label htmlFor="description">
+                          Description
+                        </Label>
+                        <textarea
+                          id="description"
+                          rows={3}
+                          placeholder="Brief description of this category..."
+                          {...register('description')}
+                          className={`flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none ${
+                            errors.description ? 'border-destructive focus-visible:ring-destructive' : ''
+                          }`}
+                          disabled={isLoading}
+                        />
+                        {errors.description && (
+                          <p className="text-sm text-destructive">
+                            {errors.description.message}
+                          </p>
+                        )}
+                      </div> */}
                     </div>
-
-                    {/* Description - Temporarily hidden to save UI space */}
-                    {/* <div className="space-y-2">
-                      <Label htmlFor="description">
-                        Description
-                      </Label>
-                      <textarea
-                        id="description"
-                        rows={3}
-                        placeholder="Brief description of this category..."
-                        {...register('description')}
-                        className={`flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none ${
-                          errors.description ? 'border-destructive focus-visible:ring-destructive' : ''
-                        }`}
-                        disabled={isLoading}
-                      />
-                      {errors.description && (
-                        <p className="text-sm text-destructive">
-                          {errors.description.message}
-                        </p>
-                      )}
-                    </div> */}
                   </div>
-                </div>
 
-                {/* Help Text */}
-                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                        Category Guidelines
-                      </h3>
-                      <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                        <ul className="list-disc list-inside space-y-1">
-                          <li>Use clear, descriptive names for categories</li>
-                          <li>Categories help organize and filter inventory items</li>
-                          {/* <li>Add descriptions to clarify what items belong in each category</li> */}
-                        </ul>
+                  {/* Help Text */}
+                  <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                          Category Guidelines
+                        </h3>
+                        <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                          <ul className="list-disc list-inside space-y-1">
+                            <li>Use clear, descriptive names for categories</li>
+                            <li>Categories help organize and filter inventory items</li>
+                            {/* <li>Add descriptions to clarify what items belong in each category</li> */}
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </RightDrawerBody>
+              </RightDrawerBody>
 
-            <RightDrawerFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-              <LoadingButton
-                type="submit"
-                loading={isLoading}
-                loadingText={isEditing ? 'Updating...' : 'Creating...'}
-              >
-                {isEditing ? 'Update Category' : 'Create Category'}
-              </LoadingButton>
-            </RightDrawerFooter>
-          </form>
-        </RightDrawerContent>
-      </RightDrawer>
+              <RightDrawerFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  disabled={isLoading}
+                >
+                  Cancel
+                </Button>
+                <LoadingButton
+                  type="submit"
+                  loading={isLoading}
+                  loadingText={isEditing ? 'Updating...' : 'Creating...'}
+                >
+                  {isEditing ? 'Update Category' : 'Create Category'}
+                </LoadingButton>
+              </RightDrawerFooter>
+            </form>
+          </RightDrawerContent>
+        </RightDrawer>
+
+        {/* Unsaved Changes Warning Dialog */}
+        <UnsavedChangesDialogComponent
+          open={showUnsavedDialog}
+          onOpenChange={setShowUnsavedDialog}
+          title="Unsaved Changes"
+          description="You have unsaved changes. Are you sure you want to close without saving?"
+          discardLabel="Discard Changes"
+          cancelLabel="Continue Editing"
+          onDiscard={handleDiscardChanges}
+          onCancel={handleContinueEditing}
+        />
+      </>
     );
   }
 );

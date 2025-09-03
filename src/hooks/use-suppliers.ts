@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Supplier, CreateSupplierData, BaseFilters, PaginatedResponse } from '@/lib/types';
-import { suppliersService, ServiceError } from '@/lib/api';
+import { suppliersService } from '@/lib/api/suppliers-service';
+import { ServiceError } from '@/lib/api/client';
 
 interface UseSuppliersOptions {
   initialFilters?: BaseFilters;
@@ -41,7 +42,7 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
         const allResponse = await suppliersService.getAll({ ...filters, page: 1, per_page: 1000 });
         setAllSuppliers(allResponse.data || []);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       const message = error instanceof ServiceError ? error.message : 'Failed to fetch suppliers';
       setError(message);
       setPaginatedSuppliers({

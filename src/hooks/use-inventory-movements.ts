@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { InventoryMovement, InventoryMovementFilters, MovementStats, PaginatedResponse, CreateStockEntryData } from '@/lib/types';
-import { inventoryMovementsService, ServiceError } from '@/lib/api';
+import { inventoryMovementsService } from '@/lib/api/inventory-movements-service';
+import { ServiceError } from '@/lib/api/client';
 
 type MovementUpdateData = Partial<CreateStockEntryData>;
 
