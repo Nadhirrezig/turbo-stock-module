@@ -88,56 +88,56 @@ const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
           </div>
         ),
       },
-      {
-        key: 'address',
-        label: 'Address',
-        sortable: false,
-        render: (value: unknown) => {
-          const address = value as string | undefined;
-          return (
-            <div className="text-sm text-muted-foreground">
-              {address ? (
-                <div className="flex items-start">
-                  <MapPin className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
-                  <span>{truncateText(address, 50)}</span>
-                </div>
-              ) : (
-                <span className="italic">No address</span>
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        key: 'description',
-        label: 'Description',
-        sortable: false,
-        render: (value: unknown) => {
-          const description = value as string | undefined;
-          return (
-            <div className="text-sm text-muted-foreground max-w-xs">
-              {description ? (
-                <span className="line-clamp-2">{description}</span>
-              ) : (
-                <span className="italic">No description</span>
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        key: 'created_at',
-        label: 'Created',
-        sortable: true,
-        render: (value: unknown) => {
-          const dateString = value as string;
-          return (
-            <div className="text-sm text-muted-foreground">
-              {formatDateTime(dateString)}
-            </div>
-          );
-        },
-      },
+      // {
+      //   key: 'address',
+      //   label: 'Address',
+      //   sortable: false,
+      //   render: (value: unknown) => {
+      //     const address = value as string | undefined;
+      //     return (
+      //       <div className="text-sm text-muted-foreground">
+      //         {address ? (
+      //           <div className="flex items-start">
+      //             <MapPin className="h-3 w-3 mr-1 mt-0.5 flex-shrink-0" />
+      //             <span>{truncateText(address, 50)}</span>
+      //           </div>
+      //         ) : (
+      //           <span className="italic">No address</span>
+      //         )}
+      //       </div>
+      //     );
+      //   },
+      // },
+      // {
+      //   key: 'description',
+      //   label: 'Description',
+      //   sortable: false,
+      //   render: (value: unknown) => {
+      //     const description = value as string | undefined;
+      //     return (
+      //       <div className="text-sm text-muted-foreground max-w-xs">
+      //         {description ? (
+      //           <span className="line-clamp-2">{description}</span>
+      //         ) : (
+      //           <span className="italic">No description</span>
+      //         )}
+      //       </div>
+      //     );
+      //   },
+      // },
+      // {
+      //   key: 'created_at',
+      //   label: 'Created',
+      //   sortable: true,
+      //   render: (value: unknown) => {
+      //     const dateString = value as string;
+      //     return (
+      //       <div className="text-sm text-muted-foreground">
+      //         {formatDateTime(dateString)}
+      //       </div>
+      //     );
+      //   },
+      // },
       {
         key: 'updated_at',
         label: 'Last Updated',
