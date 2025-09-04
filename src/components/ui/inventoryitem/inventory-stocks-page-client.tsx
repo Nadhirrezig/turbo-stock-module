@@ -141,6 +141,8 @@ export function InventoryStocksPageClient() {
           sortField={filters.sort_field}
           sortDirection={filters.sort_direction}
           loading={loading}
+          className="rounded-xl border border-border shadow-sm overflow-hidden"
+          rowClassName="odd:bg-muted/40 hover:bg-accent hover:text-accent-foreground transition-colors"
         />
       </div>
 
