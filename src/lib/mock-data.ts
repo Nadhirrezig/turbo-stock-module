@@ -1,4 +1,5 @@
 import { 
+  Department,
   Unit, 
   InventoryItemCategory, 
   Supplier, 
@@ -7,42 +8,77 @@ import {
   InventoryMovement 
 } from './types';
 
+// Mock Departments data
+export const mockDepartments: Department[] = [
+  {
+    id: '1',
+    name: 'Main Restaurant',
+    description: 'Primary restaurant operations including dining and kitchen',
+    created_at: '2024-01-01T08:00:00Z',
+    updated_at: '2024-01-01T08:00:00Z',
+  },
+  {
+    id: '2',
+    name: 'Bar & Beverages',
+    description: 'Bar operations and beverage service',
+    created_at: '2024-01-01T08:01:00Z',
+    updated_at: '2024-01-01T08:01:00Z',
+  },
+  {
+    id: '3',
+    name: 'Kitchen',
+    description: 'Food preparation and cooking operations',
+    created_at: '2024-01-01T08:02:00Z',
+    updated_at: '2024-01-01T08:02:00Z',
+  },
+];
+
 // Mock Units data
 export const mockUnits: Unit[] = [
   {
     id: '1',
     name: 'Kilogram',
     symbol: 'kg',
+    department_id: '1',
     created_at: '2024-01-15T10:30:00Z',
     updated_at: '2024-01-15T10:30:00Z',
+    department: mockDepartments[0],
   },
   {
     id: '2',
     name: 'Liter',
     symbol: 'L',
+    department_id: '2',
     created_at: '2024-01-15T10:31:00Z',
     updated_at: '2024-01-15T10:31:00Z',
+    department: mockDepartments[1],
   },
   {
     id: '3',
     name: 'Piece',
     symbol: 'pcs',
+    department_id: '1',
     created_at: '2024-01-15T10:32:00Z',
     updated_at: '2024-01-15T10:32:00Z',
+    department: mockDepartments[0],
   },
   {
     id: '4',
     name: 'Gram',
     symbol: 'g',
+    department_id: '3',
     created_at: '2024-01-15T10:33:00Z',
     updated_at: '2024-01-15T10:33:00Z',
+    department: mockDepartments[2],
   },
   {
     id: '5',
     name: 'Milliliter',
     symbol: 'ml',
+    department_id: '2',
     created_at: '2024-01-15T10:34:00Z',
     updated_at: '2024-01-15T10:34:00Z',
+    department: mockDepartments[1],
   },
 ];
 
@@ -52,37 +88,47 @@ export const mockCategories: InventoryItemCategory[] = [
   {
     id: '1',
     name: 'Beverages',
+    department_id: '2',
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:00:00Z',
     updated_at: '2024-01-15T09:00:00Z',
+    department: mockDepartments[1],
   },
   {
     id: '2',
     name: 'Dairy Products',
+    department_id: '1',
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:01:00Z',
     updated_at: '2024-01-15T09:01:00Z',
+    department: mockDepartments[0],
   },
   {
     id: '3',
     name: 'Bakery Items',
+    department_id: '1',
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:02:00Z',
     updated_at: '2024-01-15T09:02:00Z',
+    department: mockDepartments[0],
   },
   {
     id: '4',
     name: 'Ingredients',
+    department_id: '3',
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:03:00Z',
     updated_at: '2024-01-15T09:03:00Z',
+    department: mockDepartments[2],
   },
   {
     id: '5',
     name: 'Packaging',
+    department_id: '1',
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:04:00Z',
     updated_at: '2024-01-15T09:04:00Z',
+    department: mockDepartments[0],
   },
 ];
 
@@ -148,6 +194,7 @@ export const mockInventoryItems: InventoryItem[] = [
     name: 'Arabica Coffee Beans',
     inventory_item_category_id: '1',
     unit_id: '1',
+    department_id: '2',
     threshold_quantity: 5,
     // preferred_supplier_id: '1', // Removed - suppliers belong to transactions, not product definitions
     reorder_quantity: 20,
@@ -155,6 +202,7 @@ export const mockInventoryItems: InventoryItem[] = [
     updated_at: '2024-01-20T10:00:00Z',
     category: mockCategories[0],
     unit: mockUnits[0],
+    department: mockDepartments[1],
     // preferred_supplier: mockSuppliers[0], // Removed - suppliers belong to transactions, not product definitions
   },
   {
@@ -162,6 +210,7 @@ export const mockInventoryItems: InventoryItem[] = [
     name: 'Whole Milk',
     inventory_item_category_id: '2',
     unit_id: '2',
+    department_id: '1',
     threshold_quantity: 10,
     // preferred_supplier_id: '2', // Removed - suppliers belong to transactions, not product definitions
     reorder_quantity: 50,
@@ -169,6 +218,7 @@ export const mockInventoryItems: InventoryItem[] = [
     updated_at: '2024-01-20T10:01:00Z',
     category: mockCategories[1],
     unit: mockUnits[1],
+    department: mockDepartments[0],
     // preferred_supplier: mockSuppliers[1], // Removed - suppliers belong to transactions, not product definitions
   },
   {
@@ -176,6 +226,7 @@ export const mockInventoryItems: InventoryItem[] = [
     name: 'Croissants',
     inventory_item_category_id: '3',
     unit_id: '3',
+    department_id: '1',
     threshold_quantity: 20,
     // preferred_supplier_id: '3', // Removed - suppliers belong to transactions, not product definitions
     reorder_quantity: 100,
@@ -183,6 +234,7 @@ export const mockInventoryItems: InventoryItem[] = [
     updated_at: '2024-01-20T10:02:00Z',
     category: mockCategories[2],
     unit: mockUnits[2],
+    department: mockDepartments[0],
     // preferred_supplier: mockSuppliers[2], // Removed - suppliers belong to transactions, not product definitions
   },
   {
@@ -190,6 +242,7 @@ export const mockInventoryItems: InventoryItem[] = [
     name: 'Sugar',
     inventory_item_category_id: '4',
     unit_id: '1',
+    department_id: '3',
     threshold_quantity: 2,
     // preferred_supplier_id: '5', // Removed - suppliers belong to transactions, not product definitions
     reorder_quantity: 10,
@@ -197,6 +250,7 @@ export const mockInventoryItems: InventoryItem[] = [
     updated_at: '2024-01-20T10:03:00Z',
     category: mockCategories[3],
     unit: mockUnits[0],
+    department: mockDepartments[2],
     // preferred_supplier: mockSuppliers[4], // Removed - suppliers belong to transactions, not product definitions
   },
   {
@@ -204,6 +258,7 @@ export const mockInventoryItems: InventoryItem[] = [
     name: 'Paper Cups (12oz)',
     inventory_item_category_id: '5',
     unit_id: '3',
+    department_id: '1',
     threshold_quantity: 100,
     // preferred_supplier_id: '4', // Removed - suppliers belong to transactions, not product definitions
     reorder_quantity: 500,
@@ -211,6 +266,7 @@ export const mockInventoryItems: InventoryItem[] = [
     updated_at: '2024-01-20T10:04:00Z',
     category: mockCategories[4],
     unit: mockUnits[2],
+    department: mockDepartments[0],
     // preferred_supplier: mockSuppliers[3], // Removed - suppliers belong to transactions, not product definitions
   },
 ];
@@ -223,6 +279,7 @@ export const generateMockUnits = (count: number): Unit[] => {
       id: i.toString(),
       name: `Unit ${i}`,
       symbol: `U${i}`,
+      department_id: '1', // Default to first department
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });

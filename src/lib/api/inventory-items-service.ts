@@ -22,6 +22,7 @@ class InventoryItemsService {
       if (filters.per_page) queryParams.append('per_page', filters.per_page.toString());
       if (filters.sort_field) queryParams.append('sort_field', filters.sort_field);
       if (filters.sort_direction) queryParams.append('sort_direction', filters.sort_direction);
+      if (filters.department_id) queryParams.append('department_id', filters.department_id);
 
       const response = await apiClient.get<PaginatedResponse<InventoryItem>>(
         `${this.endpoint}?${queryParams.toString()}`
@@ -115,6 +116,11 @@ class InventoryItemsService {
 
     let filteredItems = [...this.mockData];
 
+    // Apply department filter
+    if (filters.department_id) {
+      filteredItems = filteredItems.filter(item => item.department_id === filters.department_id);
+    }
+
     // Apply search filter
     if (filters.search) {
       filteredItems = filterBySearch(filteredItems, filters.search, ['name']);
@@ -153,6 +159,7 @@ class InventoryItemsService {
       name: data.name,
       inventory_item_category_id: data.inventory_item_category_id,
       unit_id: data.unit_id,
+      department_id: data.department_id,
       threshold_quantity: data.threshold_quantity,
       reorder_quantity: data.reorder_quantity,
       created_at: getCurrentTimestamp(),
@@ -184,6 +191,7 @@ class InventoryItemsService {
       name: data.name,
       inventory_item_category_id: data.inventory_item_category_id,
       unit_id: data.unit_id,
+      department_id: data.department_id,
       threshold_quantity: data.threshold_quantity,
       reorder_quantity: data.reorder_quantity,
       updated_at: getCurrentTimestamp(),

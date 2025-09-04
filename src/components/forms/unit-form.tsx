@@ -11,6 +11,8 @@ import { LoadingButton } from '@/components/shared/loading-button';
 import { Button } from '@/components/ui/button';
 import { UnsavedChangesDialogComponent } from '@/components/modals/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
+import { useDepartmentContext } from '@/contexts/department-context';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   RightDrawer,
   RightDrawerContent,
@@ -32,6 +34,7 @@ interface UnitFormProps {
 const UnitForm = React.forwardRef<HTMLDivElement, UnitFormProps>(
   ({ open, onOpenChange, unit, onSubmit, loading = false }, ref) => {
     const isEditing = Boolean(unit);
+    const { allDepartments, selectedDepartmentId } = useDepartmentContext();
     
     const {
       register,
@@ -39,11 +42,13 @@ const UnitForm = React.forwardRef<HTMLDivElement, UnitFormProps>(
       formState: { errors, isSubmitting, isDirty },
       reset,
       setValue,
+      watch,
     } = useForm<UnitFormData>({
       resolver: zodResolver(unitSchema),
       defaultValues: {
         name: '',
         symbol: '',
+        department_id: selectedDepartmentId || '',
       },
     });
 
@@ -67,14 +72,16 @@ const UnitForm = React.forwardRef<HTMLDivElement, UnitFormProps>(
         if (unit) {
           setValue('name', unit.name);
           setValue('symbol', unit.symbol);
+          setValue('department_id', unit.department_id);
         } else {
           reset({
             name: '',
             symbol: '',
+            department_id: selectedDepartmentId || '',
           });
         }
       }
-    }, [open, unit, setValue, reset]);
+    }, [open, unit, setValue, reset, selectedDepartmentId]);
 
     // Handle form submission
     const handleFormSubmit = async (data: UnitFormData) => {
@@ -109,45 +116,75 @@ const UnitForm = React.forwardRef<HTMLDivElement, UnitFormProps>(
                       Basic Information
                     </h3>
                     
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {/* Unit Name */}
+                    <div className="space-y-4">
+                      {/* Department Selection */}
                       <div className="space-y-2">
-                        <Label htmlFor="name">
-                          Unit Name <span className="text-destructive">*</span>
+                        <Label htmlFor="department_id">
+                          Department <span className="text-destructive">*</span>
                         </Label>
-                        <Input
-                          id="name"
-                          type="text"
-                          placeholder="e.g., Kilogram, Liter, Piece"
-                          {...register('name')}
-                          className={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
+                        <Select
+                          value={watch('department_id')}
+                          onValueChange={(value) => setValue('department_id', value)}
                           disabled={isLoading}
-                        />
-                        {errors.name && (
+                        >
+                          <SelectTrigger className={errors.department_id ? 'border-destructive focus-visible:ring-destructive' : ''}>
+                            <SelectValue placeholder="Select a department" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allDepartments.map((department) => (
+                              <SelectItem key={department.id} value={department.id}>
+                                {department.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.department_id && (
                           <p className="text-sm text-destructive">
-                            {errors.name.message}
+                            {errors.department_id.message}
                           </p>
                         )}
                       </div>
 
-                      {/* Unit Symbol */}
-                      <div className="space-y-2">
-                        <Label htmlFor="symbol">
-                          Unit Symbol <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                          id="symbol"
-                          type="text"
-                          placeholder="e.g., kg, L, pcs"
-                          {...register('symbol')}
-                          className={errors.symbol ? 'border-destructive focus-visible:ring-destructive' : ''}
-                          disabled={isLoading}
-                        />
-                        {errors.symbol && (
-                          <p className="text-sm text-destructive">
-                            {errors.symbol.message}
-                          </p>
-                        )}
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {/* Unit Name */}
+                        <div className="space-y-2">
+                          <Label htmlFor="name">
+                            Unit Name <span className="text-destructive">*</span>
+                          </Label>
+                          <Input
+                            id="name"
+                            type="text"
+                            placeholder="e.g., Kilogram, Liter, Piece"
+                            {...register('name')}
+                            className={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
+                            disabled={isLoading}
+                          />
+                          {errors.name && (
+                            <p className="text-sm text-destructive">
+                              {errors.name.message}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Unit Symbol */}
+                        <div className="space-y-2">
+                          <Label htmlFor="symbol">
+                            Unit Symbol <span className="text-destructive">*</span>
+                          </Label>
+                          <Input
+                            id="symbol"
+                            type="text"
+                            placeholder="e.g., kg, L, pcs"
+                            {...register('symbol')}
+                            className={errors.symbol ? 'border-destructive focus-visible:ring-destructive' : ''}
+                            disabled={isLoading}
+                          />
+                          {errors.symbol && (
+                            <p className="text-sm text-destructive">
+                              {errors.symbol.message}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

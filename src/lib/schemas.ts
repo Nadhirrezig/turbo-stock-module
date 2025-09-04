@@ -1,5 +1,16 @@
 import { z } from 'zod';
 
+// Department validation schema
+export const departmentSchema = z.object({
+  name: z.string()
+    .min(1, 'Department name is required')
+    .max(255, 'Department name must not exceed 255 characters'),
+  description: z.string()
+    .max(500, 'Description must not exceed 500 characters')
+    .optional()
+    .or(z.literal('')),
+});
+
 // Unit validation schema - matches Laravel validation rules
 export const unitSchema = z.object({
   name: z.string()
@@ -8,6 +19,8 @@ export const unitSchema = z.object({
   symbol: z.string()
     .min(1, 'Unit symbol is required')
     .max(10, 'Unit symbol must not exceed 10 characters'),
+  department_id: z.string()
+    .min(1, 'Department is required'),
 });
 
 // Inventory Item Category validation schema
@@ -15,6 +28,8 @@ export const inventoryItemCategorySchema = z.object({
   name: z.string()
     .min(1, 'Category name is required')
     .max(255, 'Category name must not exceed 255 characters'),
+  department_id: z.string()
+    .min(1, 'Department is required'),
   // Description field temporarily hidden to save UI space
   // description: z.string()
   //   .max(500, 'Description must not exceed 500 characters')
@@ -51,6 +66,8 @@ export const inventoryItemSchema = z.object({
     .min(1, 'Category is required'),
   unit_id: z.string()
     .min(1, 'Unit is required'),
+  department_id: z.string()
+    .min(1, 'Department is required'),
   threshold_quantity: z.number().min(0, 'Threshold quantity must be 0 or greater'),
   // Preferred supplier removed - suppliers belong to transactions, not product definitions
   // preferred_supplier_id: z.string()
@@ -107,6 +124,7 @@ export const baseFiltersSchema = z.object({
   per_page: z.number().min(1).max(100).optional(),
   sort_field: z.string().optional(),
   sort_direction: z.enum(['asc', 'desc']).optional(),
+  department_id: z.string().optional(),
 });
 
 export const inventoryMovementFiltersSchema = baseFiltersSchema.extend({
@@ -116,6 +134,7 @@ export const inventoryMovementFiltersSchema = baseFiltersSchema.extend({
 });
 
 // Type exports for form data
+export type DepartmentFormData = z.infer<typeof departmentSchema>;
 export type UnitFormData = z.infer<typeof unitSchema>;
 export type InventoryItemCategoryFormData = z.infer<typeof inventoryItemCategorySchema>;
 export type SupplierFormData = z.infer<typeof supplierSchema>;

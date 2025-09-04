@@ -1,19 +1,33 @@
 // Core entity types based on Laravel Blade analysis
+export interface Department {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Unit {
   id: string;
   name: string;
   symbol: string;
+  department_id: string;
   created_at: string;
   updated_at: string;
+  // Relations
+  department?: Department;
 }
 
 export interface InventoryItemCategory {
   id: string;
   name: string;
   // description?: string; // Temporarily hidden from UI to save space, but kept in data model
+  department_id: string;
   branch_id?: string;
   created_at: string;
   updated_at: string;
+  // Relations
+  department?: Department;
 }
 
 export interface Supplier {
@@ -32,6 +46,7 @@ export interface InventoryItem {
   name: string;
   inventory_item_category_id: string;
   unit_id: string;
+  department_id: string;
   threshold_quantity: number;
   // preferred_supplier_id: string; // Removed - suppliers belong to transactions, not product definitions
   reorder_quantity: number;
@@ -40,6 +55,7 @@ export interface InventoryItem {
   // Relations
   category?: InventoryItemCategory;
   unit?: Unit;
+  department?: Department;
   // preferred_supplier?: Supplier; // Removed - suppliers belong to transactions, not product definitions
 }
 
@@ -76,13 +92,20 @@ export interface InventoryMovement {
 }
 
 // Form types for create/edit operations
+export interface CreateDepartmentData extends Record<string, unknown> {
+  name: string;
+  description?: string;
+}
+
 export interface CreateUnitData extends Record<string, unknown> {
   name: string;
   symbol: string;
+  department_id: string;
 }
 
 export interface CreateInventoryItemCategoryData extends Record<string, unknown> {
   name: string;
+  department_id: string;
   // description?: string; // Temporarily hidden from UI to save space
 }
 
@@ -98,6 +121,7 @@ export interface CreateInventoryItemData extends Record<string, unknown> {
   name: string;
   inventory_item_category_id: string;
   unit_id: string;
+  department_id: string;
   threshold_quantity: number;
   // preferred_supplier_id: string; // Removed - suppliers belong to transactions, not product definitions
   reorder_quantity: number;
@@ -176,6 +200,7 @@ export interface BaseFilters {
   per_page?: number;
   sort_field?: string;
   sort_direction?: 'asc' | 'desc';
+  department_id?: string;
 }
 
 export interface InventoryMovementFilters extends BaseFilters {

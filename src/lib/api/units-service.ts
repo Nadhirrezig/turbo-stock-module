@@ -22,6 +22,7 @@ class UnitsService {
       if (filters.per_page) queryParams.append('per_page', filters.per_page.toString());
       if (filters.sort_field) queryParams.append('sort_field', filters.sort_field);
       if (filters.sort_direction) queryParams.append('sort_direction', filters.sort_direction);
+      if (filters.department_id) queryParams.append('department_id', filters.department_id);
 
       console.log('Fetching units with params:', queryParams.toString());
 
@@ -125,6 +126,11 @@ class UnitsService {
 
     let filteredUnits = [...this.mockData];
 
+    // Apply department filter
+    if (filters.department_id) {
+      filteredUnits = filteredUnits.filter(unit => unit.department_id === filters.department_id);
+    }
+
     // Apply search filter
     if (filters.search) {
       filteredUnits = filterBySearch(filteredUnits, filters.search, ['name', 'symbol']);
@@ -158,6 +164,7 @@ class UnitsService {
       id: generateId(),
       name: data.name,
       symbol: data.symbol,
+      department_id: data.department_id,
       created_at: getCurrentTimestamp(),
       updated_at: getCurrentTimestamp(),
     };
@@ -179,6 +186,7 @@ class UnitsService {
       ...this.mockData[index],
       name: data.name,
       symbol: data.symbol,
+      department_id: data.department_id,
       updated_at: getCurrentTimestamp(),
     };
 

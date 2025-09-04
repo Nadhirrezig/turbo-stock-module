@@ -3,16 +3,15 @@
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { InventoryItemCategory } from '@/lib/types';
-import { inventoryItemCategorySchema, InventoryItemCategoryFormData } from '@/lib/schemas';
+import { Department } from '@/lib/types';
+import { departmentSchema, DepartmentFormData } from '@/lib/schemas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { LoadingButton } from '@/components/shared/loading-button';
 import { Button } from '@/components/ui/button';
 import { UnsavedChangesDialogComponent } from '@/components/modals/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
-import { useDepartmentContext } from '@/contexts/department-context';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   RightDrawer,
   RightDrawerContent,
@@ -23,18 +22,17 @@ import {
   RightDrawerCloseButton,
 } from '@/components/modals/right-drawer';
 
-interface CategoryFormProps {
+interface DepartmentFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  category?: InventoryItemCategory | null;
-  onSubmit: (data: InventoryItemCategoryFormData) => Promise<void>;
+  department?: Department | null;
+  onSubmit: (data: DepartmentFormData) => Promise<void>;
   loading?: boolean;
 }
 
-const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
-  ({ open, onOpenChange, category, onSubmit, loading = false }, ref) => {
-    const isEditing = Boolean(category);
-    const { allDepartments, selectedDepartmentId } = useDepartmentContext();
+const DepartmentForm = React.forwardRef<HTMLDivElement, DepartmentFormProps>(
+  ({ open, onOpenChange, department, onSubmit, loading = false }, ref) => {
+    const isEditing = Boolean(department);
     
     const {
       register,
@@ -42,13 +40,11 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
       formState: { errors, isSubmitting, isDirty },
       reset,
       setValue,
-      watch,
-    } = useForm<InventoryItemCategoryFormData>({
-      resolver: zodResolver(inventoryItemCategorySchema),
+    } = useForm<DepartmentFormData>({
+      resolver: zodResolver(departmentSchema),
       defaultValues: {
         name: '',
-        department_id: selectedDepartmentId || '',
-        // description: '', // Temporarily hidden
+        description: '',
       },
     });
 
@@ -66,25 +62,23 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
       onReset: reset,
     });
 
-    // Reset form when category changes or modal opens/closes
+    // Reset form when department changes or modal opens/closes
     React.useEffect(() => {
       if (open) {
-        if (category) {
-          setValue('name', category.name);
-          setValue('department_id', category.department_id);
-          // setValue('description', category.description || ''); // Temporarily hidden
+        if (department) {
+          setValue('name', department.name);
+          setValue('description', department.description || '');
         } else {
           reset({
             name: '',
-            department_id: selectedDepartmentId || '',
-            // description: '', // Temporarily hidden
+            description: '',
           });
         }
       }
-    }, [open, category, setValue, reset, selectedDepartmentId]);
+    }, [open, department, setValue, reset]);
 
     // Handle form submission
-    const handleFormSubmit = async (data: InventoryItemCategoryFormData) => {
+    const handleFormSubmit = async (data: DepartmentFormData) => {
       try {
         await onSubmit(data);
         onOpenChange(false);
@@ -102,7 +96,7 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
           <RightDrawerContent ref={ref} maxWidth="md">
             <RightDrawerHeader>
               <RightDrawerTitle>
-                {isEditing ? 'Edit Category' : 'Add New Category'}
+                {isEditing ? 'Edit Department' : 'Add New Department'}
               </RightDrawerTitle>
               <RightDrawerCloseButton onClick={handleClose} />
             </RightDrawerHeader>
@@ -113,47 +107,19 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                   {/* Basic Information Section */}
                   <div className="bg-muted/50 rounded-lg p-4">
                     <h3 className="text-sm font-medium text-foreground mb-4">
-                      Category Information
+                      Department Information
                     </h3>
                     
                     <div className="space-y-4">
-                      {/* Department Selection */}
-                      <div className="space-y-2">
-                        <Label htmlFor="department_id">
-                          Department <span className="text-destructive">*</span>
-                        </Label>
-                        <Select
-                          value={watch('department_id')}
-                          onValueChange={(value) => setValue('department_id', value)}
-                          disabled={isLoading}
-                        >
-                          <SelectTrigger className={errors.department_id ? 'border-destructive focus-visible:ring-destructive' : ''}>
-                            <SelectValue placeholder="Select a department" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {allDepartments.map((department) => (
-                              <SelectItem key={department.id} value={department.id}>
-                                {department.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {errors.department_id && (
-                          <p className="text-sm text-destructive">
-                            {errors.department_id.message}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Category Name */}
+                      {/* Department Name */}
                       <div className="space-y-2">
                         <Label htmlFor="name">
-                          Category Name <span className="text-destructive">*</span>
+                          Department Name <span className="text-destructive">*</span>
                         </Label>
                         <Input
                           id="name"
                           type="text"
-                          placeholder="e.g., Beverages, Dairy Products, Bakery Items"
+                          placeholder="e.g., Main Restaurant, Bar & Beverages, Kitchen"
                           {...register('name')}
                           className={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
                           disabled={isLoading}
@@ -165,19 +131,17 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                         )}
                       </div>
 
-                      {/* Description - Temporarily hidden to save UI space */}
-                      {/* <div className="space-y-2">
+                      {/* Department Description */}
+                      <div className="space-y-2">
                         <Label htmlFor="description">
                           Description
                         </Label>
-                        <textarea
+                        <Textarea
                           id="description"
+                          placeholder="Brief description of the department's purpose and operations..."
                           rows={3}
-                          placeholder="Brief description of this category..."
                           {...register('description')}
-                          className={`flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none ${
-                            errors.description ? 'border-destructive focus-visible:ring-destructive' : ''
-                          }`}
+                          className={errors.description ? 'border-destructive focus-visible:ring-destructive' : ''}
                           disabled={isLoading}
                         />
                         {errors.description && (
@@ -185,7 +149,7 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                             {errors.description.message}
                           </p>
                         )}
-                      </div> */}
+                      </div>
                     </div>
                   </div>
 
@@ -199,13 +163,14 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                       </div>
                       <div className="ml-3">
                         <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                          Category Guidelines
+                          Department Guidelines
                         </h3>
                         <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
                           <ul className="list-disc list-inside space-y-1">
-                            <li>Use clear, descriptive names for categories</li>
-                            <li>Categories help organize and filter inventory items</li>
-                            {/* <li>Add descriptions to clarify what items belong in each category</li> */}
+                            <li>Departments help organize your inventory by operational areas</li>
+                            <li>Each department can have its own units, categories, and items</li>
+                            <li>Examples: Main Restaurant, Bar & Beverages, Kitchen, etc.</li>
+                            <li>Create departments first, then add units and categories within them</li>
                           </ul>
                         </div>
                       </div>
@@ -228,7 +193,7 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                   loading={isLoading}
                   loadingText={isEditing ? 'Updating...' : 'Creating...'}
                 >
-                  {isEditing ? 'Update Category' : 'Create Category'}
+                  {isEditing ? 'Update Department' : 'Create Department'}
                 </LoadingButton>
               </RightDrawerFooter>
             </form>
@@ -251,6 +216,6 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
   }
 );
 
-CategoryForm.displayName = 'CategoryForm';
+DepartmentForm.displayName = 'DepartmentForm';
 
-export { CategoryForm };
+export { DepartmentForm };

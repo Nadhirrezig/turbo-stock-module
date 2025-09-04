@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button';
 import { SearchableSelect } from '@/components/shared/searchable-select';
 import { UnsavedChangesDialogComponent } from '@/components/modals/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
+import { useDepartmentContext } from '@/contexts/department-context';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   RightDrawer,
   RightDrawerContent,
@@ -52,6 +54,7 @@ interface InventoryItemFormProps {
 const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProps>(
   ({ open, onOpenChange, inventoryItem, onSubmit, loading = false }, ref) => {
     const isEditing = Boolean(inventoryItem);
+    const { allDepartments, selectedDepartmentId } = useDepartmentContext();
 
     // Fetch categories and units from API
     const { allCategories, loading: categoriesLoading } = useCategories();
@@ -64,12 +67,14 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
       formState: { errors, isSubmitting, isDirty },
       reset,
       setValue,
+      watch,
     } = useForm<InventoryItemFormData>({
       resolver: zodResolver(inventoryItemSchema),
       defaultValues: {
         name: '',
         inventory_item_category_id: '',
         unit_id: '',
+        department_id: selectedDepartmentId || '',
         threshold_quantity: 0,
         // preferred_supplier_id: '', // Removed - suppliers belong to transactions, not product definitions
         reorder_quantity: 0,
@@ -97,6 +102,7 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
           setValue('name', inventoryItem.name);
           setValue('inventory_item_category_id', inventoryItem.inventory_item_category_id);
           setValue('unit_id', inventoryItem.unit_id);
+          setValue('department_id', inventoryItem.department_id);
           setValue('threshold_quantity', inventoryItem.threshold_quantity);
           // setValue('preferred_supplier_id', inventoryItem.preferred_supplier_id); // Removed - suppliers belong to transactions, not product definitions
           setValue('reorder_quantity', inventoryItem.reorder_quantity);
@@ -105,13 +111,14 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
             name: '',
             inventory_item_category_id: '',
             unit_id: '',
+            department_id: selectedDepartmentId || '',
             threshold_quantity: 0,
             // preferred_supplier_id: '', // Removed - suppliers belong to transactions, not product definitions
             reorder_quantity: 0,
           });
         }
       }
-    }, [open, inventoryItem, setValue, reset]);
+    }, [open, inventoryItem, setValue, reset, selectedDepartmentId]);
 
     // Handle form submission
     const handleFormSubmit = async (data: InventoryItemFormData) => {
@@ -146,71 +153,101 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
                       Basic Information
                     </h3>
                     
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {/* Item Name */}
-                      <div className="space-y-2 sm:col-span-2">
-                        <Label htmlFor="name">
-                          Item Name <span className="text-destructive">*</span>
+                    <div className="space-y-4">
+                      {/* Department Selection */}
+                      <div className="space-y-2">
+                        <Label htmlFor="department_id">
+                          Department <span className="text-destructive">*</span>
                         </Label>
-                        <Input
-                          id="name"
-                          type="text"
-                          placeholder="e.g., Arabica Coffee Beans, Whole Milk"
-                          {...register('name')}
-                          className={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
+                        <Select
+                          value={watch('department_id')}
+                          onValueChange={(value) => setValue('department_id', value)}
                           disabled={isLoading}
-                        />
-                        {errors.name && (
+                        >
+                          <SelectTrigger className={errors.department_id ? 'border-destructive focus-visible:ring-destructive' : ''}>
+                            <SelectValue placeholder="Select a department" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {allDepartments.map((department) => (
+                              <SelectItem key={department.id} value={department.id}>
+                                {department.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.department_id && (
                           <p className="text-sm text-destructive">
-                            {errors.name.message}
+                            {errors.department_id.message}
                           </p>
                         )}
                       </div>
 
-                      {/* Category */}
-                      <div className="space-y-2">
-                        <Label htmlFor="category">
-                          Category <span className="text-destructive">*</span>
-                        </Label>
-                        <Controller
-                          name="inventory_item_category_id"
-                          control={control}
-                          render={({ field }) => (
-                            <SearchableSelect
-                              options={allCategories.map(categoryToOption)}
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              placeholder={categoriesLoading ? "Loading categories..." : "Select category..."}
-                              displayField="name"
-                              // subField="description" // Temporarily hidden to save UI space
-                              disabled={isLoading || categoriesLoading}
-                              error={errors.inventory_item_category_id?.message}
-                            />
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {/* Item Name */}
+                        <div className="space-y-2 sm:col-span-2">
+                          <Label htmlFor="name">
+                            Item Name <span className="text-destructive">*</span>
+                          </Label>
+                          <Input
+                            id="name"
+                            type="text"
+                            placeholder="e.g., Arabica Coffee Beans, Whole Milk"
+                            {...register('name')}
+                            className={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
+                            disabled={isLoading}
+                          />
+                          {errors.name && (
+                            <p className="text-sm text-destructive">
+                              {errors.name.message}
+                            </p>
                           )}
-                        />
-                      </div>
+                        </div>
 
-                      {/* Unit */}
-                      <div className="space-y-2">
-                        <Label htmlFor="unit">
-                          Unit <span className="text-destructive">*</span>
-                        </Label>
-                        <Controller
-                          name="unit_id"
-                          control={control}
-                          render={({ field }) => (
-                            <SearchableSelect
-                              options={allUnits.map(unitToOption)}
-                              value={field.value}
-                              onValueChange={field.onChange}
-                              placeholder={unitsLoading ? "Loading units..." : "Select unit..."}
-                              displayField="name"
-                              subField="symbol"
-                              disabled={isLoading || unitsLoading}
-                              error={errors.unit_id?.message}
-                            />
-                          )}
-                        />
+                        {/* Category */}
+                        <div className="space-y-2">
+                          <Label htmlFor="category">
+                            Category <span className="text-destructive">*</span>
+                          </Label>
+                          <Controller
+                            name="inventory_item_category_id"
+                            control={control}
+                            render={({ field }) => (
+                              <SearchableSelect
+                                options={allCategories.map(categoryToOption)}
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                placeholder={categoriesLoading ? "Loading categories..." : "Select category..."}
+                                displayField="name"
+                                // subField="description" // Temporarily hidden to save UI space
+                                disabled={isLoading || categoriesLoading}
+                                error={errors.inventory_item_category_id?.message}
+                              />
+                            )}
+                          />
+                        </div>
+
+                        {/* Unit */}
+                        <div className="space-y-2">
+                          <Label htmlFor="unit">
+                            Unit <span className="text-destructive">*</span>
+                          </Label>
+                          <Controller
+                            name="unit_id"
+                            control={control}
+                            render={({ field }) => (
+                              <SearchableSelect
+                                options={allUnits.map(unitToOption)}
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                placeholder={unitsLoading ? "Loading units..." : "Select unit..."}
+                                displayField="name"
+                                subField="symbol"
+                                disabled={isLoading || unitsLoading}
+                                error={errors.unit_id?.message}
+                              />
+                            )}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

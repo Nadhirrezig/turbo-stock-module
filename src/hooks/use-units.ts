@@ -4,12 +4,14 @@ import { useState, useCallback, useEffect } from 'react';
 import { Unit, CreateUnitData, PaginatedResponse, BaseFilters } from '@/lib/types';
 import { unitsService } from '@/lib/api/units-service';
 import { ServiceError } from '@/lib/api/client';
+import { useDepartmentContext } from '@/contexts/department-context';
 
 interface UseUnitsOptions {
   initialFilters?: BaseFilters;
 }
 
 export function useUnits(options: UseUnitsOptions = {}) {
+  const { selectedDepartmentId } = useDepartmentContext();
   const [paginatedUnits, setPaginatedUnits] = useState<PaginatedResponse<Unit>>({
     data: [],
     pagination: {
@@ -28,6 +30,7 @@ export function useUnits(options: UseUnitsOptions = {}) {
     per_page: 5,
     sort_field: 'created_at',
     sort_direction: 'desc',
+    department_id: selectedDepartmentId || undefined,
     ...options.initialFilters,
   });
 
@@ -37,13 +40,19 @@ export function useUnits(options: UseUnitsOptions = {}) {
     setError(null);
 
     try {
-      const response = await unitsService.getAll(filters);
+      // Always include the selected department in filters
+      const filtersWithDepartment = {
+        ...filters,
+        department_id: selectedDepartmentId || undefined,
+      };
+
+      const response = await unitsService.getAll(filtersWithDepartment);
       setPaginatedUnits(response);
 
       // Also fetch all units for dropdowns and local operations
       if (filters.page === 1 && !filters.search) {
         const allResponse = await unitsService.getAll({
-          ...filters,
+          ...filtersWithDepartment,
           page: 1,
           per_page: 1000 // Get all units for dropdowns
         });
@@ -67,7 +76,7 @@ export function useUnits(options: UseUnitsOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, selectedDepartmentId]);
 
   // Initial fetch and refetch when filters change
   useEffect(() => {

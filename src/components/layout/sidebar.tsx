@@ -4,18 +4,20 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { 
-  ChevronDown, 
-  Package, 
-  Users, 
-  Tags, 
-  Boxes, 
-  TrendingUp, 
+import {
+  ChevronDown,
+  Package,
+  Users,
+  Tags,
+  Boxes,
+  TrendingUp,
   ArrowUpDown,
   BarChart3,
   Home
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DepartmentSelector } from '@/components/shared/department-selector';
+import { useDepartmentContext } from '@/contexts/department-context';
 
 interface SidebarItem {
   id: string;
@@ -104,10 +106,11 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
   ({ className }, ref) => {
     const pathname = usePathname();
     const [expandedItems, setExpandedItems] = React.useState<string[]>(['inventory']);
+    const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentContext();
 
     const toggleExpanded = (itemId: string) => {
-      setExpandedItems(prev => 
-        prev.includes(itemId) 
+      setExpandedItems(prev =>
+        prev.includes(itemId)
           ? prev.filter(id => id !== itemId)
           : [...prev, itemId]
       );
@@ -136,28 +139,42 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
               type="button"
               onClick={() => toggleExpanded(item.id)}
               className={cn(
-                'flex items-center w-full p-2 text-base transition duration-75 rounded-xl group hover:bg-accent hover:text-accent-foreground',
-                parentIsActive && 'bg-primary text-primary-foreground font-semibold',
-                level > 0 && 'ml-4'
+                'flex items-center w-full p-2 rounded-lg transition-colors duration-200 group',
+                parentIsActive
+                  ? 'bg-primary text-primary-foreground font-semibold'
+                  : 'hover:bg-accent hover:text-accent-foreground',
+                level > 0 && 'pl-10'
               )}
             >
               {item.icon}
               <span className="flex-1 ml-3 text-left whitespace-nowrap">
                 {item.name}
               </span>
-              <ChevronDown 
+              <ChevronDown
                 className={cn(
-                  'w-5 h-5 transition-transform duration-200',
+                  'w-5 h-5 transition-transform duration-300',
                   isExpanded && 'rotate-180'
                 )}
               />
             </button>
-            
-            {isExpanded && (
-              <ul className="py-2 space-y-2">
-                {item.children?.map(child => renderSidebarItem(child, level + 1))}
-              </ul>
-            )}
+
+            <ul
+              className={cn(
+                'pl-4 mt-2 space-y-1 overflow-hidden transition-[max-height] duration-300 ease-in-out',
+                isExpanded ? 'max-h-96' : 'max-h-0'
+              )}
+            >
+              {item.id === 'inventory' && (
+                <li className="px-2 mb-3">
+                  <DepartmentSelector
+                    selectedDepartmentId={selectedDepartmentId || undefined}
+                    onDepartmentChange={setSelectedDepartmentId}
+                    className="w-full"
+                  />
+                </li>
+              )}
+              {item.children?.map(child => renderSidebarItem(child, level + 1))}
+            </ul>
           </li>
         );
       }
@@ -167,9 +184,11 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
           <Link
             href={item.href || '#'}
             className={cn(
-              'flex items-center p-2 text-base transition duration-75 rounded-xl group hover:bg-accent hover:text-accent-foreground',
-              itemIsActive && 'bg-primary text-primary-foreground font-semibold',
-              level > 0 && 'ml-4'
+              'flex items-center p-2 rounded-md transition-colors duration-200 group',
+              itemIsActive
+                ? 'bg-primary text-primary-foreground font-semibold'
+                : 'hover:bg-accent hover:text-accent-foreground',
+              level > 0 && 'pl-10'
             )}
           >
             {item.icon}
@@ -184,6 +203,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
         ref={ref}
         className={cn(
           'flex flex-col w-64 h-screen bg-background border-r border-border',
+          'scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent',
           className
         )}
       >
@@ -202,7 +222,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
           </Link>
         </div>
 
-        {/* Navigation baby */}
+        {/* Navigation */}
         <nav className="flex-1 px-3 py-4 overflow-y-auto">
           <ul className="space-y-2">
             {sidebarItems.map(item => renderSidebarItem(item))}

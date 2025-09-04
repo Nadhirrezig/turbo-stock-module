@@ -22,6 +22,7 @@ class CategoriesService {
       if (filters.per_page) queryParams.append('per_page', filters.per_page.toString());
       if (filters.sort_field) queryParams.append('sort_field', filters.sort_field);
       if (filters.sort_direction) queryParams.append('sort_direction', filters.sort_direction);
+      if (filters.department_id) queryParams.append('department_id', filters.department_id);
 
       const response = await apiClient.get<PaginatedResponse<InventoryItemCategory>>(
         `${this.endpoint}?${queryParams.toString()}`
@@ -115,6 +116,11 @@ class CategoriesService {
 
     let filteredCategories = [...this.mockData];
 
+    // Apply department filter
+    if (filters.department_id) {
+      filteredCategories = filteredCategories.filter(category => category.department_id === filters.department_id);
+    }
+
     // Apply search filter
     if (filters.search) {
       filteredCategories = filterBySearch(filteredCategories, filters.search, ['name']);
@@ -147,6 +153,7 @@ class CategoriesService {
     const newCategory: InventoryItemCategory = {
       id: generateId(),
       name: data.name,
+      department_id: data.department_id,
       created_at: getCurrentTimestamp(),
       updated_at: getCurrentTimestamp(),
     };
@@ -167,6 +174,7 @@ class CategoriesService {
     const updatedCategory: InventoryItemCategory = {
       ...this.mockData[index],
       name: data.name,
+      department_id: data.department_id,
       updated_at: getCurrentTimestamp(),
     };
 

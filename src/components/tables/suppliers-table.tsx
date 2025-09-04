@@ -3,8 +3,8 @@
 import * as React from 'react';
 import { Supplier, TableColumn } from '@/lib/types';
 import { DataTable } from './data-table';
-import { formatDateTime, truncateText } from '@/lib/utils';
-import { Mail, Phone, MapPin, Building2, Eye, Trash2 } from 'lucide-react';
+import { formatDateTime } from '@/lib/utils';
+import { Mail, Phone, Building2, Eye, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SuppliersTableProps {

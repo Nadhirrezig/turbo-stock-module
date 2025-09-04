@@ -4,12 +4,14 @@ import { useState, useCallback, useEffect } from 'react';
 import { InventoryItem, CreateInventoryItemData, BaseFilters, PaginatedResponse } from '@/lib/types';
 import { inventoryItemsService } from '@/lib/api/inventory-items-service';
 import { ServiceError } from '@/lib/api/client';
+import { useDepartmentContext } from '@/contexts/department-context';
 
 interface UseInventoryItemsOptions {
   initialFilters?: BaseFilters;
 }
 
 export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
+  const { selectedDepartmentId } = useDepartmentContext();
   const [paginatedInventoryItems, setPaginatedInventoryItems] = useState<PaginatedResponse<InventoryItem>>({
     data: [],
     pagination: {
@@ -28,6 +30,7 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
     per_page: 5,
     sort_field: 'created_at',
     sort_direction: 'desc',
+    department_id: selectedDepartmentId || undefined,
     ...options.initialFilters,
   });
 
@@ -37,13 +40,19 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
     setError(null);
 
     try {
-      const response = await inventoryItemsService.getAll(filters);
+      // Always include the selected department in filters
+      const filtersWithDepartment = {
+        ...filters,
+        department_id: selectedDepartmentId || undefined,
+      };
+
+      const response = await inventoryItemsService.getAll(filtersWithDepartment);
       setPaginatedInventoryItems(response);
 
       // Also fetch all items for local operations - TODO: REMOVE IN PRODUCTION - PERFORMANCE ISSUE!
       if (filters.page === 1 && !filters.search) {
         const allResponse = await inventoryItemsService.getAll({
-          ...filters,
+          ...filtersWithDepartment,
           page: 1,
           per_page: 1000 // TODO: REMOVE - This fetches 1000 records unnecessarily!
         });
@@ -56,7 +65,7 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, selectedDepartmentId]);
 
   // Initial fetch and refetch when filters change
   useEffect(() => {

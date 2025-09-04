@@ -4,12 +4,14 @@ import { useState, useCallback, useEffect } from 'react';
 import { InventoryItemCategory, CreateInventoryItemCategoryData, BaseFilters, PaginatedResponse } from '@/lib/types';
 import { categoriesService } from '@/lib/api/categories-service';
 import { ServiceError } from '@/lib/api/client';
+import { useDepartmentContext } from '@/contexts/department-context';
 
 interface UseCategoriesOptions {
   initialFilters?: BaseFilters;
 }
 
 export function useCategories(options: UseCategoriesOptions = {}) {
+  const { selectedDepartmentId } = useDepartmentContext();
   const [paginatedCategories, setPaginatedCategories] = useState<PaginatedResponse<InventoryItemCategory>>({
     data: [],
     pagination: {
@@ -28,6 +30,7 @@ export function useCategories(options: UseCategoriesOptions = {}) {
     per_page: 5,
     sort_field: 'created_at',
     sort_direction: 'desc',
+    department_id: selectedDepartmentId || undefined,
     ...options.initialFilters,
   });
 
@@ -37,13 +40,19 @@ export function useCategories(options: UseCategoriesOptions = {}) {
     setError(null);
 
     try {
-      const response = await categoriesService.getAll(filters);
+      // Always include the selected department in filters
+      const filtersWithDepartment = {
+        ...filters,
+        department_id: selectedDepartmentId || undefined,
+      };
+
+      const response = await categoriesService.getAll(filtersWithDepartment);
       setPaginatedCategories(response);
 
       // Also fetch all categories for local operations
       if (filters.page === 1 && !filters.search) {
         const allResponse = await categoriesService.getAll({
-          ...filters,
+          ...filtersWithDepartment,
           page: 1,
           per_page: 1000 // Get all categories
         });
@@ -56,7 +65,7 @@ export function useCategories(options: UseCategoriesOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, selectedDepartmentId]);
 
   // Initial fetch and refetch when filters change
   useEffect(() => {

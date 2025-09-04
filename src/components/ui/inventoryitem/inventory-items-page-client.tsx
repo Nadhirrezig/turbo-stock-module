@@ -2,12 +2,16 @@
 
 import * as React from 'react';
 import { InventoryItem } from '@/lib/types';
-import { InventoryItemFormData } from '@/lib/schemas';
+import { InventoryItemFormData, DepartmentFormData } from '@/lib/schemas';
 import { useInventoryItems } from '@/hooks/use-inventory-items';
+import { useDepartments } from '@/hooks/use-departments';
 import { PageHeader } from '@/components/shared/page-header';
 import { InventoryItemsTable } from '@/components/tables/inventory-items-table';
 import { InventoryItemForm } from '@/components/forms/inventory-item-form';
+import { DepartmentForm } from '@/components/forms/department-form';
 import { ConfirmationDialogComponent } from '@/components/modals/confirmation-dialog';
+import { Button } from '@/components/ui/button';
+import { Building2 } from 'lucide-react';
 
 export function InventoryItemsPageClient() {
   const {
@@ -21,10 +25,18 @@ export function InventoryItemsPageClient() {
     updateFilters,
   } = useInventoryItems();
 
+  const {
+    createDepartment,
+  } = useDepartments();
+
   // Form state
   const [showForm, setShowForm] = React.useState(false);
   const [editingItem, setEditingItem] = React.useState<InventoryItem | null>(null);
   const [formLoading, setFormLoading] = React.useState(false);
+
+  // Department form state
+  const [showDepartmentForm, setShowDepartmentForm] = React.useState(false);
+  const [departmentFormLoading, setDepartmentFormLoading] = React.useState(false);
 
   // Delete confirmation state
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
@@ -52,6 +64,11 @@ export function InventoryItemsPageClient() {
     setShowForm(true);
   }, []);
 
+  // Handle add department
+  const handleAddDepartment = React.useCallback(() => {
+    setShowDepartmentForm(true);
+  }, []);
+
   // Handle edit item
   const handleEditItem = React.useCallback((item: InventoryItem) => {
     setEditingItem(item);
@@ -77,6 +94,16 @@ export function InventoryItemsPageClient() {
       setFormLoading(false);
     }
   }, [editingItem, updateInventoryItem, createInventoryItem]);
+
+  // Handle department form submit
+  const handleDepartmentFormSubmit = React.useCallback(async (data: DepartmentFormData) => {
+    setDepartmentFormLoading(true);
+    try {
+      await createDepartment(data);
+    } finally {
+      setDepartmentFormLoading(false);
+    }
+  }, [createDepartment]);
 
   // Handle delete confirmation
   const handleDeleteConfirm = React.useCallback(async () => {
@@ -112,6 +139,29 @@ export function InventoryItemsPageClient() {
         actionLoading={formLoading}
       />
 
+      {/* Department Management Section */}
+      <div className="px-4 sm:px-6">
+        <div className="bg-muted/50 rounded-lg p-4 border border-border">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-foreground">Department Management</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Create departments to organize your inventory by operational areas
+              </p>
+            </div>
+            <Button
+              onClick={handleAddDepartment}
+              variant="outline"
+              size="sm"
+              className="flex items-center space-x-2"
+            >
+              <Building2 className="h-4 w-4" />
+              <span>Create Department</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Inventory Items Table */}
       <div className="px-4 sm:px-6">
         <InventoryItemsTable
@@ -134,6 +184,14 @@ export function InventoryItemsPageClient() {
         inventoryItem={editingItem}
         onSubmit={handleFormSubmit}
         loading={formLoading}
+      />
+
+      {/* Department Form Modal */}
+      <DepartmentForm
+        open={showDepartmentForm}
+        onOpenChange={setShowDepartmentForm}
+        onSubmit={handleDepartmentFormSubmit}
+        loading={departmentFormLoading}
       />
 
       {/* Delete Confirmation Dialog */}
