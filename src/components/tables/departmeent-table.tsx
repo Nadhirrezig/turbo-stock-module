@@ -1,13 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { InventoryItemCategory, TableColumn } from '@/lib/types';
+import { Department, TableColumn } from '@/lib/types';
 import { DataTable } from './data-table';
 import { formatDateTime } from '@/lib/utils';
 // import { truncateText } from '@/lib/utils'; // Temporarily unused - for description column
 
-interface CategoriesTableProps {
-  categories: InventoryItemCategory[];
+interface DepartmentsTableProps {
+  departments: Department[];
   pagination?: {
     current_page: number;
     per_page: number;
@@ -18,16 +18,16 @@ interface CategoriesTableProps {
   onSort?: (field: string, direction: 'asc' | 'desc') => void;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  onEdit?: (category: InventoryItemCategory) => void;
-  onDelete?: (category: InventoryItemCategory) => void;
+  onEdit?: (department: Department) => void;
+  onDelete?: (department: Department) => void;
   loading?: boolean;
   className?: string;
   rowClassName?: string;
 }
 
-const CategoriesTable = React.forwardRef<HTMLDivElement, CategoriesTableProps>(
+const DepartmentsTable = React.forwardRef<HTMLDivElement, DepartmentsTableProps>(
   ({
-    categories,
+    departments,
     pagination,
     onPageChange,
     onSort,
@@ -39,10 +39,10 @@ const CategoriesTable = React.forwardRef<HTMLDivElement, CategoriesTableProps>(
     className,
     rowClassName,
   }, ref) => {
-    const columns: TableColumn<InventoryItemCategory>[] = [
+    const columns: TableColumn<Department>[] = [
       {
         key: 'name',
-        label: 'Category Name',
+        label: 'Department Name',
         sortable: true,
         render: (value: unknown) => {
           const name = value as string;
@@ -53,19 +53,6 @@ const CategoriesTable = React.forwardRef<HTMLDivElement, CategoriesTableProps>(
           );
         },
       },
-      // Description column temporarily hidden to save UI space
-      // {
-      //   key: 'description',
-      //   label: 'Description',
-      //   sortable: false,
-      //   render: (value: string | undefined) => (
-      //     <div className="text-sm text-muted-foreground">
-      //       {value ? truncateText(value, 60) : (
-      //         <span className="italic">No description</span>
-      //       )}
-      //     </div>
-      //   ),
-      // },
       {
         key: 'created_at',
         label: 'Created',
@@ -97,7 +84,7 @@ const CategoriesTable = React.forwardRef<HTMLDivElement, CategoriesTableProps>(
     return (
       <div ref={ref} className={className}>
         <DataTable
-          data={categories}
+          data={departments}
           columns={columns}
           pagination={pagination}
           onPageChange={onPageChange}
@@ -108,13 +95,13 @@ const CategoriesTable = React.forwardRef<HTMLDivElement, CategoriesTableProps>(
           onDelete={onDelete}
           loading={loading}
           rowClassName={rowClassName}
-          emptyMessage="No categories found. Create your first category to organize inventory items."
+          emptyMessage="No departments found. Create your first department to organize inventory items."
         />
       </div>
     );
   }
 );
 
-CategoriesTable.displayName = 'CategoriesTable';
+DepartmentsTable.displayName = 'DepartmentsTable';
 
-export { CategoriesTable };
+export { DepartmentsTable };

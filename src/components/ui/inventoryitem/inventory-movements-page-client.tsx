@@ -31,6 +31,7 @@ import { SearchableSelect } from '@/components/shared/searchable-select';
 import { MovementViewDrawer } from '@/components/forms/movement-view-drawer';
 import { MovementEditForm } from '@/components/forms/movement-edit-form';
 import { formatNumber } from '@/lib/utils';
+import { ArrowRightLeft } from 'lucide-react';
 
 export function InventoryMovementsPageClient() {
   const {
@@ -135,11 +136,12 @@ export function InventoryMovementsPageClient() {
       {/* Page Header */}
       <PageHeader
         title="Inventory Movements"
-        description="Track all inventory transactions and stock changes"
+        description="Track all inventory transactions and stock changes across your departments."
         searchPlaceholder="Search movements..."
         searchValue={filters.search || ''}
         onSearchChange={handleSearchChange}
         showAction={false}
+        icon={<ArrowRightLeft className="w-6 h-6 text-primary" />}
       />
 
       {/* Statistics Cards */}
@@ -253,6 +255,8 @@ export function InventoryMovementsPageClient() {
           onView={handleViewMovement}
           onEdit={handleEditMovement}
           loading={loading}
+          className="rounded-xl border border-border shadow-sm overflow-hidden"
+          rowClassName="odd:bg-muted/40 hover:bg-accent hover:text-accent-foreground transition-colors"
         />
       </div>
 

@@ -19,6 +19,7 @@ interface DataTableProps<T> {
   loading?: boolean;
   emptyMessage?: string;
   className?: string;
+  rowClassName?: string;
 }
 
 function DataTable<T extends { id: string }>({
@@ -34,6 +35,7 @@ function DataTable<T extends { id: string }>({
   loading = false,
   emptyMessage = 'No data found',
   className,
+  rowClassName,
 }: DataTableProps<T>) {
   const handleSort = (column: TableColumn<T>) => {
     if (!column.sortable || !onSort) return;
@@ -189,7 +191,7 @@ function DataTable<T extends { id: string }>({
               </tr>
             ) : (
               (data || []).map((item) => (
-                <tr key={item.id} className="hover:bg-muted/50">
+                <tr key={item.id} className={cn("hover:bg-muted/50", rowClassName)}>
                   {columns.map((column, index) => (
                     <td key={index} className="px-6 py-4 whitespace-nowrap text-sm">
                       {renderCell(item, column)}

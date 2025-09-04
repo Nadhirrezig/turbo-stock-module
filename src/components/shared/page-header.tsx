@@ -12,10 +12,12 @@ interface PageHeaderProps {
   searchPlaceholder?: string;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
-  actionLabel?: string;
+  actionLabel?: string | React.ReactNode;
   onActionClick?: () => void;
   actionLoading?: boolean;
   showAction?: boolean;
+  actionButtonProps?: React.ComponentProps<typeof LoadingButton>;
+  icon?: React.ReactNode;
   className?: string;
   children?: React.ReactNode;
 }
@@ -31,6 +33,8 @@ const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
     onActionClick,
     actionLoading = false,
     showAction = true,
+    actionButtonProps,
+    icon,
     className,
     children,
   }, ref) => {
@@ -65,9 +69,12 @@ const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
         <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           {/* Title and Description */}
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-semibold text-foreground sm:text-2xl">
-              {title}
-            </h1>
+            <div className="flex items-center space-x-3">
+              {icon && <div className="flex-shrink-0">{icon}</div>}
+              <h1 className="text-xl font-semibold text-foreground sm:text-2xl">
+                {title}
+              </h1>
+            </div>
             {description && (
               <p className="mt-1 text-sm text-muted-foreground">
                 {description}
@@ -99,6 +106,7 @@ const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
                 onClick={onActionClick}
                 loading={actionLoading}
                 className="w-full sm:w-auto"
+                {...actionButtonProps}
               >
                 {actionLabel}
               </LoadingButton>

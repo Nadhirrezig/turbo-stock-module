@@ -23,6 +23,7 @@ interface SuppliersTableProps {
   onDelete?: (supplier: Supplier) => void;
   loading?: boolean;
   className?: string;
+  rowClassName?: string;
 }
 
 const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
@@ -37,6 +38,7 @@ const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
     onDelete,
     loading = false,
     className,
+    rowClassName,
   }, ref) => {
     const columns: TableColumn<Supplier>[] = [
       {
@@ -190,6 +192,7 @@ const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
           sortField={sortField}
           sortDirection={sortDirection}
           loading={loading}
+          rowClassName={rowClassName}
           emptyMessage="No suppliers found. Add suppliers to manage your inventory procurement."
         />
       </div>

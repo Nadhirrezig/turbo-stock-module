@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/shared/page-header';
 import { CategoriesTable } from '@/components/tables/categories-table';
 import { CategoryForm } from '@/components/forms/category-form';
 import { ConfirmationDialogComponent } from '@/components/modals/confirmation-dialog';
+import { FolderOpen, Plus } from 'lucide-react';
 
 export function CategoriesPageClient() {
   const {
@@ -103,13 +104,23 @@ export function CategoriesPageClient() {
       {/* Page Header */}
       <PageHeader
         title="Item Categories"
-        description="Organize your inventory items into categories for better management"
+        description="Organize your inventory items into categories for better management and tracking."
         searchPlaceholder="Search categories..."
         searchValue={filters.search || ''}
         onSearchChange={handleSearchChange}
-        actionLabel="Add Category"
+        actionLabel={
+          <div className="flex items-center space-x-2">
+            <Plus className="w-4 h-4" />
+            <span>Add Category</span>
+          </div>
+        }
         onActionClick={handleAddCategory}
         actionLoading={formLoading}
+        actionButtonProps={{
+          variant: "default",
+          className: "bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-md"
+        }}
+        icon={<FolderOpen className="w-6 h-6 text-primary" />}
       />
 
       {/* Categories Table */}
@@ -124,6 +135,8 @@ export function CategoriesPageClient() {
           onEdit={handleEditCategory}
           onDelete={handleDeleteCategory}
           loading={loading}
+          className="rounded-xl border border-border shadow-sm overflow-hidden"
+          rowClassName="odd:bg-muted/40 hover:bg-accent hover:text-accent-foreground transition-colors"
         />
       </div>
 
@@ -143,7 +156,7 @@ export function CategoriesPageClient() {
         title="Delete Category"
         description={
           categoryToDelete
-            ? `Are you sure you want to delete "${categoryToDelete.name}"? This action cannot be undone and may affect inventory items in this category.`
+            ? <>Are you sure you want to delete <span className="text-primary font-semibold">&ldquo;{categoryToDelete.name}&rdquo;</span>? This action cannot be undone and may affect inventory items in this category.</>
             : 'Are you sure you want to delete this category?'
         }
         confirmLabel="Delete Category"

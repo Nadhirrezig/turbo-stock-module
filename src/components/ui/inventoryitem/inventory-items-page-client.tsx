@@ -11,7 +11,7 @@ import { InventoryItemForm } from '@/components/forms/inventory-item-form';
 import { DepartmentForm } from '@/components/forms/department-form';
 import { ConfirmationDialogComponent } from '@/components/modals/confirmation-dialog';
 import { Button } from '@/components/ui/button';
-import { Building2 } from 'lucide-react';
+import { Package, Plus, Building2 } from 'lucide-react';
 
 export function InventoryItemsPageClient() {
   const {
@@ -130,13 +130,23 @@ export function InventoryItemsPageClient() {
       {/* Page Header */}
       <PageHeader
         title="Inventory Items"
-        description="Manage your inventory items with categories and units"
+        description="Manage your inventory items with categories, units, and departments for comprehensive tracking."
         searchPlaceholder="Search inventory items..."
         searchValue={filters.search || ''}
         onSearchChange={handleSearchChange}
-        actionLabel="Add Item"
+        actionLabel={
+          <div className="flex items-center space-x-2">
+            <Plus className="w-4 h-4" />
+            <span>Add Item</span>
+          </div>
+        }
         onActionClick={handleAddItem}
         actionLoading={formLoading}
+        actionButtonProps={{
+          variant: "default",
+          className: "bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-md"
+        }}
+        icon={<Package className="w-6 h-6 text-primary" />}
       />
 
       {/* Department Management Section */}
@@ -174,6 +184,8 @@ export function InventoryItemsPageClient() {
           onEdit={handleEditItem}
           onDelete={handleDeleteItem}
           loading={loading}
+          className="rounded-xl border border-border shadow-sm overflow-hidden"
+          rowClassName="odd:bg-muted/40 hover:bg-accent hover:text-accent-foreground transition-colors"
         />
       </div>
 
@@ -201,7 +213,7 @@ export function InventoryItemsPageClient() {
         title="Delete Inventory Item"
         description={
           itemToDelete
-            ? `Are you sure you want to delete "${itemToDelete.name}"? This action cannot be undone and may affect stock records and movements.`
+            ? <>Are you sure you want to delete <span className="text-primary font-semibold">&ldquo;{itemToDelete.name}&rdquo;</span>? This action cannot be undone and may affect stock records and movements.</>
             : 'Are you sure you want to delete this inventory item?'
         }
         confirmLabel="Delete Item"

@@ -23,6 +23,7 @@ interface MovementsTableProps {
   onEdit?: (movement: InventoryMovement) => void;
   loading?: boolean;
   className?: string;
+  rowClassName?: string;
 }
 
 const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
@@ -37,6 +38,7 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
     onEdit,
     loading = false,
     className,
+    rowClassName,
   }, ref) => {
     const getTransactionIcon = (type: string) => {
       switch (type) {
@@ -195,6 +197,7 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
           sortField={sortField}
           sortDirection={sortDirection}
           loading={loading}
+          rowClassName={rowClassName}
           emptyMessage="No inventory movements found. Stock transactions will appear here."
         />
       </div>

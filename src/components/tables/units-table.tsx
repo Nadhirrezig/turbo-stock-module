@@ -21,6 +21,7 @@ interface UnitsTableProps {
   onDelete?: (unit: Unit) => void;
   loading?: boolean;
   className?: string;
+  rowClassName?: string;
 }
 
 const UnitsTable = React.forwardRef<HTMLDivElement, UnitsTableProps>(
@@ -35,6 +36,7 @@ const UnitsTable = React.forwardRef<HTMLDivElement, UnitsTableProps>(
     onDelete,
     loading = false,
     className,
+    rowClassName,
   }, ref) => {
     const columns: TableColumn<Unit>[] = [
       {
@@ -92,6 +94,7 @@ const UnitsTable = React.forwardRef<HTMLDivElement, UnitsTableProps>(
           onEdit={onEdit}
           onDelete={onDelete}
           loading={loading}
+          rowClassName={rowClassName}
           emptyMessage="No units found. Create your first unit to get started."
         />
       </div>

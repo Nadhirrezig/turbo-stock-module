@@ -13,7 +13,8 @@ import {
   TrendingUp,
   ArrowUpDown,
   BarChart3,
-  Home
+  Home,
+  Building2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DepartmentSelector } from '@/components/shared/department-selector';
@@ -33,6 +34,12 @@ const sidebarItems: SidebarItem[] = [
     name: 'Dashboard',
     href: '/',
     icon: <Home className="w-5 h-5" />,
+  },
+  {
+    id: 'Departments',
+    name: 'Departments',
+    href: '/departments',
+    icon: <Building2 className="w-5 h-5" />,
   },
   {
     id: 'inventory',

@@ -9,6 +9,7 @@ import { SuppliersTable } from '@/components/tables/suppliers-table';
 import { SupplierForm } from '@/components/forms/supplier-form';
 import { SupplierViewDrawer } from '@/components/forms/supplier-view-drawer';
 import { ConfirmationDialogComponent } from '@/components/modals/confirmation-dialog';
+import { Truck, Plus } from 'lucide-react';
 
 export function SuppliersPageClient() {
   const {
@@ -121,13 +122,23 @@ export function SuppliersPageClient() {
       {/* Page Header */}
       <PageHeader
         title="Suppliers"
-        description="Manage your inventory suppliers and their contact information"
+        description="Manage your inventory suppliers and their contact information for seamless procurement."
         searchPlaceholder="Search suppliers..."
         searchValue={filters.search || ''}
         onSearchChange={handleSearchChange}
-        actionLabel="Add Supplier"
+        actionLabel={
+          <div className="flex items-center space-x-2">
+            <Plus className="w-4 h-4" />
+            <span>Add Supplier</span>
+          </div>
+        }
         onActionClick={handleAddSupplier}
         actionLoading={formLoading}
+        actionButtonProps={{
+          variant: "default",
+          className: "bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-md"
+        }}
+        icon={<Truck className="w-6 h-6 text-primary" />}
       />
 
       {/* Suppliers Table */}
@@ -142,6 +153,8 @@ export function SuppliersPageClient() {
           onView={handleViewSupplier}
           onDelete={handleDeleteSupplier}
           loading={loading}
+          className="rounded-xl border border-border shadow-sm overflow-hidden"
+          rowClassName="odd:bg-muted/40 hover:bg-accent hover:text-accent-foreground transition-colors"
         />
       </div>
 
@@ -169,7 +182,7 @@ export function SuppliersPageClient() {
         title="Delete Supplier"
         description={
           supplierToDelete
-            ? `Are you sure you want to delete "${supplierToDelete.name}"? This action cannot be undone and may affect inventory items using this supplier.`
+            ? <>Are you sure you want to delete <span className="text-primary font-semibold">&ldquo;{supplierToDelete.name}&rdquo;</span>? This action cannot be undone and may affect inventory items using this supplier.</>
             : 'Are you sure you want to delete this supplier?'
         }
         confirmLabel="Delete Supplier"

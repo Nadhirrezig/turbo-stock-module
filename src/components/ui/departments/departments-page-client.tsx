@@ -1,150 +1,138 @@
 'use client';
 
 import * as React from 'react';
-import { Unit } from '@/lib/types';
-import { UnitFormData } from '@/lib/schemas';
-import { useUnits } from '@/hooks/use-units';
+import { Department } from '@/lib/types';
+import { DepartmentFormData } from '@/lib/schemas';
+import { useDepartments } from '@/hooks/use-departments';
 import { PageHeader } from '@/components/shared/page-header';
-import { UnitsTable } from '@/components/tables/units-table';
-import { UnitForm } from '@/components/forms/unit-form';
+import { DepartmentsTable } from '@/components/tables/departmeent-table';
+import { DepartmentForm } from '@/components/forms/department-form';
 import { ConfirmationDialogComponent } from '@/components/modals/confirmation-dialog';
-import { Ruler, Plus } from 'lucide-react';
+import { Building2, Plus } from 'lucide-react';
 
-export function UnitsPageClient() {
+export function DepartmentsPageClient() {
   const {
-    units,
+    departments,
     pagination,
     loading,
     filters,
-    createUnit,
-    updateUnit,
-    deleteUnit,
+    createDepartment,
+    updateDepartment,
+    deleteDepartment,
     updateFilters,
-  } = useUnits();
+  } = useDepartments();
 
-  // Form state
   const [showForm, setShowForm] = React.useState(false);
-  const [editingUnit, setEditingUnit] = React.useState<Unit | null>(null);
+  const [editingDepartment, setEditingDepartment] = React.useState<Department | null>(null);
   const [formLoading, setFormLoading] = React.useState(false);
 
-  // Delete confirmation state
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
-  const [unitToDelete, setUnitToDelete] = React.useState<Unit | null>(null);
+  const [departmentToDelete, setDepartmentToDelete] = React.useState<Department | null>(null);
   const [deleteLoading, setDeleteLoading] = React.useState(false);
 
-  // Handle search
   const handleSearchChange = React.useCallback((search: string) => {
     updateFilters({ search, page: 1 });
   }, [updateFilters]);
 
-  // Handle pagination
   const handlePageChange = React.useCallback((page: number) => {
     updateFilters({ page });
   }, [updateFilters]);
 
-  // Handle sorting
   const handleSort = React.useCallback((field: string, direction: 'asc' | 'desc') => {
     updateFilters({ sort_field: field, sort_direction: direction });
   }, [updateFilters]);
 
-  // Handle add unit
-  const handleAddUnit = React.useCallback(() => {
-    setEditingUnit(null);
+  const handleAddDepartment = React.useCallback(() => {
+    setEditingDepartment(null);
     setShowForm(true);
   }, []);
 
-  // Handle edit unit
-  const handleEditUnit = React.useCallback((unit: Unit) => {
-    setEditingUnit(unit);
+  const handleEditDepartment = React.useCallback((department: Department) => {
+    setEditingDepartment(department);
     setShowForm(true);
   }, []);
 
-  // Handle delete unit
-  const handleDeleteUnit = React.useCallback((unit: Unit) => {
-    setUnitToDelete(unit);
+  const handleDeleteDepartment = React.useCallback((department: Department) => {
+    setDepartmentToDelete(department);
     setShowDeleteDialog(true);
   }, []);
 
-  // Handle form submit
-  const handleFormSubmit = React.useCallback(async (data: UnitFormData) => {
+  const handleFormSubmit = React.useCallback(async (data: DepartmentFormData) => {
     setFormLoading(true);
     try {
-      if (editingUnit) {
-        await updateUnit(editingUnit.id, data);
+      if (editingDepartment) {
+        await updateDepartment(editingDepartment.id, data);
       } else {
-        await createUnit(data);
+        await createDepartment(data);
       }
     } finally {
       setFormLoading(false);
     }
-  }, [editingUnit, updateUnit, createUnit]);
+  }, [editingDepartment, updateDepartment, createDepartment]);
 
-  // Handle delete confirmation
   const handleDeleteConfirm = React.useCallback(async () => {
-    if (!unitToDelete) return;
-    
+    if (!departmentToDelete) return;
     setDeleteLoading(true);
     try {
-      await deleteUnit(unitToDelete.id);
+      await deleteDepartment(departmentToDelete.id);
       setShowDeleteDialog(false);
-      setUnitToDelete(null);
+      setDepartmentToDelete(null);
     } finally {
       setDeleteLoading(false);
     }
-  }, [unitToDelete, deleteUnit]);
+  }, [departmentToDelete, deleteDepartment]);
 
-  // Handle delete cancel
   const handleDeleteCancel = React.useCallback(() => {
     setShowDeleteDialog(false);
-    setUnitToDelete(null);
+    setDepartmentToDelete(null);
   }, []);
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <PageHeader
-        title="Measurement Units"
-        description="Manage measurement units for your inventory items to ensure accurate tracking."
-        searchPlaceholder="Search units..."
+        title="Item Departments"
+        description="Organize your inventory items into departments for better management."
+        searchPlaceholder="Search departments..."
         searchValue={filters.search || ''}
         onSearchChange={handleSearchChange}
         actionLabel={
           <div className="flex items-center space-x-2">
             <Plus className="w-4 h-4" />
-            <span>Add Unit</span>
+            <span>Add Department</span>
           </div>
         }
-        onActionClick={handleAddUnit}
+        onActionClick={handleAddDepartment}
         actionLoading={formLoading}
         actionButtonProps={{
           variant: "default",
           className: "bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl shadow-md"
         }}
-        icon={<Ruler className="w-6 h-6 text-primary" />}
+        icon={<Building2 className="w-6 h-6 text-primary" />}
       />
 
-      {/* Units Table */}
+      {/* Departments Table */}
       <div className="px-4 sm:px-6">
-        <UnitsTable
-          units={units}
+        <DepartmentsTable
+          departments={departments}
           pagination={pagination}
           onPageChange={handlePageChange}
           onSort={handleSort}
           sortField={filters.sort_field}
           sortDirection={filters.sort_direction}
-          onEdit={handleEditUnit}
-          onDelete={handleDeleteUnit}
+          onEdit={handleEditDepartment}
+          onDelete={handleDeleteDepartment}
           loading={loading}
           className="rounded-xl border border-border shadow-sm overflow-hidden"
           rowClassName="odd:bg-muted/40 hover:bg-accent hover:text-accent-foreground transition-colors"
         />
       </div>
 
-      {/* Unit Form Modal */}
-      <UnitForm
+      {/* Department Form Modal */}
+      <DepartmentForm
         open={showForm}
         onOpenChange={setShowForm}
-        unit={editingUnit}
+        department={editingDepartment}
         onSubmit={handleFormSubmit}
         loading={formLoading}
       />
@@ -153,13 +141,13 @@ export function UnitsPageClient() {
       <ConfirmationDialogComponent
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
-        title="Delete Unit"
+        title="Delete Department"
         description={
-          unitToDelete
-            ? <>Are you sure you want to delete <span className="text-primary font-semibold">&ldquo;{unitToDelete.name}&rdquo;</span>? This action cannot be undone and may affect inventory items using this unit.</>
-            : 'Are you sure you want to delete this unit?'
+          departmentToDelete
+            ? <>Are you sure you want to delete <span className="text-primary font-semibold">&ldquo;{departmentToDelete.name}&rdquo;</span>? This action cannot be undone and may affect inventory items in this department.</>
+            : 'Are you sure you want to delete this department?'
         }
-        confirmLabel="Delete Unit"
+        confirmLabel="Delete Department"
         cancelLabel="Cancel"
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}

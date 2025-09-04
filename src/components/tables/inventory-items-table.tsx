@@ -21,6 +21,7 @@ interface InventoryItemsTableProps {
   onDelete?: (item: InventoryItem) => void;
   loading?: boolean;
   className?: string;
+  rowClassName?: string;
 }
 
 const InventoryItemsTable = React.forwardRef<HTMLDivElement, InventoryItemsTableProps>(
@@ -35,6 +36,7 @@ const InventoryItemsTable = React.forwardRef<HTMLDivElement, InventoryItemsTable
     onDelete,
     loading = false,
     className,
+    rowClassName,
   }, ref) => {
     const columns: TableColumn<InventoryItem>[] = [
       {
@@ -151,6 +153,7 @@ const InventoryItemsTable = React.forwardRef<HTMLDivElement, InventoryItemsTable
           onEdit={onEdit}
           onDelete={onDelete}
           loading={loading}
+          rowClassName={rowClassName}
           emptyMessage="No inventory items found. Create your first inventory item to get started."
         />
       </div>
