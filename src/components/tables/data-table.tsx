@@ -205,6 +205,7 @@ function DataTable<T extends { id: string }>({
                             variant="ghost"
                             size="sm"
                             onClick={() => onEdit(item)}
+                            className="cursor-pointer hover:bg-primary/10"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -214,7 +215,7 @@ function DataTable<T extends { id: string }>({
                             variant="ghost"
                             size="sm"
                             onClick={() => onDelete(item)}
-                            className="text-destructive hover:text-destructive"
+                            className="text-destructive hover:text-destructive cursor-pointer hover:bg-destructive/10"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

@@ -164,6 +164,7 @@ const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
               size="sm"
               onClick={() => onView?.(supplier)}
               title="View Details"
+              className="cursor-pointer hover:bg-primary/10"
             >
               <Eye className="h-4 w-4" />
             </Button>
@@ -172,7 +173,7 @@ const SuppliersTable = React.forwardRef<HTMLDivElement, SuppliersTableProps>(
               size="sm"
               onClick={() => onDelete?.(supplier)}
               title="Delete Supplier"
-              className="text-destructive hover:text-destructive"
+              className="text-destructive hover:text-destructive cursor-pointer hover:bg-destructive/10"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

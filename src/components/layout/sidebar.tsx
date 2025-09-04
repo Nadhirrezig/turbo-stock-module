@@ -7,7 +7,7 @@ import Image from 'next/image';
 import {
   ChevronDown,
   Package,
-  Users,
+  Truck,
   Tags,
   Boxes,
   TrendingUp,
@@ -80,7 +80,7 @@ const sidebarItems: SidebarItem[] = [
         id: 'suppliers',
         name: 'Suppliers',
         href: '/suppliers',
-        icon: <Users className="w-4 h-4" />,
+        icon: <Truck className="w-4 h-4" />,
       },
     ],
   },

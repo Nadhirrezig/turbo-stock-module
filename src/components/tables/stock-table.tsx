@@ -20,6 +20,7 @@ interface StockTableProps {
   sortDirection?: 'asc' | 'desc';
   loading?: boolean;
   className?: string;
+  rowClassName?: string;
 }
 
 const StockTable = React.forwardRef<HTMLDivElement, StockTableProps>(
@@ -32,6 +33,7 @@ const StockTable = React.forwardRef<HTMLDivElement, StockTableProps>(
     sortDirection,
     loading = false,
     className,
+    rowClassName,
   }, ref) => {
     const columns: TableColumn<InventoryStock>[] = [
       {
@@ -165,6 +167,7 @@ const StockTable = React.forwardRef<HTMLDivElement, StockTableProps>(
           sortField={sortField}
           sortDirection={sortDirection}
           loading={loading}
+          rowClassName={rowClassName}
           emptyMessage="No stock records found. Add stock entries to track inventory levels."
         />
       </div>

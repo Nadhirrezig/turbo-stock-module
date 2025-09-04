@@ -170,6 +170,7 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
               size="sm"
               onClick={() => onView?.(movement)}
               title="View Details"
+              className="cursor-pointer hover:bg-primary/10"
             >
               <Eye className="h-4 w-4" />
             </Button>
@@ -178,6 +179,7 @@ const MovementsTable = React.forwardRef<HTMLDivElement, MovementsTableProps>(
               size="sm"
               onClick={() => onEdit?.(movement)}
               title="Edit Movement"
+              className="cursor-pointer hover:bg-primary/10"
             >
               <Edit className="h-4 w-4" />
             </Button>
