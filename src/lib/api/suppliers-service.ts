@@ -1,4 +1,5 @@
-import { Supplier, CreateSupplierData, PaginatedResponse, BaseFilters } from '@/lib/types';
+import { Supplier, CreateSupplierData, PaginatedResponse, BaseFilters, Document, SupplierAdditionalInfo } from '@/lib/types';
+import { SupplierFormData } from '@/lib/schemas';
 import { apiClient, ServiceError } from './client';
 import { API_CONFIG, simulateApiDelay, simulateApiError, getCurrentTimestamp, generateId } from './config';
 import { mockSuppliers } from '@/lib/mock-data';
@@ -52,13 +53,15 @@ class SuppliersService {
     }
   }
 
-  async create(data: CreateSupplierData): Promise<Supplier> {
+  async create(data: SupplierFormData): Promise<Supplier> {
     if (API_CONFIG.useMockData) {
       return this.createMock(data);
     }
 
     try {
-      const response = await apiClient.post<Supplier>(this.endpoint, data);
+      // Handle file uploads for documents
+      const processedData = await this.processSupplierData(data);
+      const response = await apiClient.post<Supplier>(this.endpoint, processedData);
       return response.data;
     } catch (error) {
       throw new ServiceError(
@@ -69,13 +72,15 @@ class SuppliersService {
     }
   }
 
-  async update(id: string, data: CreateSupplierData): Promise<Supplier> {
+  async update(id: string, data: SupplierFormData): Promise<Supplier> {
     if (API_CONFIG.useMockData) {
       return this.updateMock(id, data);
     }
 
     try {
-      const response = await apiClient.put<Supplier>(`${this.endpoint}/${id}`, data);
+      // Handle file uploads for documents
+      const processedData = await this.processSupplierData(data);
+      const response = await apiClient.put<Supplier>(`${this.endpoint}/${id}`, processedData);
       return response.data;
     } catch (error) {
       throw new ServiceError(
@@ -130,7 +135,49 @@ class SuppliersService {
     return supplier;
   }
 
-  private async createMock(data: CreateSupplierData): Promise<Supplier> {
+  private async processSupplierData(data: SupplierFormData): Promise<CreateSupplierData> {
+    const processedData: CreateSupplierData = {
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      description: data.description,
+    };
+
+    // Process additional info if present
+    if (data.additional_info) {
+      const additionalInfo = { ...data.additional_info };
+      
+      // Process documents - upload files and get URLs
+      if (additionalInfo.documents && additionalInfo.documents.length > 0) {
+        const uploadedDocuments = await Promise.all(
+          additionalInfo.documents.map(async (doc: Document) => {
+            const uploadedUrl = await this.uploadDocument(doc.file);
+            return {
+              name: doc.name,
+              url: uploadedUrl as string,
+              type: doc.type,
+              category: doc.category,
+            };
+          })
+        );
+        (additionalInfo as SupplierAdditionalInfo).documents = uploadedDocuments;
+      }
+
+      processedData.additional_info = additionalInfo;
+    }
+
+    return processedData;
+  }
+
+  private async uploadDocument(file: File): Promise<string> {
+    // In a real implementation, this would upload the file to a storage service
+    // For now, we'll simulate with a mock URL
+    await simulateApiDelay();
+    return `https://storage.example.com/documents/${file.name}`;
+  }
+
+  private async createMock(data: SupplierFormData): Promise<Supplier> {
     await simulateApiDelay();
     simulateApiError();
 
@@ -141,6 +188,7 @@ class SuppliersService {
       phone: data.phone,
       address: data.address,
       description: data.description,
+      additional_info: data.additional_info as SupplierAdditionalInfo,
       created_at: getCurrentTimestamp(),
       updated_at: getCurrentTimestamp(),
     };
@@ -149,7 +197,7 @@ class SuppliersService {
     return newSupplier;
   }
 
-  private async updateMock(id: string, data: CreateSupplierData): Promise<Supplier> {
+  private async updateMock(id: string, data: SupplierFormData): Promise<Supplier> {
     await simulateApiDelay();
     simulateApiError();
 
@@ -165,6 +213,7 @@ class SuppliersService {
       phone: data.phone,
       address: data.address,
       description: data.description,
+      additional_info: data.additional_info as SupplierAdditionalInfo,
       updated_at: getCurrentTimestamp(),
     };
 

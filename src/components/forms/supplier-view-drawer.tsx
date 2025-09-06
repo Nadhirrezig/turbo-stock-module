@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Supplier } from '@/lib/types';
 import { formatDateTime } from '@/lib/utils';
-import { Building2, Mail, Phone, MapPin, FileText, Calendar, Edit, User } from 'lucide-react';
+import { Building2, Mail, Phone, MapPin, FileText, Calendar, Edit, User, CreditCard, DollarSign, Truck, Users, File, Percent, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   RightDrawer,
@@ -187,6 +187,295 @@ const SupplierViewDrawer = React.forwardRef<HTMLDivElement, SupplierViewDrawerPr
                         {supplier.description}
                       </div>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Payment Information Section */}
+              {supplier.additional_info?.payment && (
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Payment Information
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {/* Payment Method */}
+                    <div className="space-y-2">
+                      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Preferred Method
+                      </div>
+                      <div className="text-sm text-foreground">
+                        {supplier.additional_info.payment.preferred_method}
+                      </div>
+                    </div>
+
+                    {/* Payment Terms */}
+                    {supplier.additional_info.payment.terms && (
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Terms
+                        </div>
+                        <div className="text-sm text-foreground">
+                          {supplier.additional_info.payment.terms}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Finance Information Section */}
+              {supplier.additional_info?.finance && (
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Finance Information
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {/* Account Number */}
+                    {supplier.additional_info.finance.account_number && (
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Account Number
+                        </div>
+                        <div className="text-sm text-foreground font-mono">
+                          {supplier.additional_info.finance.account_number}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Bank Name */}
+                    {supplier.additional_info.finance.bank_name && (
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Bank Name
+                        </div>
+                        <div className="text-sm text-foreground">
+                          {supplier.additional_info.finance.bank_name}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Currency */}
+                    {supplier.additional_info.finance.currency && (
+                      <div className="space-y-2 sm:col-span-2">
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Currency
+                        </div>
+                        <div className="text-sm text-foreground">
+                          {supplier.additional_info.finance.currency}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Operations Information Section */}
+              {supplier.additional_info?.operations && (
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                    <Truck className="h-4 w-4 mr-2" />
+                    Operations Information
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {/* Lead Time */}
+                    {supplier.additional_info.operations.lead_time_days && (
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Lead Time
+                        </div>
+                        <div className="text-sm text-foreground">
+                          {supplier.additional_info.operations.lead_time_days} days
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Minimum Order Quantity */}
+                    {supplier.additional_info.operations.minimum_order_quantity && (
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Minimum Order Quantity
+                        </div>
+                        <div className="text-sm text-foreground">
+                          {supplier.additional_info.operations.minimum_order_quantity}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Delivery Terms */}
+                    {supplier.additional_info.operations.delivery_terms && (
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Delivery Terms
+                        </div>
+                        <div className="text-sm text-foreground">
+                          {supplier.additional_info.operations.delivery_terms}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Delivery Address */}
+                    {supplier.additional_info.operations.delivery_address && (
+                      <div className="space-y-2 sm:col-span-2">
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Delivery Address
+                        </div>
+                        <div className="text-sm text-foreground">
+                          {supplier.additional_info.operations.delivery_address}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Active Status */}
+                    <div className="space-y-2 sm:col-span-2">
+                      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Status
+                      </div>
+                      <div className="text-sm">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          supplier.additional_info.operations.active 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
+                        }`}>
+                          {supplier.additional_info.operations.active ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Contacts Section */}
+              {supplier.additional_info?.contacts && supplier.additional_info.contacts.length > 0 && (
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                    <Users className="h-4 w-4 mr-2" />
+                    Contact Persons
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    {supplier.additional_info.contacts.map((contact, index) => (
+                      <div key={index} className="border border-input rounded-lg p-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground mb-2">
+                              {contact.name}
+                              {contact.role && (
+                                <span className="text-sm text-muted-foreground ml-2">
+                                  ({contact.role})
+                                </span>
+                              )}
+                            </div>
+                            
+                            <div className="space-y-1">
+                              {contact.phone && (
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                  <Phone className="h-3 w-3 mr-2" />
+                                  <a 
+                                    href={`tel:${contact.phone}`}
+                                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                                  >
+                                    {contact.phone}
+                                  </a>
+                                </div>
+                              )}
+                              
+                              {contact.email && (
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                  <Mail className="h-3 w-3 mr-2" />
+                                  <a 
+                                    href={`mailto:${contact.email}`}
+                                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                                  >
+                                    {contact.email}
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Documents Section */}
+              {supplier.additional_info?.documents && supplier.additional_info.documents.length > 0 && (
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                    <File className="h-4 w-4 mr-2" />
+                    Documents
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    {supplier.additional_info.documents.map((document, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border border-input rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <File className="h-5 w-5 text-muted-foreground" />
+                          <div>
+                            <div className="text-sm font-medium text-foreground">
+                              {document.name}
+                            </div>
+                            {document.category && (
+                              <div className="text-xs text-muted-foreground">
+                                Category: {document.category}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(document.url, '_blank')}
+                          className="flex items-center gap-2"
+                        >
+                          <Download className="h-4 w-4" />
+                          Download
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tax Information Section */}
+              {supplier.additional_info?.tax && (
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                    <Percent className="h-4 w-4 mr-2" />
+                    Tax Information
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {/* Tax ID */}
+                    {supplier.additional_info.tax.tax_id && (
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Tax ID / VAT Number
+                        </div>
+                        <div className="text-sm text-foreground font-mono">
+                          {supplier.additional_info.tax.tax_id}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tax Rate */}
+                    {supplier.additional_info.tax.tax_rate && (
+                      <div className="space-y-2">
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Tax Rate
+                        </div>
+                        <div className="text-sm text-foreground">
+                          {supplier.additional_info.tax.tax_rate}%
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

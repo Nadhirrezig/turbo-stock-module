@@ -39,7 +39,67 @@ export interface Supplier {
   description?: string;
   created_at: string;
   updated_at: string;
+
+  additional_info?: SupplierAdditionalInfo;
 }
+
+export interface SupplierAdditionalInfo {
+  finance?: Finance;
+  payment?: Payment;
+  contacts?: Contact[];
+  operations?: Operations;
+  documents?: DocumentWithUrl[];
+  tax?: Tax;
+}
+
+// Subtypes for supplier
+
+export interface Finance {
+  account_number?: string;  // Bank account/IBAN
+  bank_name?: string;
+  currency?: string;        // e.g., TND, USD, EUR
+}
+
+export interface Payment {
+  preferred_method: 'Cash' | 'COD' | 'Bank Transfer' | 'Credit'; // enum
+  terms?: string;           // e.g., Net 30, COD terms
+}
+
+export interface Contact {
+  name: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+}
+
+export interface Operations {
+  lead_time_days?: number;
+  minimum_order_quantity?: number;
+  delivery_terms?: 'Pickup' | 'Delivered'; // enum
+  delivery_address?: string;
+  active?: boolean;
+}
+
+export interface Document {
+  name: string;
+  file: File;                       // uploaded file
+  type?: string;                    // pdf, image, etc.
+  category?: 'contract' | 'certificate' | 'invoice';
+}
+
+// Document with URL (after upload)
+export interface DocumentWithUrl {
+  name: string;
+  url: string;
+  type?: string;
+  category?: 'contract' | 'certificate' | 'invoice';
+}
+
+export interface Tax {
+  tax_id?: string;         // VAT/Tax number
+  tax_rate?: number;
+}
+
 
 export interface InventoryItem {
   id: string;

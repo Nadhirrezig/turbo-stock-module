@@ -15,7 +15,7 @@ const ConfirmationDialogPortal = DialogPrimitive.Portal;
 
 
 const ConfirmationDialogOverlay = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
@@ -30,7 +30,7 @@ const ConfirmationDialogOverlay = React.forwardRef<
 ConfirmationDialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const ConfirmationDialogContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => (
   <ConfirmationDialogPortal>

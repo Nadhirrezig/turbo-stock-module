@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { motion, AnimatePresence, HTMLMotionProps } from 'framer-motion';
 import { ChevronDown, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -59,7 +60,7 @@ const Select = ({ value, onValueChange, disabled = false, children }: SelectProp
   );
 };
 
-interface SelectTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface SelectTriggerProps extends Omit<HTMLMotionProps<"button">, "children"> {
   children: React.ReactNode;
 }
 
@@ -71,9 +72,12 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
     }
 
     return (
-      <button
+      <motion.button
         ref={ref}
         type="button"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
         className={cn(
           'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
           className
@@ -83,8 +87,13 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, SelectTriggerProps>(
         {...props}
       >
         {children}
-        <ChevronDown className="h-4 w-4 opacity-50" />
-      </button>
+        <motion.div
+          animate={{ rotate: context.isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+        >
+          <ChevronDown className="h-4 w-4 opacity-50" />
+        </motion.div>
+      </motion.button>
     );
   }
 );
@@ -101,23 +110,34 @@ const SelectContent = ({ children }: SelectContentProps) => {
     throw new Error('SelectContent must be used within a Select');
   }
 
-  if (!context.isOpen || context.disabled) {
-    return null;
-  }
-
   return (
-    <div className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md">
-      <div className="py-1 max-h-60 overflow-auto">
-        {React.Children.map(children, (child) => {
-          if (React.isValidElement(child) && child.type === SelectItem) {
-            return React.cloneElement(child as React.ReactElement<SelectItemProps>, { 
-              onClose: () => context.setIsOpen(false) 
-            });
-          }
-          return child;
-        })}
-      </div>
-    </div>
+    <AnimatePresence>
+      {context.isOpen && !context.disabled && (
+        <motion.div
+          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 25,
+            duration: 0.2
+          }}
+          className="absolute z-50 w-full mt-1 bg-popover border rounded-md shadow-md"
+        >
+          <div className="py-1 max-h-60 overflow-auto">
+            {React.Children.map(children, (child) => {
+              if (React.isValidElement(child) && child.type === SelectItem) {
+                return React.cloneElement(child as React.ReactElement<SelectItemProps>, { 
+                  onClose: () => context.setIsOpen(false) 
+                });
+              }
+              return child;
+            })}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
@@ -138,7 +158,7 @@ const SelectValue = ({ placeholder }: SelectValueProps) => {
   );
 };
 
-interface SelectItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface SelectItemProps extends Omit<HTMLMotionProps<"button">, "children"> {
   value: string;
   children: React.ReactNode;
   onClose?: () => void;
@@ -162,9 +182,12 @@ const SelectItem = React.forwardRef<HTMLButtonElement, SelectItemProps>(
     };
 
     return (
-      <button
+      <motion.button
         ref={ref}
         type="button"
+        whileHover={{ scale: 1.02, x: 2 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
         className={cn(
           'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
           className
@@ -173,11 +196,16 @@ const SelectItem = React.forwardRef<HTMLButtonElement, SelectItemProps>(
         disabled={context.disabled}
         {...props}
       >
-        <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+        <motion.span 
+          className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center"
+          initial={{ scale: 0 }}
+          animate={{ scale: isSelected ? 1 : 0 }}
+          transition={{ type: "spring", stiffness: 500, damping: 20 }}
+        >
           {isSelected && <Check className="h-4 w-4" />}
-        </span>
+        </motion.span>
         {children}
-      </button>
+      </motion.button>
     );
   }
 );

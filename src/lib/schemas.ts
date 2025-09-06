@@ -1,5 +1,94 @@
 import { z } from 'zod';
 
+// Document validation schema
+export const documentSchema = z.object({
+  name: z.string().min(1, 'Document name is required'),
+  file: z.instanceof(File, { message: 'File is required' }),
+  type: z.string().optional(),
+  category: z.enum(['contract', 'certificate', 'invoice']).optional(),
+});
+
+// Finance validation schema
+export const financeSchema = z.object({
+  account_number: z.string().optional(),
+  bank_name: z.string().optional(),
+  currency: z.string().optional(),
+});
+
+// Payment validation schema
+export const paymentSchema = z.object({
+  preferred_method: z.enum(['Cash', 'COD', 'Bank Transfer', 'Credit']),
+  terms: z.string().optional(),
+});
+
+// Contact validation schema
+export const contactSchema = z.object({
+  name: z.string().min(1, 'Contact name is required'),
+  role: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().email('Invalid email address').optional(),
+}).refine((data) => data.phone || data.email, {
+  message: 'Contact must have either phone or email',
+  path: ['phone'],
+});
+
+// Operations validation schema
+export const operationsSchema = z.object({
+  lead_time_days: z.number().min(0).optional(),
+  minimum_order_quantity: z.number().min(0).optional(),
+  delivery_terms: z.enum(['Pickup', 'Delivered']).optional(),
+  delivery_address: z.string().optional(),
+  active: z.boolean().optional(),
+}).refine((data) => {
+  if (data.delivery_terms === 'Delivered' && !data.delivery_address) {
+    return false;
+  }
+  return true;
+}, {
+  message: 'Delivery address is required when delivery terms is "Delivered"',
+  path: ['delivery_address'],
+});
+
+// Tax validation schema
+export const taxSchema = z.object({
+  tax_id: z.string().optional(),
+  tax_rate: z.number().min(0).max(100).optional(),
+});
+
+// Supplier Additional Info validation schema with constraints
+export const supplierAdditionalInfoSchema = z.object({
+  finance: financeSchema.optional(),
+  payment: paymentSchema.optional(),
+  contacts: z.array(contactSchema).optional(),
+  operations: operationsSchema.optional(),
+  documents: z.array(documentSchema).optional(),
+  tax: taxSchema.optional(),
+}).refine((data) => {
+  // If payment method is Cash or COD, finance should be empty
+  if (data.payment?.preferred_method === 'Cash' || data.payment?.preferred_method === 'COD') {
+    return !data.finance?.account_number && !data.finance?.bank_name;
+  }
+  return true;
+}, {
+  message: 'Finance details are not allowed for Cash or COD payment methods',
+  path: ['finance'],
+}).refine((data) => {
+  // If payment method is Bank Transfer, require finance details
+  if (data.payment?.preferred_method === 'Bank Transfer') {
+    return data.finance?.account_number && data.finance?.bank_name;
+  }
+  return true;
+}, {
+  message: 'Account number and bank name are required for Bank Transfer',
+  path: ['finance'],
+});
+
+    
+
+
+
+
+
 // Department validation schema
 export const departmentSchema = z.object({
   name: z.string()
@@ -55,6 +144,7 @@ export const supplierSchema = z.object({
     .max(500, 'Description must not exceed 500 characters')
     .optional()
     .or(z.literal('')),
+  additional_info: supplierAdditionalInfoSchema.optional(),
 });
 
 // Inventory Item validation schema -
@@ -138,6 +228,13 @@ export type DepartmentFormData = z.infer<typeof departmentSchema>;
 export type UnitFormData = z.infer<typeof unitSchema>;
 export type InventoryItemCategoryFormData = z.infer<typeof inventoryItemCategorySchema>;
 export type SupplierFormData = z.infer<typeof supplierSchema>;
+export type SupplierAdditionalInfoFormData = z.infer<typeof supplierAdditionalInfoSchema>;
+export type DocumentFormData = z.infer<typeof documentSchema>;
+export type FinanceFormData = z.infer<typeof financeSchema>;
+export type PaymentFormData = z.infer<typeof paymentSchema>;
+export type ContactFormData = z.infer<typeof contactSchema>;
+export type OperationsFormData = z.infer<typeof operationsSchema>;
+export type TaxFormData = z.infer<typeof taxSchema>;
 export type InventoryItemFormData = z.infer<typeof inventoryItemSchema>;
 export type StockEntryFormData = z.infer<typeof stockEntrySchema>;
 export type BaseFiltersData = z.infer<typeof baseFiltersSchema>;

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Supplier, CreateSupplierData, BaseFilters, PaginatedResponse } from '@/lib/types';
+import { Supplier, BaseFilters, PaginatedResponse } from '@/lib/types';
+import { SupplierFormData } from '@/lib/schemas';
 import { suppliersService } from '@/lib/api/suppliers-service';
 import { ServiceError } from '@/lib/api/client';
 
@@ -67,7 +68,7 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
     setFilters(prev => ({ ...prev, ...newFilters }));
   }, []);
 
-  const createSupplier = useCallback(async (data: CreateSupplierData): Promise<Supplier> => {
+  const createSupplier = useCallback(async (data: SupplierFormData): Promise<Supplier> => {
     setLoading(true);
     setError(null);
     try {
@@ -83,7 +84,7 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
     }
   }, [fetchSuppliers]);
 
-  const updateSupplier = useCallback(async (id: string, data: CreateSupplierData): Promise<Supplier> => {
+  const updateSupplier = useCallback(async (id: string, data: SupplierFormData): Promise<Supplier> => {
     setLoading(true);
     setError(null);
     try {

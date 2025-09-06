@@ -11,7 +11,7 @@ const UnsavedChangesDialogTrigger = DialogPrimitive.Trigger;
 const UnsavedChangesDialogPortal = DialogPrimitive.Portal;
 
 const UnsavedChangesDialogOverlay = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
@@ -26,7 +26,7 @@ const UnsavedChangesDialogOverlay = React.forwardRef<
 UnsavedChangesDialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const UnsavedChangesDialogContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => (
   <UnsavedChangesDialogPortal>
