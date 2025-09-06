@@ -36,17 +36,9 @@ export const contactSchema = z.object({
 export const operationsSchema = z.object({
   lead_time_days: z.number().min(0).optional(),
   minimum_order_quantity: z.number().min(0).optional(),
-  delivery_terms: z.enum(['Pickup', 'Delivered']).optional(),
+  delivery_terms: z.string().optional(),
   delivery_address: z.string().optional(),
   active: z.boolean().optional(),
-}).refine((data) => {
-  if (data.delivery_terms === 'Delivered' && !data.delivery_address) {
-    return false;
-  }
-  return true;
-}, {
-  message: 'Delivery address is required when delivery terms is "Delivered"',
-  path: ['delivery_address'],
 });
 
 // Tax validation schema

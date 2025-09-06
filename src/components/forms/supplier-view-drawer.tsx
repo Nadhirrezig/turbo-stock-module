@@ -184,7 +184,7 @@ const SupplierViewDrawer = React.forwardRef<HTMLDivElement, SupplierViewDrawerPr
                         Description
                       </div>
                       <div className="text-sm text-foreground">
-                        {supplier.description}
+                        {supplier.description || 'No description provided'}
                       </div>
                     </div>
                   </div>
@@ -192,13 +192,15 @@ const SupplierViewDrawer = React.forwardRef<HTMLDivElement, SupplierViewDrawerPr
               )}
 
               {/* Payment Information Section */}
-              {supplier.additional_info?.payment && (
-                <div className="bg-muted/50 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Payment Information
-                  </h3>
-                  
+              <div className="bg-muted/50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Payment Information
+                </h3>
+                
+                {supplier.additional_info?.payment && 
+                 (supplier.additional_info.payment.preferred_method || 
+                  supplier.additional_info.payment.terms) ? (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {/* Payment Method */}
                     <div className="space-y-2">
@@ -206,7 +208,7 @@ const SupplierViewDrawer = React.forwardRef<HTMLDivElement, SupplierViewDrawerPr
                         Preferred Method
                       </div>
                       <div className="text-sm text-foreground">
-                        {supplier.additional_info.payment.preferred_method}
+                        {supplier.additional_info.payment.preferred_method || 'No preferred method specified'}
                       </div>
                     </div>
 
@@ -222,17 +224,27 @@ const SupplierViewDrawer = React.forwardRef<HTMLDivElement, SupplierViewDrawerPr
                       </div>
                     )}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="text-center py-6">
+                    <CreditCard className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground italic">
+                      Payment preferences have not been configured for this supplier
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {/* Finance Information Section */}
-              {supplier.additional_info?.finance && (
-                <div className="bg-muted/50 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    Finance Information
-                  </h3>
-                  
+              <div className="bg-muted/50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  Finance Information
+                </h3>
+                
+                {supplier.additional_info?.finance && 
+                 (supplier.additional_info.finance.account_number || 
+                  supplier.additional_info.finance.bank_name || 
+                  supplier.additional_info.finance.currency) ? (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {/* Account Number */}
                     {supplier.additional_info.finance.account_number && (
@@ -270,17 +282,24 @@ const SupplierViewDrawer = React.forwardRef<HTMLDivElement, SupplierViewDrawerPr
                       </div>
                     )}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="text-center py-6">
+                    <DollarSign className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground italic">
+                      Financial details have not been configured for this supplier
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {/* Operations Information Section */}
-              {supplier.additional_info?.operations && (
-                <div className="bg-muted/50 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
-                    <Truck className="h-4 w-4 mr-2" />
-                    Operations Information
-                  </h3>
-                  
+              <div className="bg-muted/50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                  <Truck className="h-4 w-4 mr-2" />
+                  Operations Information
+                </h3>
+                
+                {supplier.additional_info?.operations ? (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {/* Lead Time */}
                     {supplier.additional_info.operations.lead_time_days && (
@@ -346,27 +365,34 @@ const SupplierViewDrawer = React.forwardRef<HTMLDivElement, SupplierViewDrawerPr
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="text-center py-6">
+                    <Truck className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground italic">
+                      No operations information has been added by admin
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {/* Contacts Section */}
-              {supplier.additional_info?.contacts && supplier.additional_info.contacts.length > 0 && (
-                <div className="bg-muted/50 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
-                    <Users className="h-4 w-4 mr-2" />
-                    Contact Persons
-                  </h3>
-                  
+              <div className="bg-muted/50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                  <Users className="h-4 w-4 mr-2" />
+                  Contact Persons
+                </h3>
+                
+                {supplier.additional_info?.contacts && supplier.additional_info.contacts.length > 0 ? (
                   <div className="space-y-4">
                     {supplier.additional_info.contacts.map((contact, index) => (
                       <div key={index} className="border border-input rounded-lg p-3">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="font-medium text-foreground mb-2">
-                              {contact.name}
+                              {contact.name || 'No name provided'}
                               {contact.role && (
                                 <span className="text-sm text-muted-foreground ml-2">
-                                  ({contact.role})
+                                  ({contact.role || 'No role specified'})
                                 </span>
                               )}
                             </div>
@@ -401,17 +427,24 @@ const SupplierViewDrawer = React.forwardRef<HTMLDivElement, SupplierViewDrawerPr
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="text-center py-6">
+                    <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground italic">
+                      No contact persons have been added by admin
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {/* Documents Section */}
-              {supplier.additional_info?.documents && supplier.additional_info.documents.length > 0 && (
-                <div className="bg-muted/50 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
-                    <File className="h-4 w-4 mr-2" />
-                    Documents
-                  </h3>
-                  
+              <div className="bg-muted/50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                  <File className="h-4 w-4 mr-2" />
+                  Documents
+                </h3>
+                
+                {supplier.additional_info?.documents && supplier.additional_info.documents.length > 0 ? (
                   <div className="space-y-3">
                     {supplier.additional_info.documents.map((document, index) => (
                       <div key={index} className="flex items-center justify-between p-3 border border-input rounded-lg">
@@ -419,11 +452,11 @@ const SupplierViewDrawer = React.forwardRef<HTMLDivElement, SupplierViewDrawerPr
                           <File className="h-5 w-5 text-muted-foreground" />
                           <div>
                             <div className="text-sm font-medium text-foreground">
-                              {document.name}
+                              {document.name || 'No document name provided'}
                             </div>
                             {document.category && (
                               <div className="text-xs text-muted-foreground">
-                                Category: {document.category}
+                                Category: {document.category || 'No category specified'}
                               </div>
                             )}
                           </div>
@@ -432,26 +465,34 @@ const SupplierViewDrawer = React.forwardRef<HTMLDivElement, SupplierViewDrawerPr
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => window.open(document.url, '_blank')}
+                          onClick={() => document.url && window.open(document.url, '_blank')}
                           className="flex items-center gap-2"
+                          disabled={!document.url}
                         >
                           <Download className="h-4 w-4" />
-                          Download
+                          Download {document.name || 'Document'}
                         </Button>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="text-center py-6">
+                    <File className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground italic">
+                      No documents have been uploaded by admin
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {/* Tax Information Section */}
-              {supplier.additional_info?.tax && (
-                <div className="bg-muted/50 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
-                    <Percent className="h-4 w-4 mr-2" />
-                    Tax Information
-                  </h3>
-                  
+              <div className="bg-muted/50 rounded-lg p-4">
+                <h3 className="text-sm font-medium text-foreground mb-4 flex items-center">
+                  <Percent className="h-4 w-4 mr-2" />
+                  Tax Information
+                </h3>
+                
+                {supplier.additional_info?.tax ? (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {/* Tax ID */}
                     {supplier.additional_info.tax.tax_id && (
@@ -477,8 +518,15 @@ const SupplierViewDrawer = React.forwardRef<HTMLDivElement, SupplierViewDrawerPr
                       </div>
                     )}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="text-center py-6">
+                    <Percent className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground italic">
+                      No tax information has been added by admin
+                    </p>
+                  </div>
+                )}
+              </div>
 
               {/* Metadata Section */}
               <div className="bg-muted/50 rounded-lg p-4">

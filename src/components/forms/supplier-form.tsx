@@ -327,7 +327,7 @@ const SupplierForm = React.forwardRef<HTMLDivElement, SupplierFormProps>(
                               operations: {
                                 lead_time_days: undefined,
                                 minimum_order_quantity: undefined,
-                                delivery_terms: 'Pickup',
+                                delivery_terms: '',
                                 delivery_address: '',
                                 active: true,
                               },
@@ -579,48 +579,22 @@ const SupplierForm = React.forwardRef<HTMLDivElement, SupplierFormProps>(
                             <Label htmlFor="delivery_terms">
                               Delivery Terms
                             </Label>
-                            <Select
-                              value={deliveryTerms || 'Pickup'}
-                              onValueChange={(value) => setValue('additional_info.operations.delivery_terms', value as 'Pickup' | 'Delivered')}
-                            >
-                              <SelectTrigger className="transition-colors border border-input bg-background hover:bg-accent hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer">
-                                <SelectValue placeholder="Select delivery terms" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Pickup">Pickup</SelectItem>
-                                <SelectItem value="Delivered">Delivered</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Input
+                              id="delivery_terms"
+                              placeholder="e.g., Supplier delivers to our warehouse, We pickup from supplier location, Third-party courier service..."
+                              value={deliveryTerms || ''}
+                              onChange={(e) => setValue('additional_info.operations.delivery_terms', e.target.value)}
+                              disabled={isLoading}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Describe the delivery arrangement between you and this supplier
+                            </p>
                             {errors.additional_info?.operations?.delivery_terms && (
                               <p className="text-sm text-destructive">
                                 {errors.additional_info.operations.delivery_terms.message}
                               </p>
                             )}
                           </div>
-
-                          {/* Delivery Address - Only show for Delivered */}
-                          {deliveryTerms === 'Delivered' && (
-                            <div className="space-y-2 sm:col-span-2">
-                              <Label htmlFor="delivery_address">
-                                Delivery Address <span className="text-destructive">*</span>
-                              </Label>
-                              <textarea
-                                id="delivery_address"
-                                rows={3}
-                                placeholder="Delivery address for this supplier"
-                                {...register('additional_info.operations.delivery_address')}
-                                className={`flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none ${
-                                  errors.additional_info?.operations?.delivery_address ? 'border-destructive focus-visible:ring-destructive' : ''
-                                }`}
-                                disabled={isLoading}
-                              />
-                              {errors.additional_info?.operations?.delivery_address && (
-                                <p className="text-sm text-destructive">
-                                  {errors.additional_info.operations.delivery_address.message}
-                                </p>
-                              )}
-                            </div>
-                          )}
                         </div>
                       </div>
 
@@ -981,7 +955,7 @@ const SupplierForm = React.forwardRef<HTMLDivElement, SupplierFormProps>(
                             <li>Suppliers can be assigned as preferred for inventory items</li>
                             <li>Advanced details are optional - use for complex supplier relationships</li>
                             <li>Bank Transfer requires account number and bank name</li>
-                            <li>Delivery address is required when delivery terms is &quot;Delivered&quot;</li>
+                            <li>Delivery address is required when delivery terms is &quot;Delivery&quot;</li>
                           </ul>
                         </div>
                       </div>

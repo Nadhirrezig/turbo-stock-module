@@ -75,7 +75,7 @@ export interface Contact {
 export interface Operations {
   lead_time_days?: number;
   minimum_order_quantity?: number;
-  delivery_terms?: 'Pickup' | 'Delivered'; // enum
+  delivery_terms?: string; // Free text for custom delivery arrangements
   delivery_address?: string;
   active?: boolean;
 }
