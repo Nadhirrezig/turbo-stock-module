@@ -14,7 +14,8 @@ import {
   ArrowUpDown,
   BarChart3,
   Home,
-  Building2
+  Building2,
+  Ruler,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DepartmentSelector } from '@/components/shared/department-selector';
@@ -49,7 +50,7 @@ const sidebarItems: SidebarItem[] = [
         id: 'units',
         name: 'Units',
         href: '/units',
-        icon: <Tags className="w-4 h-4" />,
+        icon: <Ruler className="w-4 h-4" />,
       },
       {
         id: 'inventory-item-categories',

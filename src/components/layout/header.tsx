@@ -7,7 +7,6 @@ import { ChevronRight, Menu, Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { BranchSelector } from '@/components/shared/branch-selector';
-import { DepartmentSelector } from '@/components/shared/department-selector';
 import { useBranchContext } from '@/contexts/branch-context';
 
 interface BreadcrumbItem {
@@ -121,12 +120,19 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(
         </div>
 
         {/* Center - Branch and Department Selectors */}
-        <div className="hidden lg:flex items-center space-x-4">
-          <BranchSelector 
-            selectedBranchId={selectedBranchId || undefined}
-            onBranchChange={switchToBranch}
-          />
-          <DepartmentSelector />
+        <div className="flex items-center space-x-2 lg:space-x-4">
+          <div className="hidden sm:block">
+            <BranchSelector 
+              selectedBranchId={selectedBranchId || undefined}
+              onBranchChange={switchToBranch}
+            />
+          </div>
+          <div className="sm:hidden ">
+            <BranchSelector 
+              selectedBranchId={selectedBranchId || undefined}
+              onBranchChange={switchToBranch}
+            />
+          </div>
         </div>
 
         {/* Right side - Actions */}

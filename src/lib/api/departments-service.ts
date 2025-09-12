@@ -17,6 +17,7 @@ class DepartmentsService {
 
     try {
       const queryParams = new URLSearchParams();
+      if (filters.branch_id) queryParams.append('branch_id', filters.branch_id);
       if (filters.search) queryParams.append('search', filters.search);
       if (filters.page) queryParams.append('page', filters.page.toString());
       if (filters.per_page) queryParams.append('per_page', filters.per_page.toString());
@@ -124,6 +125,11 @@ class DepartmentsService {
     simulateApiError();
 
     let filteredDepartments = [...this.mockData];
+
+    // Apply branch filter
+    if (filters.branch_id) {
+      filteredDepartments = filteredDepartments.filter(department => department.branch_id === filters.branch_id);
+    }
 
     // Apply search filter
     if (filters.search) {

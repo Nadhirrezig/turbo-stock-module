@@ -5,6 +5,7 @@ import { InventoryMovement, InventoryMovementFilters, MovementStats, PaginatedRe
 import { inventoryMovementsService } from '@/lib/api/inventory-movements-service';
 import { ServiceError } from '@/lib/api/client';
 import { useBranchContext } from '@/contexts/branch-context';
+import { useDepartmentContext } from '@/contexts/department-context';
 
 type MovementUpdateData = Partial<CreateStockEntryData>;
 
@@ -14,6 +15,7 @@ interface UseInventoryMovementsOptions {
 
 export function useInventoryMovements(options: UseInventoryMovementsOptions = {}) {
   const { selectedBranchId } = useBranchContext();
+  const { selectedDepartmentId } = useDepartmentContext();
   const [paginatedMovements, setPaginatedMovements] = useState<PaginatedResponse<InventoryMovement>>({
     data: [],
     pagination: {
@@ -28,6 +30,7 @@ export function useInventoryMovements(options: UseInventoryMovementsOptions = {}
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<InventoryMovementFilters>({
     branch_id: selectedBranchId || '',
+    department_id: selectedDepartmentId || undefined,
     search: '',
     page: 1,
     per_page: 5,
@@ -43,21 +46,23 @@ export function useInventoryMovements(options: UseInventoryMovementsOptions = {}
     setLoading(true);
     setError(null);
     try {
-      // Always include the selected branch in filters
-      const filtersWithBranch = {
+      // Always include the selected branch and department in filters
+      const filtersWithContext = {
         ...filters,
         branch_id: selectedBranchId || '',
+        department_id: selectedDepartmentId || undefined,
       };
 
-      const response = await inventoryMovementsService.getAll(filtersWithBranch);
+      const response = await inventoryMovementsService.getAll(filtersWithContext);
       setPaginatedMovements(response);
 
       if (filters.page === 1 && !filters.search && !filters.transaction_type && !filters.category && !filters.date_range) {
         const allResponse = await inventoryMovementsService.getAll({ 
-          ...filtersWithBranch, 
+          ...filtersWithContext, 
           page: 1, 
           per_page: 1000,
-          branch_id: selectedBranchId || ''
+          branch_id: selectedBranchId || '',
+          department_id: selectedDepartmentId || undefined
         });
         setAllInventoryMovements(allResponse.data || []);
       }
@@ -76,7 +81,7 @@ export function useInventoryMovements(options: UseInventoryMovementsOptions = {}
     } finally {
       setLoading(false);
     }
-  }, [filters, selectedBranchId]);
+  }, [filters, selectedBranchId, selectedDepartmentId]);
 
   useEffect(() => {
     fetchMovements();

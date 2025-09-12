@@ -5,6 +5,7 @@ import { InventoryStock, CreateStockEntryData, BaseFilters, StockStats, Paginate
 import { inventoryStockService } from '@/lib/api/inventory-stock-service';
 import { ServiceError } from '@/lib/api/client';
 import { useBranchContext } from '@/contexts/branch-context';
+import { useDepartmentContext } from '@/contexts/department-context';
 
 interface UseInventoryStockOptions {
   initialFilters?: BaseFilters;
@@ -12,6 +13,7 @@ interface UseInventoryStockOptions {
 
 export function useInventoryStock(options: UseInventoryStockOptions = {}) {
   const { selectedBranchId } = useBranchContext();
+  const { selectedDepartmentId } = useDepartmentContext();
   const [paginatedInventoryStock, setPaginatedInventoryStock] = useState<PaginatedResponse<InventoryStock>>({
     data: [],
     pagination: {
@@ -26,6 +28,7 @@ export function useInventoryStock(options: UseInventoryStockOptions = {}) {
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BaseFilters>({
     branch_id: selectedBranchId || undefined,
+    department_id: selectedDepartmentId || undefined,
     search: '',
     page: 1,
     per_page: 5,
@@ -38,20 +41,22 @@ export function useInventoryStock(options: UseInventoryStockOptions = {}) {
     setLoading(true);
     setError(null);
     try {
-      // Always include the selected branch in filters
-      const filtersWithBranch = {
+      // Always include the selected branch and department in filters
+      const filtersWithContext = {
         ...filters,
         branch_id: selectedBranchId || undefined,
+        department_id: selectedDepartmentId || undefined,
       };
 
-      const response = await inventoryStockService.getAll(filtersWithBranch);
+      const response = await inventoryStockService.getAll(filtersWithContext);
       setPaginatedInventoryStock(response);
 
       if (filters.page === 1 && !filters.search) {
-        const allResponse = await inventoryStockService.getAll({ ...filtersWithBranch,
+        const allResponse = await inventoryStockService.getAll({ ...filtersWithContext,
           page: 1,
           per_page: 1000,
-          branch_id: selectedBranchId || ''  
+          branch_id: selectedBranchId || '',
+          department_id: selectedDepartmentId || undefined
         });
         setAllInventoryStock(allResponse.data || []);
       }
@@ -70,7 +75,7 @@ export function useInventoryStock(options: UseInventoryStockOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters, selectedBranchId]);
+  }, [filters, selectedBranchId, selectedDepartmentId]);
 
   useEffect(() => {
     fetchStock();

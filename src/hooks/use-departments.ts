@@ -36,6 +36,22 @@ export function useDepartments(options: UseDepartmentsOptions = {}) {
 
   // Fetch departments from service
   const fetchDepartments = useCallback(async () => {
+    // Don't fetch if no branch is selected
+    if (!selectedBranchId) {
+      setPaginatedDepartments({
+        data: [],
+        pagination: {
+          current_page: 1,
+          per_page: 5,
+          total: 0,
+          last_page: 0,
+        },
+      });
+      setAllDepartments([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -43,7 +59,7 @@ export function useDepartments(options: UseDepartmentsOptions = {}) {
       // Always include the selected branch in filters
       const filtersWithBranch = {
         ...filters,
-        branch_id: selectedBranchId || undefined,
+        branch_id: selectedBranchId,
       };
 
       const response = await departmentsService.getAll(filtersWithBranch);

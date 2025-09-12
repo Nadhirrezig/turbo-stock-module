@@ -39,6 +39,22 @@ export function useCategories(options: UseCategoriesOptions = {}) {
 
   // Fetch categories from service
   const fetchCategories = useCallback(async () => {
+    // Don't fetch if no branch or department is selected
+    if (!selectedBranchId || !selectedDepartmentId) {
+      setPaginatedCategories({
+        data: [],
+        pagination: {
+          current_page: 1,
+          per_page: 5,
+          total: 0,
+          last_page: 0,
+        },
+      });
+      setAllCategories([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -46,8 +62,8 @@ export function useCategories(options: UseCategoriesOptions = {}) {
       // Always include the selected branch and department in filters
       const filtersWithContext = {
         ...filters,
-        branch_id: selectedBranchId || '',
-        department_id: selectedDepartmentId || undefined,
+        branch_id: selectedBranchId,
+        department_id: selectedDepartmentId,
       };
 
       const response = await categoriesService.getAll(filtersWithContext);
