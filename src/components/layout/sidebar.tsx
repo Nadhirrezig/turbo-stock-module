@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DepartmentSelector } from '@/components/shared/department-selector';
-import { useDepartmentContext } from '@/contexts/department-context';
 
 interface SidebarItem {
   id: string;
@@ -113,7 +112,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
   ({ className }, ref) => {
     const pathname = usePathname();
     const [expandedItems, setExpandedItems] = React.useState<string[]>(['inventory']);
-    const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentContext();
+    // Department context is used by DepartmentSelector component internally
 
     const toggleExpanded = (itemId: string) => {
       setExpandedItems(prev =>
@@ -173,11 +172,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
             >
               {item.id === 'inventory' && (
                 <li className="px-2 mb-3">
-                  <DepartmentSelector
-                    selectedDepartmentId={selectedDepartmentId || undefined}
-                    onDepartmentChange={setSelectedDepartmentId}
-                    className="w-full"
-                  />
+                  <DepartmentSelector className="w-full" />
                 </li>
               )}
               {item.children?.map(child => renderSidebarItem(child, level + 1))}

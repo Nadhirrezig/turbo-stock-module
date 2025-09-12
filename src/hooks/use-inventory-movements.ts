@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { InventoryMovement, InventoryMovementFilters, MovementStats, PaginatedResponse, CreateStockEntryData } from '@/lib/types';
 import { inventoryMovementsService } from '@/lib/api/inventory-movements-service';
 import { ServiceError } from '@/lib/api/client';
+import { useBranchContext } from '@/contexts/branch-context';
 
 type MovementUpdateData = Partial<CreateStockEntryData>;
 
@@ -12,6 +13,7 @@ interface UseInventoryMovementsOptions {
 }
 
 export function useInventoryMovements(options: UseInventoryMovementsOptions = {}) {
+  const { selectedBranchId } = useBranchContext();
   const [paginatedMovements, setPaginatedMovements] = useState<PaginatedResponse<InventoryMovement>>({
     data: [],
     pagination: {
@@ -25,6 +27,7 @@ export function useInventoryMovements(options: UseInventoryMovementsOptions = {}
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<InventoryMovementFilters>({
+    branch_id: selectedBranchId || '',
     search: '',
     page: 1,
     per_page: 5,
@@ -40,11 +43,22 @@ export function useInventoryMovements(options: UseInventoryMovementsOptions = {}
     setLoading(true);
     setError(null);
     try {
-      const response = await inventoryMovementsService.getAll(filters);
+      // Always include the selected branch in filters
+      const filtersWithBranch = {
+        ...filters,
+        branch_id: selectedBranchId || '',
+      };
+
+      const response = await inventoryMovementsService.getAll(filtersWithBranch);
       setPaginatedMovements(response);
 
       if (filters.page === 1 && !filters.search && !filters.transaction_type && !filters.category && !filters.date_range) {
-        const allResponse = await inventoryMovementsService.getAll({ ...filters, page: 1, per_page: 1000 });
+        const allResponse = await inventoryMovementsService.getAll({ 
+          ...filtersWithBranch, 
+          page: 1, 
+          per_page: 1000,
+          branch_id: selectedBranchId || ''
+        });
         setAllInventoryMovements(allResponse.data || []);
       }
     } catch (err) {
@@ -62,7 +76,7 @@ export function useInventoryMovements(options: UseInventoryMovementsOptions = {}
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, selectedBranchId]);
 
   useEffect(() => {
     fetchMovements();

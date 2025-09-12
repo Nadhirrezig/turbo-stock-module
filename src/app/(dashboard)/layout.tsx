@@ -1,5 +1,6 @@
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { InventoryProvider } from '@/contexts/inventory-context';
+import { BranchProvider } from '@/contexts/branch-context';
 import { DepartmentProvider } from '@/contexts/department-context';
 
 export default function Layout({
@@ -9,9 +10,11 @@ export default function Layout({
 }) {
   return (
     <InventoryProvider>
-      <DepartmentProvider>
-        <DashboardLayout>{children}</DashboardLayout>
-      </DepartmentProvider>
+      <BranchProvider>
+        <DepartmentProvider>
+          <DashboardLayout>{children}</DashboardLayout>
+        </DepartmentProvider>
+      </BranchProvider>
     </InventoryProvider>
   );
 }

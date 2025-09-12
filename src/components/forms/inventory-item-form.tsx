@@ -16,6 +16,7 @@ import { SearchableSelect } from '@/components/shared/searchable-select';
 import { UnsavedChangesDialogComponent } from '@/components/modals/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 import { useDepartmentContext } from '@/contexts/department-context';
+import { useBranchContext } from '@/contexts/branch-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   RightDrawer,
@@ -55,6 +56,7 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
   ({ open, onOpenChange, inventoryItem, onSubmit, loading = false }, ref) => {
     const isEditing = Boolean(inventoryItem);
     const { allDepartments, selectedDepartmentId } = useDepartmentContext();
+    const { selectedBranchId } = useBranchContext();
 
     // Fetch categories and units from API
     const { allCategories, loading: categoriesLoading } = useCategories();
@@ -75,6 +77,7 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
         inventory_item_category_id: '',
         unit_id: '',
         department_id: selectedDepartmentId || '',
+        branch_id: selectedBranchId || '',
         threshold_quantity: 0,
         // preferred_supplier_id: '', // Removed - suppliers belong to transactions, not product definitions
         reorder_quantity: 0,
@@ -103,6 +106,7 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
           setValue('inventory_item_category_id', inventoryItem.inventory_item_category_id);
           setValue('unit_id', inventoryItem.unit_id);
           setValue('department_id', inventoryItem.department_id);
+          setValue('branch_id', inventoryItem.branch_id);
           setValue('threshold_quantity', inventoryItem.threshold_quantity);
           // setValue('preferred_supplier_id', inventoryItem.preferred_supplier_id); // Removed - suppliers belong to transactions, not product definitions
           setValue('reorder_quantity', inventoryItem.reorder_quantity);
@@ -112,13 +116,14 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
             inventory_item_category_id: '',
             unit_id: '',
             department_id: selectedDepartmentId || '',
+            branch_id: selectedBranchId || '',
             threshold_quantity: 0,
             // preferred_supplier_id: '', // Removed - suppliers belong to transactions, not product definitions
             reorder_quantity: 0,
           });
         }
       }
-    }, [open, inventoryItem, setValue, reset, selectedDepartmentId]);
+    }, [open, inventoryItem, setValue, reset, selectedDepartmentId, selectedBranchId]);
 
     // Handle form submission
     const handleFormSubmit = async (data: InventoryItemFormData) => {
@@ -145,6 +150,8 @@ const InventoryItemForm = React.forwardRef<HTMLDivElement, InventoryItemFormProp
             </RightDrawerHeader>
 
             <form onSubmit={handleSubmit(handleFormSubmit)}>
+              {/* Hidden field for branch_id */}
+              <input type="hidden" {...register('branch_id')} />
               <RightDrawerBody>
                 <div className="space-y-6">
                   {/* Basic Information Section */}

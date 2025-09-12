@@ -3,17 +3,15 @@
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { InventoryItemCategory } from '@/lib/types';
-import { inventoryItemCategorySchema, InventoryItemCategoryFormData } from '@/lib/schemas';
+import { Branch } from '@/lib/types';
+import { branchSchema, BranchFormData } from '@/lib/schemas';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { LoadingButton } from '@/components/shared/loading-button';
 import { Button } from '@/components/ui/button';
 import { UnsavedChangesDialogComponent } from '@/components/modals/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
-import { useDepartmentContext } from '@/contexts/department-context';
-import { useBranchContext } from '@/contexts/branch-context';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   RightDrawer,
   RightDrawerContent,
@@ -24,19 +22,17 @@ import {
   RightDrawerCloseButton,
 } from '@/components/modals/right-drawer';
 
-interface CategoryFormProps {
+interface BranchFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  category?: InventoryItemCategory | null;
-  onSubmit: (data: InventoryItemCategoryFormData) => Promise<void>;
+  branch?: Branch | null;
+  onSubmit: (data: BranchFormData) => Promise<void>;
   loading?: boolean;
 }
 
-const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
-  ({ open, onOpenChange, category, onSubmit, loading = false }, ref) => {
-    const isEditing = Boolean(category);
-    const { allDepartments, selectedDepartmentId } = useDepartmentContext();
-    const { selectedBranchId } = useBranchContext();
+const BranchForm = React.forwardRef<HTMLDivElement, BranchFormProps>(
+  ({ open, onOpenChange, branch, onSubmit, loading = false }, ref) => {
+    const isEditing = Boolean(branch);
     
     const {
       register,
@@ -44,19 +40,16 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
       formState: { errors, isSubmitting, isDirty },
       reset,
       setValue,
-      watch,
-    } = useForm<InventoryItemCategoryFormData>({
-      resolver: zodResolver(inventoryItemCategorySchema),
+    } = useForm<BranchFormData>({
+      resolver: zodResolver(branchSchema),
       defaultValues: {
         name: '',
-        department_id: selectedDepartmentId || '',
-        branch_id: selectedBranchId || '',
-        // description: '', // Temporarily hidden
+        description: '',
       },
     });
 
     // Use the reusable unsaved changes hook
-    const {
+    const { 
       showUnsavedDialog,
       handleClose,
       handleDiscardChanges,
@@ -69,27 +62,23 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
       onReset: reset,
     });
 
-    // Reset form when category changes or modal opens/closes
+    // Reset form when branch changes or modal opens/closes
     React.useEffect(() => {
       if (open) {
-        if (category) {
-          setValue('name', category.name);
-          setValue('department_id', category.department_id);
-          setValue('branch_id', category.branch_id);
-          // setValue('description', category.description || ''); // Temporarily hidden
+        if (branch) {
+          setValue('name', branch.name);
+          setValue('description', branch.description || '');
         } else {
           reset({
             name: '',
-            department_id: selectedDepartmentId || '',
-            branch_id: selectedBranchId || '',
-            // description: '', // Temporarily hidden
+            description: '',
           });
         }
       }
-    }, [open, category, setValue, reset, selectedDepartmentId, selectedBranchId]);
+    }, [open, branch, setValue, reset]);
 
     // Handle form submission
-    const handleFormSubmit = async (data: InventoryItemCategoryFormData) => {
+    const handleFormSubmit = async (data: BranchFormData) => {
       try {
         await onSubmit(data);
         onOpenChange(false);
@@ -107,7 +96,7 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
           <RightDrawerContent ref={ref} maxWidth="md">
             <RightDrawerHeader>
               <RightDrawerTitle>
-                {isEditing ? 'Edit Category' : 'Add New Category'}
+                {isEditing ? 'Edit Branch' : 'Add New Branch'}
               </RightDrawerTitle>
               <RightDrawerCloseButton onClick={handleClose} />
             </RightDrawerHeader>
@@ -118,47 +107,19 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                   {/* Basic Information Section */}
                   <div className="bg-muted/50 rounded-lg p-4">
                     <h3 className="text-sm font-medium text-foreground mb-4">
-                      Category Information
+                      Branch Information
                     </h3>
                     
                     <div className="space-y-4">
-                      {/* Department Selection */}
-                      <div className="space-y-2">
-                        <Label htmlFor="department_id">
-                          Department <span className="text-destructive">*</span>
-                        </Label>
-                        <Select
-                          value={watch('department_id')}
-                          onValueChange={(value) => setValue('department_id', value)}
-                          disabled={isLoading}
-                        >
-                          <SelectTrigger className={errors.department_id ? 'border-destructive focus-visible:ring-destructive' : ''}>
-                            <SelectValue placeholder="Select a department" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {allDepartments.map((department) => (
-                              <SelectItem key={department.id} value={department.id}>
-                                {department.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {errors.department_id && (
-                          <p className="text-sm text-destructive">
-                            {errors.department_id.message}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Category Name */}
+                      {/* Branch Name */}
                       <div className="space-y-2">
                         <Label htmlFor="name">
-                          Category Name <span className="text-destructive">*</span>
+                          Branch Name <span className="text-destructive">*</span>
                         </Label>
                         <Input
                           id="name"
                           type="text"
-                          placeholder="e.g., Beverages, Dairy Products, Bakery Items"
+                          placeholder="e.g., Main Restaurant, Downtown Branch, etc."
                           {...register('name')}
                           className={errors.name ? 'border-destructive focus-visible:ring-destructive' : ''}
                           disabled={isLoading}
@@ -170,19 +131,17 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                         )}
                       </div>
 
-                      {/* Description - Temporarily hidden to save UI space */}
-                      {/* <div className="space-y-2">
+                      {/* Branch Description */}
+                      <div className="space-y-2">
                         <Label htmlFor="description">
                           Description
                         </Label>
-                        <textarea
+                        <Textarea
                           id="description"
+                          placeholder="Brief description of the branch..."
                           rows={3}
-                          placeholder="Brief description of this category..."
                           {...register('description')}
-                          className={`flex w-full rounded-lg border border-input bg-transparent px-3 py-2 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none ${
-                            errors.description ? 'border-destructive focus-visible:ring-destructive' : ''
-                          }`}
+                          className={errors.description ? 'border-destructive focus-visible:ring-destructive' : ''}
                           disabled={isLoading}
                         />
                         {errors.description && (
@@ -190,7 +149,7 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                             {errors.description.message}
                           </p>
                         )}
-                      </div> */}
+                      </div>
                     </div>
                   </div>
 
@@ -204,13 +163,14 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                       </div>
                       <div className="ml-3">
                         <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                          Category Guidelines
+                          Branch Guidelines
                         </h3>
                         <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
                           <ul className="list-disc list-inside space-y-1">
-                            <li>Use clear, descriptive names for categories</li>
-                            <li>Categories help organize and filter inventory items</li>
-                            {/* <li>Add descriptions to clarify what items belong in each category</li> */}
+                            <li>Branches help organize your inventory by operational areas</li>
+                            <li>Each branch can have its own departments, units, and items</li>
+                            <li>Examples: Main Restaurant, Bar & Beverages, Kitchen, etc.</li>
+                            <li>Create branches first, then add departments within them</li>
                           </ul>
                         </div>
                       </div>
@@ -233,7 +193,7 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
                   loading={isLoading}
                   loadingText={isEditing ? 'Updating...' : 'Creating...'}
                 >
-                  {isEditing ? 'Update Category' : 'Create Category'}
+                  {isEditing ? 'Update Branch' : 'Create Branch'}
                 </LoadingButton>
               </RightDrawerFooter>
             </form>
@@ -256,6 +216,6 @@ const CategoryForm = React.forwardRef<HTMLDivElement, CategoryFormProps>(
   }
 );
 
-CategoryForm.displayName = 'CategoryForm';
+BranchForm.displayName = 'BranchForm';
 
-export { CategoryForm };
+export { BranchForm };

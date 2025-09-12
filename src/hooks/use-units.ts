@@ -5,6 +5,7 @@ import { Unit, CreateUnitData, PaginatedResponse, BaseFilters } from '@/lib/type
 import { unitsService } from '@/lib/api/units-service';
 import { ServiceError } from '@/lib/api/client';
 import { useDepartmentContext } from '@/contexts/department-context';
+import { useBranchContext } from '@/contexts/branch-context';
 
 interface UseUnitsOptions {
   initialFilters?: BaseFilters;
@@ -12,6 +13,7 @@ interface UseUnitsOptions {
 
 export function useUnits(options: UseUnitsOptions = {}) {
   const { selectedDepartmentId } = useDepartmentContext();
+  const { selectedBranchId } = useBranchContext();
   const [paginatedUnits, setPaginatedUnits] = useState<PaginatedResponse<Unit>>({
     data: [],
     pagination: {
@@ -25,6 +27,7 @@ export function useUnits(options: UseUnitsOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BaseFilters>({
+    branch_id: selectedBranchId || undefined,
     search: '',
     page: 1,
     per_page: 5,
@@ -40,19 +43,20 @@ export function useUnits(options: UseUnitsOptions = {}) {
     setError(null);
 
     try {
-      // Always include the selected department in filters
-      const filtersWithDepartment = {
+      // Always include the selected branch and department in filters
+      const filtersWithContext = {
         ...filters,
+        branch_id: selectedBranchId || undefined,
         department_id: selectedDepartmentId || undefined,
       };
 
-      const response = await unitsService.getAll(filtersWithDepartment);
+      const response = await unitsService.getAll(filtersWithContext);
       setPaginatedUnits(response);
 
       // Also fetch all units for dropdowns and local operations
       if (filters.page === 1 && !filters.search) {
         const allResponse = await unitsService.getAll({
-          ...filtersWithDepartment,
+          ...filtersWithContext,
           page: 1,
           per_page: 1000 // Get all units for dropdowns
         });
@@ -76,7 +80,7 @@ export function useUnits(options: UseUnitsOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters, selectedDepartmentId]);
+  }, [filters, selectedBranchId, selectedDepartmentId]);
 
   // Initial fetch and refetch when filters change
   useEffect(() => {

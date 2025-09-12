@@ -8,7 +8,7 @@ class InventoryStockService {
   private readonly endpoint = '/inventory-stock';
   private mockData: InventoryStock[] = [...mockInventoryStock];
 
-  async getAll(filters: BaseFilters = {}): Promise<PaginatedResponse<InventoryStock>> {
+  async getAll(filters: BaseFilters): Promise<PaginatedResponse<InventoryStock>> {
     if (API_CONFIG.useMockData) {
       return this.getAllMock(filters);
     }
@@ -66,7 +66,7 @@ class InventoryStockService {
     }
   }
 
-  private async getAllMock(filters: BaseFilters = {}): Promise<PaginatedResponse<InventoryStock>> {
+  private async getAllMock(filters: BaseFilters): Promise<PaginatedResponse<InventoryStock>> {
     await simulateApiDelay();
     simulateApiError();
     let filtered = [...this.mockData];
@@ -121,7 +121,7 @@ class InventoryStockService {
     const created: InventoryStock = {
       id: generateId(),
       inventory_item_id: data.inventory_item_id,
-      branch_id: 'branch-1',
+      branch_id: data.branch_id,
       quantity: data.quantity,
       unit_purchase_price: data.unit_purchase_price || 0,
       expiration_date: data.expiration_date,

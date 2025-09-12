@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { UnsavedChangesDialogComponent } from '@/components/modals/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 import { useDepartmentContext } from '@/contexts/department-context';
+import { useBranchContext } from '@/contexts/branch-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   RightDrawer,
@@ -35,6 +36,7 @@ const UnitForm = React.forwardRef<HTMLDivElement, UnitFormProps>(
   ({ open, onOpenChange, unit, onSubmit, loading = false }, ref) => {
     const isEditing = Boolean(unit);
     const { allDepartments, selectedDepartmentId } = useDepartmentContext();
+    const { selectedBranchId } = useBranchContext();
     
     const {
       register,
@@ -49,6 +51,7 @@ const UnitForm = React.forwardRef<HTMLDivElement, UnitFormProps>(
         name: '',
         symbol: '',
         department_id: selectedDepartmentId || '',
+        branch_id: selectedBranchId || '',
       },
     });
 
@@ -73,15 +76,17 @@ const UnitForm = React.forwardRef<HTMLDivElement, UnitFormProps>(
           setValue('name', unit.name);
           setValue('symbol', unit.symbol);
           setValue('department_id', unit.department_id);
+          setValue('branch_id', unit.branch_id);
         } else {
           reset({
             name: '',
             symbol: '',
             department_id: selectedDepartmentId || '',
+            branch_id: selectedBranchId || '',
           });
         }
       }
-    }, [open, unit, setValue, reset, selectedDepartmentId]);
+    }, [open, unit, setValue, reset, selectedDepartmentId, selectedBranchId]);
 
     // Handle form submission
     const handleFormSubmit = async (data: UnitFormData) => {

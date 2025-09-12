@@ -5,6 +5,7 @@ import { InventoryItem, CreateInventoryItemData, BaseFilters, PaginatedResponse 
 import { inventoryItemsService } from '@/lib/api/inventory-items-service';
 import { ServiceError } from '@/lib/api/client';
 import { useDepartmentContext } from '@/contexts/department-context';
+import { useBranchContext } from '@/contexts/branch-context';
 
 interface UseInventoryItemsOptions {
   initialFilters?: BaseFilters;
@@ -12,6 +13,7 @@ interface UseInventoryItemsOptions {
 
 export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
   const { selectedDepartmentId } = useDepartmentContext();
+  const { selectedBranchId } = useBranchContext();
   const [paginatedInventoryItems, setPaginatedInventoryItems] = useState<PaginatedResponse<InventoryItem>>({
     data: [],
     pagination: {
@@ -25,6 +27,7 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BaseFilters>({
+    branch_id: selectedBranchId || undefined,
     search: '',
     page: 1,
     per_page: 5,
@@ -40,19 +43,20 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
     setError(null);
 
     try {
-      // Always include the selected department in filters
-      const filtersWithDepartment = {
+      // Always include the selected branch and department in filters
+      const filtersWithContext = {
         ...filters,
+        branch_id: selectedBranchId || undefined,
         department_id: selectedDepartmentId || undefined,
       };
 
-      const response = await inventoryItemsService.getAll(filtersWithDepartment);
+      const response = await inventoryItemsService.getAll(filtersWithContext);
       setPaginatedInventoryItems(response);
 
       // Also fetch all items for local operations - TODO: REMOVE IN PRODUCTION - PERFORMANCE ISSUE!
       if (filters.page === 1 && !filters.search) {
         const allResponse = await inventoryItemsService.getAll({
-          ...filtersWithDepartment,
+          ...filtersWithContext,
           page: 1,
           per_page: 1000 // TODO: REMOVE - This fetches 1000 records unnecessarily!
         });
@@ -65,7 +69,7 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters, selectedDepartmentId]);
+  }, [filters, selectedBranchId, selectedDepartmentId]);
 
   // Initial fetch and refetch when filters change
   useEffect(() => {

@@ -8,7 +8,7 @@ class InventoryMovementsService {
   private readonly endpoint = '/inventory-movements';
   private mockData: InventoryMovement[] = [...mockInventoryMovements];
 
-  async getAll(filters: InventoryMovementFilters = {}): Promise<PaginatedResponse<InventoryMovement>> {
+  async getAll(filters: InventoryMovementFilters): Promise<PaginatedResponse<InventoryMovement>> {
     if (API_CONFIG.useMockData) {
       return this.getAllMock(filters);
     }
@@ -86,7 +86,7 @@ class InventoryMovementsService {
   }
 
   // Mock implementations
-  private async getAllMock(filters: InventoryMovementFilters = {}): Promise<PaginatedResponse<InventoryMovement>> {
+  private async getAllMock(filters: InventoryMovementFilters): Promise<PaginatedResponse<InventoryMovement>> {
     await simulateApiDelay();
     simulateApiError();
 
@@ -155,7 +155,7 @@ class InventoryMovementsService {
     const newMovement: InventoryMovement = {
       id: `${Date.now()}`,
       inventory_item_id: data.inventory_item_id,
-      branch_id: 'branch-1',
+      branch_id: data.branch_id,
       transaction_type: data.transaction_type,
       quantity: data.quantity,
       unit_purchase_price: data.unit_purchase_price,

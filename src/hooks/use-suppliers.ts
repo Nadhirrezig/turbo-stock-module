@@ -5,12 +5,14 @@ import { Supplier, BaseFilters, PaginatedResponse } from '@/lib/types';
 import { SupplierFormData } from '@/lib/schemas';
 import { suppliersService } from '@/lib/api/suppliers-service';
 import { ServiceError } from '@/lib/api/client';
+import { useBranchContext } from '@/contexts/branch-context';
 
 interface UseSuppliersOptions {
   initialFilters?: BaseFilters;
 }
 
 export function useSuppliers(options: UseSuppliersOptions = {}) {
+  const { selectedBranchId } = useBranchContext();
   const [paginatedSuppliers, setPaginatedSuppliers] = useState<PaginatedResponse<Supplier>>({
     data: [],
     pagination: {
@@ -24,6 +26,7 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BaseFilters>({
+    branch_id: selectedBranchId || undefined,
     search: '',
     page: 1,
     per_page: 5,
@@ -36,11 +39,17 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
     setLoading(true);
     setError(null);
     try {
-      const response = await suppliersService.getAll(filters);
+      // Always include the selected branch in filters
+      const filtersWithBranch = {
+        ...filters,
+        branch_id: selectedBranchId || undefined,
+      };
+
+      const response = await suppliersService.getAll(filtersWithBranch);
       setPaginatedSuppliers(response);
 
       if (filters.page === 1 && !filters.search) {
-        const allResponse = await suppliersService.getAll({ ...filters, page: 1, per_page: 1000 });
+        const allResponse = await suppliersService.getAll({ ...filtersWithBranch, page: 1, per_page: 1000 });
         setAllSuppliers(allResponse.data || []);
       }
     } catch (error: unknown) {
@@ -58,7 +67,7 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, selectedBranchId]);
 
   useEffect(() => {
     fetchSuppliers();

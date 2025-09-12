@@ -9,7 +9,7 @@ class SuppliersService {
   private readonly endpoint = '/suppliers';
   private mockData: Supplier[] = [...mockSuppliers];
 
-  async getAll(filters: BaseFilters = {}): Promise<PaginatedResponse<Supplier>> {
+  async getAll(filters: BaseFilters): Promise<PaginatedResponse<Supplier>> {
     if (API_CONFIG.useMockData) {
       return this.getAllMock(filters);
     }
@@ -107,7 +107,7 @@ class SuppliersService {
     }
   }
 
-  private async getAllMock(filters: BaseFilters = {}): Promise<PaginatedResponse<Supplier>> {
+  private async getAllMock(filters: BaseFilters): Promise<PaginatedResponse<Supplier>> {
     await simulateApiDelay();
     simulateApiError();
 
@@ -137,6 +137,7 @@ class SuppliersService {
 
   private async processSupplierData(data: SupplierFormData): Promise<CreateSupplierData> {
     const processedData: CreateSupplierData = {
+      branch_id: data.branch_id,
       name: data.name,
       email: data.email,
       phone: data.phone,
@@ -183,6 +184,7 @@ class SuppliersService {
 
     const newSupplier: Supplier = {
       id: generateId(),
+      branch_id: data.branch_id,
       name: data.name,
       email: data.email,
       phone: data.phone,

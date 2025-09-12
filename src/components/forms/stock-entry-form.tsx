@@ -17,6 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowDown, ArrowUp, Trash2, ArrowRightLeft } from 'lucide-react';
 import { UnsavedChangesDialogComponent } from '@/components/modals/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
+import { useBranchContext } from '@/contexts/branch-context';
 import {
   RightDrawer,
   RightDrawerContent,
@@ -59,6 +60,8 @@ interface StockEntryFormProps {
 
 const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
   ({ open, onOpenChange, onSubmit, loading = false }, ref) => {
+    const { selectedBranchId } = useBranchContext();
+    
     const {
       register,
       handleSubmit,
@@ -70,6 +73,7 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
       resolver: zodResolver(stockEntrySchema),
       defaultValues: {
         inventory_item_id: '',
+        branch_id: selectedBranchId || '',
         transaction_type: 'IN',
         quantity: 0,
         unit_purchase_price: 0,
@@ -102,6 +106,7 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
       if (open) {
         reset({
           inventory_item_id: '',
+          branch_id: selectedBranchId || '',
           transaction_type: 'IN',
           quantity: 0,
           unit_purchase_price: 0,
@@ -112,7 +117,7 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
           expiration_date: '',
         });
       }
-    }, [open, reset]);
+    }, [open, reset, selectedBranchId]);
 
     // Handle form submission
     const handleFormSubmit = async (data: StockEntryFormData) => {
@@ -171,6 +176,8 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
             </RightDrawerHeader>
 
             <form onSubmit={handleSubmit(handleFormSubmit)}>
+              {/* Hidden field for branch_id */}
+              <input type="hidden" {...register('branch_id')} />
               <RightDrawerBody>
                 <div className="space-y-6">
                   {/* Basic Information Section */}

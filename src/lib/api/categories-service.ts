@@ -10,7 +10,7 @@ class CategoriesService {
   private mockData: InventoryItemCategory[] = [...mockCategories];
 
   // Get all categories with filtering and pagination
-  async getAll(filters: BaseFilters = {}): Promise<PaginatedResponse<InventoryItemCategory>> {
+  async getAll(filters: BaseFilters): Promise<PaginatedResponse<InventoryItemCategory>> {
     if (API_CONFIG.useMockData) {
       return this.getAllMock(filters);
     }
@@ -110,7 +110,7 @@ class CategoriesService {
   }
 
   // Mock implementation methods
-  private async getAllMock(filters: BaseFilters = {}): Promise<PaginatedResponse<InventoryItemCategory>> {
+  private async getAllMock(filters: BaseFilters): Promise<PaginatedResponse<InventoryItemCategory>> {
     await simulateApiDelay();
     simulateApiError();
 
@@ -154,6 +154,7 @@ class CategoriesService {
       id: generateId(),
       name: data.name,
       department_id: data.department_id,
+      branch_id: data.branch_id,
       created_at: getCurrentTimestamp(),
       updated_at: getCurrentTimestamp(),
     };
@@ -175,6 +176,7 @@ class CategoriesService {
       ...this.mockData[index],
       name: data.name,
       department_id: data.department_id,
+      branch_id: data.branch_id,
       updated_at: getCurrentTimestamp(),
     };
 

@@ -1,4 +1,5 @@
 import { 
+  Branch,
   Department,
   Unit, 
   InventoryItemCategory, 
@@ -8,266 +9,282 @@ import {
   InventoryMovement 
 } from './types';
 
-// Mock Departments data
-export const mockDepartments: Department[] = [
+// ========================================
+// MOCK DATABASE STRUCTURE
+// ========================================
+// This file simulates a database with multiple tables/arrays
+// - 3 branches exist in the system (like database records)
+// - Only 1 branch is active/used (branch-1)
+// - Active branch has 3 departments
+// - Only 1 department (Kitchen) has operational data
+// ========================================
+
+// Mock Branches data - Database-like structure with 3 branches
+export const mockBranches: Branch[] = [
   {
-    id: '1',
+    id: 'branch-1',
     name: 'Main Restaurant',
-    description: 'Primary restaurant operations including dining and kitchen',
+    description: 'Primary restaurant location with multiple departments',
     created_at: '2024-01-01T08:00:00Z',
     updated_at: '2024-01-01T08:00:00Z',
   },
   {
-    id: '2',
-    name: 'Bar & Beverages',
-    description: 'Bar operations and beverage service',
-    created_at: '2024-01-01T08:01:00Z',
-    updated_at: '2024-01-01T08:01:00Z',
+    id: 'branch-2',
+    name: 'Downtown Branch',
+    description: 'Downtown location with modern facilities',
+    created_at: '2024-01-01T09:00:00Z',
+    updated_at: '2024-01-01T09:00:00Z',
   },
   {
-    id: '3',
-    name: 'Kitchen',
-    description: 'Food preparation and cooking operations',
-    created_at: '2024-01-01T08:02:00Z',
-    updated_at: '2024-01-01T08:02:00Z',
+    id: 'branch-3',
+    name: 'Mall Location',
+    description: 'Shopping mall location with high foot traffic',
+    created_at: '2024-01-01T10:00:00Z',
+    updated_at: '2024-01-01T10:00:00Z',
   },
 ];
 
-// Mock Units data
+
+// Mock Departments data - Only for active branch (branch-1), 3 departments, only Kitchen has data
+export const mockDepartments: Department[] = [
+  {
+    id: '1',
+    name: 'Bar',
+    description: 'Bar operations and beverage service',
+    branch_id: 'branch-1', // Only belongs to active branch
+    created_at: '2024-01-01T08:01:00Z',
+    updated_at: '2024-01-01T08:01:00Z',
+    branch: mockBranches[0],
+  },
+  {
+    id: '2',
+    name: 'Kitchen',
+    description: 'Food preparation and cooking operations',
+    branch_id: 'branch-1', // Only belongs to active branch
+    created_at: '2024-01-01T08:02:00Z',
+    updated_at: '2024-01-01T08:02:00Z',
+    branch: mockBranches[0],
+  },
+  {
+    id: '3',
+    name: 'Smoke',
+    description: 'Smoking and specialty food preparation',
+    branch_id: 'branch-1', // Only belongs to active branch
+    created_at: '2024-01-01T08:03:00Z',
+    updated_at: '2024-01-01T08:03:00Z',
+    branch: mockBranches[0],
+  },
+];
+
+// Mock Units data - Only Kitchen department (id: '2') has units
 export const mockUnits: Unit[] = [
   {
     id: '1',
     name: 'Kilogram',
     symbol: 'kg',
-    department_id: '1',
+    branch_id: 'branch-1',
+    department_id: '2', // Kitchen department
     created_at: '2024-01-15T10:30:00Z',
     updated_at: '2024-01-15T10:30:00Z',
-    department: mockDepartments[0],
+    branch: mockBranches[0],
+    department: mockDepartments[1], // Kitchen
   },
   {
     id: '2',
-    name: 'Liter',
-    symbol: 'L',
-    department_id: '2',
+    name: 'Gram',
+    symbol: 'g',
+    branch_id: 'branch-1',
+    department_id: '2', // Kitchen department
     created_at: '2024-01-15T10:31:00Z',
     updated_at: '2024-01-15T10:31:00Z',
-    department: mockDepartments[1],
+    branch: mockBranches[0],
+    department: mockDepartments[1], // Kitchen
   },
   {
     id: '3',
-    name: 'Piece',
-    symbol: 'pcs',
-    department_id: '1',
+    name: 'Liter',
+    symbol: 'L',
+    branch_id: 'branch-1',
+    department_id: '2', // Kitchen department
     created_at: '2024-01-15T10:32:00Z',
     updated_at: '2024-01-15T10:32:00Z',
-    department: mockDepartments[0],
+    branch: mockBranches[0],
+    department: mockDepartments[1], // Kitchen
   },
   {
     id: '4',
-    name: 'Gram',
-    symbol: 'g',
-    department_id: '3',
+    name: 'Piece',
+    symbol: 'pcs',
+    branch_id: 'branch-1',
+    department_id: '2', // Kitchen department
     created_at: '2024-01-15T10:33:00Z',
     updated_at: '2024-01-15T10:33:00Z',
-    department: mockDepartments[2],
-  },
-  {
-    id: '5',
-    name: 'Milliliter',
-    symbol: 'ml',
-    department_id: '2',
-    created_at: '2024-01-15T10:34:00Z',
-    updated_at: '2024-01-15T10:34:00Z',
-    department: mockDepartments[1],
+    branch: mockBranches[0],
+    department: mockDepartments[1], // Kitchen
   },
 ];
 
-// Mock Categories data
-// Note: Description fields are temporarily hidden from UI to save space, but preserved in data
+// Mock Categories data - Only Kitchen department (id: '2') has categories
 export const mockCategories: InventoryItemCategory[] = [
   {
     id: '1',
-    name: 'Beverages',
-    department_id: '2',
+    name: 'Dairy Products',
+    department_id: '2', // Kitchen department
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:00:00Z',
     updated_at: '2024-01-15T09:00:00Z',
-    department: mockDepartments[1],
+    branch: mockBranches[0],
+    department: mockDepartments[1], // Kitchen
   },
   {
     id: '2',
-    name: 'Dairy Products',
-    department_id: '1',
+    name: 'Bakery Items',
+    department_id: '2', // Kitchen department
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:01:00Z',
     updated_at: '2024-01-15T09:01:00Z',
-    department: mockDepartments[0],
+    branch: mockBranches[0],
+    department: mockDepartments[1], // Kitchen
   },
   {
     id: '3',
-    name: 'Bakery Items',
-    department_id: '1',
+    name: 'Ingredients',
+    department_id: '2', // Kitchen department
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:02:00Z',
     updated_at: '2024-01-15T09:02:00Z',
-    department: mockDepartments[0],
+    branch: mockBranches[0],
+    department: mockDepartments[1], // Kitchen
   },
   {
     id: '4',
-    name: 'Ingredients',
-    department_id: '3',
+    name: 'Packaging',
+    department_id: '2', // Kitchen department
     branch_id: 'branch-1',
     created_at: '2024-01-15T09:03:00Z',
     updated_at: '2024-01-15T09:03:00Z',
-    department: mockDepartments[2],
-  },
-  {
-    id: '5',
-    name: 'Packaging',
-    department_id: '1',
-    branch_id: 'branch-1',
-    created_at: '2024-01-15T09:04:00Z',
-    updated_at: '2024-01-15T09:04:00Z',
-    department: mockDepartments[0],
+    branch: mockBranches[0],
+    department: mockDepartments[1], // Kitchen
   },
 ];
 
-// Mock Suppliers data
+// Mock Suppliers data - All suppliers belong to the main branch
 export const mockSuppliers: Supplier[] = [
   {
     id: '1',
-    name: 'Coffee Beans Co.',
-    email: 'orders@coffeebeans.com',
-    phone: '+1-555-0101',
-    address: '123 Coffee Street, Bean City, BC 12345',
-    description: 'Premium coffee beans from sustainable farms worldwide',
-    created_at: '2024-01-10T08:00:00Z',
-    updated_at: '2024-01-10T08:00:00Z',
-  },
-  {
-    id: '2',
     name: 'Fresh Dairy Ltd.',
     email: 'supply@freshdairy.com',
     phone: '+1-555-0102',
     address: '456 Milk Avenue, Dairy Town, DT 67890',
     description: 'Farm-fresh dairy products and ingredients',
+    branch_id: 'branch-1',
     created_at: '2024-01-10T08:01:00Z',
     updated_at: '2024-01-10T08:01:00Z',
+    branch: mockBranches[0],
   },
   {
-    id: '3',
+    id: '2',
     name: 'Bakery Supplies Inc.',
     email: 'info@bakerysupplies.com',
     phone: '+1-555-0103',
     address: '789 Flour Road, Bakery City, BC 11111',
     description: 'Professional bakery ingredients and supplies',
+    branch_id: 'branch-1',
     created_at: '2024-01-10T08:02:00Z',
     updated_at: '2024-01-10T08:02:00Z',
+    branch: mockBranches[0],
   },
   {
-    id: '4',
+    id: '3',
     name: 'Packaging Solutions',
     email: 'sales@packagingsolutions.com',
     phone: '+1-555-0104',
     address: '321 Package Lane, Supply Town, ST 22222',
     description: 'Eco-friendly packaging and container solutions',
+    branch_id: 'branch-1',
     created_at: '2024-01-10T08:03:00Z',
     updated_at: '2024-01-10T08:03:00Z',
+    branch: mockBranches[0],
   },
   {
-    id: '5',
+    id: '4',
     name: 'Organic Ingredients',
     email: 'orders@organicingredients.com',
     phone: '+1-555-0105',
     address: '654 Organic Way, Green Valley, GV 33333',
     description: 'Certified organic ingredients and specialty products',
+    branch_id: 'branch-1',
     created_at: '2024-01-10T08:04:00Z',
     updated_at: '2024-01-10T08:04:00Z',
+    branch: mockBranches[0],
   },
 ];
 
-// Mock Inventory Items data
-// Note: Preferred supplier fields removed - suppliers belong to transactions, not product definitions
+// Mock Inventory Items data - Only Kitchen department (id: '2') has items
 export const mockInventoryItems: InventoryItem[] = [
   {
     id: '1',
-    name: 'Arabica Coffee Beans',
-    inventory_item_category_id: '1',
-    unit_id: '1',
-    department_id: '2',
-    threshold_quantity: 5,
-    // preferred_supplier_id: '1', // Removed - suppliers belong to transactions, not product definitions
-    reorder_quantity: 20,
+    name: 'Whole Milk',
+    inventory_item_category_id: '1', // Dairy Products
+    unit_id: '3', // Liter
+    department_id: '2', // Kitchen department
+    threshold_quantity: 10,
+    reorder_quantity: 50,
     created_at: '2024-01-20T10:00:00Z',
     updated_at: '2024-01-20T10:00:00Z',
-    category: mockCategories[0],
-    unit: mockUnits[0],
-    department: mockDepartments[1],
-    // preferred_supplier: mockSuppliers[0], // Removed - suppliers belong to transactions, not product definitions
+    branch_id: 'branch-1',
+    branch: mockBranches[0],
+    category: mockCategories[0], // Dairy Products
+    unit: mockUnits[2], // Liter
+    department: mockDepartments[1], // Kitchen
   },
   {
     id: '2',
-    name: 'Whole Milk',
-    inventory_item_category_id: '2',
-    unit_id: '2',
-    department_id: '1',
-    threshold_quantity: 10,
-    // preferred_supplier_id: '2', // Removed - suppliers belong to transactions, not product definitions
-    reorder_quantity: 50,
+    name: 'Croissants',
+    inventory_item_category_id: '2', // Bakery Items
+    unit_id: '4', // Piece
+    department_id: '2', // Kitchen department
+    threshold_quantity: 20,
+    reorder_quantity: 100,
     created_at: '2024-01-20T10:01:00Z',
     updated_at: '2024-01-20T10:01:00Z',
-    category: mockCategories[1],
-    unit: mockUnits[1],
-    department: mockDepartments[0],
-    // preferred_supplier: mockSuppliers[1], // Removed - suppliers belong to transactions, not product definitions
+    branch_id: 'branch-1',
+    branch: mockBranches[0],
+    category: mockCategories[1], // Bakery Items
+    unit: mockUnits[3], // Piece
+    department: mockDepartments[1], // Kitchen
   },
   {
     id: '3',
-    name: 'Croissants',
-    inventory_item_category_id: '3',
-    unit_id: '3',
-    department_id: '1',
-    threshold_quantity: 20,
-    // preferred_supplier_id: '3', // Removed - suppliers belong to transactions, not product definitions
-    reorder_quantity: 100,
+    name: 'Sugar',
+    inventory_item_category_id: '3', // Ingredients
+    unit_id: '1', // Kilogram
+    department_id: '2', // Kitchen department
+    threshold_quantity: 2,
+    reorder_quantity: 10,
     created_at: '2024-01-20T10:02:00Z',
     updated_at: '2024-01-20T10:02:00Z',
-    category: mockCategories[2],
-    unit: mockUnits[2],
-    department: mockDepartments[0],
-    // preferred_supplier: mockSuppliers[2], // Removed - suppliers belong to transactions, not product definitions
+    branch_id: 'branch-1',
+    branch: mockBranches[0],
+    category: mockCategories[2], // Ingredients
+    unit: mockUnits[0], // Kilogram
+    department: mockDepartments[1], // Kitchen
   },
   {
     id: '4',
-    name: 'Sugar',
-    inventory_item_category_id: '4',
-    unit_id: '1',
-    department_id: '3',
-    threshold_quantity: 2,
-    // preferred_supplier_id: '5', // Removed - suppliers belong to transactions, not product definitions
-    reorder_quantity: 10,
+    name: 'Paper Cups (12oz)',
+    inventory_item_category_id: '4', // Packaging
+    unit_id: '4', // Piece
+    department_id: '2', // Kitchen department
+    threshold_quantity: 100,
+    reorder_quantity: 500,
     created_at: '2024-01-20T10:03:00Z',
     updated_at: '2024-01-20T10:03:00Z',
-    category: mockCategories[3],
-    unit: mockUnits[0],
-    department: mockDepartments[2],
-    // preferred_supplier: mockSuppliers[4], // Removed - suppliers belong to transactions, not product definitions
-  },
-  {
-    id: '5',
-    name: 'Paper Cups (12oz)',
-    inventory_item_category_id: '5',
-    unit_id: '3',
-    department_id: '1',
-    threshold_quantity: 100,
-    // preferred_supplier_id: '4', // Removed - suppliers belong to transactions, not product definitions
-    reorder_quantity: 500,
-    created_at: '2024-01-20T10:04:00Z',
-    updated_at: '2024-01-20T10:04:00Z',
-    category: mockCategories[4],
-    unit: mockUnits[2],
-    department: mockDepartments[0],
-    // preferred_supplier: mockSuppliers[3], // Removed - suppliers belong to transactions, not product definitions
+    branch_id: 'branch-1',
+    branch: mockBranches[0],
+    category: mockCategories[3], // Packaging
+    unit: mockUnits[3], // Piece
+    department: mockDepartments[1], // Kitchen
   },
 ];
 
@@ -279,7 +296,8 @@ export const generateMockUnits = (count: number): Unit[] => {
       id: i.toString(),
       name: `Unit ${i}`,
       symbol: `U${i}`,
-      department_id: '1', // Default to first department
+      branch_id: 'branch-1',
+      department_id: '2', // Default to Kitchen department
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
@@ -300,119 +318,103 @@ export const getCurrentTimestamp = (): string => {
   return new Date().toISOString();
 };
 
-// Mock Inventory Stock data
+// Mock Inventory Stock data - Only Kitchen department items
 export const mockInventoryStock: InventoryStock[] = [
   {
     id: '1',
-    inventory_item_id: '1',
-    branch_id: 'branch-1',
-    quantity: 15.5,
-    unit_purchase_price: 12.50,
-    expiration_date: '2024-12-31',
-    created_at: '2024-01-20T10:00:00Z',
-    updated_at: '2024-02-15T14:30:00Z',
-    inventory_item: mockInventoryItems[0],
-  },
-  {
-    id: '2',
-    inventory_item_id: '2',
+    inventory_item_id: '1', // Whole Milk
     branch_id: 'branch-1',
     quantity: 25.0,
     unit_purchase_price: 3.25,
     expiration_date: '2024-03-15',
-    created_at: '2024-01-20T10:01:00Z',
+    created_at: '2024-01-20T10:00:00Z',
     updated_at: '2024-02-10T09:15:00Z',
+    branch: mockBranches[0],
+    inventory_item: mockInventoryItems[0],
+  },
+  {
+    id: '2',
+    inventory_item_id: '2', // Croissants
+    branch_id: 'branch-1',
+    quantity: 45,
+    unit_purchase_price: 1.75,
+    created_at: '2024-01-20T10:01:00Z',
+    updated_at: '2024-02-14T16:45:00Z',
+    branch: mockBranches[0],
     inventory_item: mockInventoryItems[1],
   },
   {
     id: '3',
-    inventory_item_id: '3',
+    inventory_item_id: '3', // Sugar
     branch_id: 'branch-1',
-    quantity: 45,
-    unit_purchase_price: 1.75,
+    quantity: 8.2,
+    unit_purchase_price: 2.80,
     created_at: '2024-01-20T10:02:00Z',
-    updated_at: '2024-02-14T16:45:00Z',
+    updated_at: '2024-02-12T11:20:00Z',
+    branch: mockBranches[0],
     inventory_item: mockInventoryItems[2],
   },
   {
     id: '4',
-    inventory_item_id: '4',
-    branch_id: 'branch-1',
-    quantity: 8.2,
-    unit_purchase_price: 2.80,
-    created_at: '2024-01-20T10:03:00Z',
-    updated_at: '2024-02-12T11:20:00Z',
-    inventory_item: mockInventoryItems[3],
-  },
-  {
-    id: '5',
-    inventory_item_id: '5',
+    inventory_item_id: '4', // Paper Cups
     branch_id: 'branch-1',
     quantity: 250,
     unit_purchase_price: 0.15,
-    created_at: '2024-01-20T10:04:00Z',
+    created_at: '2024-01-20T10:03:00Z',
     updated_at: '2024-02-13T13:10:00Z',
-    inventory_item: mockInventoryItems[4],
+    branch: mockBranches[0],
+    inventory_item: mockInventoryItems[3],
   },
 ];
 
-// Mock Inventory Movements data
+// Mock Inventory Movements data - Only Kitchen department items
 export const mockInventoryMovements: InventoryMovement[] = [
   {
     id: '1',
-    inventory_item_id: '1',
+    inventory_item_id: '1', // Whole Milk
     branch_id: 'branch-1',
     transaction_type: 'IN',
-    quantity: 20,
-    unit_purchase_price: 12.50,
+    quantity: 30,
+    unit_purchase_price: 3.25,
     supplier_id: '1',
-    notes: 'Initial stock purchase',
-    expiration_date: '2024-12-31',
-    created_at: '2024-01-20T10:00:00Z',
-    updated_at: '2024-01-20T10:00:00Z',
+    notes: 'Weekly milk delivery',
+    expiration_date: '2024-03-15',
+    created_at: '2024-02-08T08:00:00Z',
+    updated_at: '2024-02-08T08:00:00Z',
+    branch: mockBranches[0],
     inventory_item: mockInventoryItems[0],
     supplier: mockSuppliers[0],
   },
   {
     id: '2',
-    inventory_item_id: '1',
-    branch_id: 'branch-1',
-    transaction_type: 'OUT',
-    quantity: 4.5,
-    notes: 'Used for daily operations',
-    created_at: '2024-02-15T14:30:00Z',
-    updated_at: '2024-02-15T14:30:00Z',
-    inventory_item: mockInventoryItems[0],
-  },
-  {
-    id: '3',
-    inventory_item_id: '2',
-    branch_id: 'branch-1',
-    transaction_type: 'IN',
-    quantity: 30,
-    unit_purchase_price: 3.25,
-    supplier_id: '2',
-    notes: 'Weekly milk delivery',
-    expiration_date: '2024-03-15',
-    created_at: '2024-02-08T08:00:00Z',
-    updated_at: '2024-02-08T08:00:00Z',
-    inventory_item: mockInventoryItems[1],
-    supplier: mockSuppliers[1],
-  },
-  {
-    id: '4',
-    inventory_item_id: '2',
+    inventory_item_id: '1', // Whole Milk
     branch_id: 'branch-1',
     transaction_type: 'OUT',
     quantity: 5,
     notes: 'Daily usage',
     created_at: '2024-02-10T09:15:00Z',
     updated_at: '2024-02-10T09:15:00Z',
-    inventory_item: mockInventoryItems[1],
+    branch: mockBranches[0],
+    inventory_item: mockInventoryItems[0],
   },
   {
-    id: '5',
-    inventory_item_id: '3',
+    id: '3',
+    inventory_item_id: '2', // Croissants
+    branch_id: 'branch-1',
+    transaction_type: 'IN',
+    quantity: 50,
+    unit_purchase_price: 1.75,
+    supplier_id: '2',
+    notes: 'Daily bakery delivery',
+    created_at: '2024-02-14T06:00:00Z',
+    updated_at: '2024-02-14T06:00:00Z',
+    branch: mockBranches[0],
+    inventory_item: mockInventoryItems[1],
+    supplier: mockSuppliers[1],
+  },
+  {
+    id: '4',
+    inventory_item_id: '2', // Croissants
     branch_id: 'branch-1',
     transaction_type: 'WASTE',
     quantity: 5,
@@ -420,57 +422,62 @@ export const mockInventoryMovements: InventoryMovement[] = [
     notes: 'Past expiration date',
     created_at: '2024-02-14T16:45:00Z',
     updated_at: '2024-02-14T16:45:00Z',
-    inventory_item: mockInventoryItems[2],
+    branch: mockBranches[0],
+    inventory_item: mockInventoryItems[1],
   },
   {
-    id: '6',
-    inventory_item_id: '4',
+    id: '5',
+    inventory_item_id: '3', // Sugar
     branch_id: 'branch-1',
     transaction_type: 'IN',
     quantity: 10,
     unit_purchase_price: 2.80,
-    supplier_id: '5',
+    supplier_id: '4',
     notes: 'Monthly sugar order',
     created_at: '2024-02-01T10:00:00Z',
     updated_at: '2024-02-01T10:00:00Z',
-    inventory_item: mockInventoryItems[3],
-    supplier: mockSuppliers[4],
+    branch: mockBranches[0],
+    inventory_item: mockInventoryItems[2],
+    supplier: mockSuppliers[3],
   },
   {
-    id: '7',
-    inventory_item_id: '4',
+    id: '6',
+    inventory_item_id: '3', // Sugar
     branch_id: 'branch-1',
     transaction_type: 'OUT',
     quantity: 1.8,
     notes: 'Baking supplies',
     created_at: '2024-02-12T11:20:00Z',
     updated_at: '2024-02-12T11:20:00Z',
-    inventory_item: mockInventoryItems[3],
+    branch: mockBranches[0],
+    inventory_item: mockInventoryItems[2],
   },
   {
-    id: '8',
-    inventory_item_id: '5',
+    id: '7',
+    inventory_item_id: '4', // Paper Cups
     branch_id: 'branch-1',
     transaction_type: 'IN',
     quantity: 500,
     unit_purchase_price: 0.15,
-    supplier_id: '4',
+    supplier_id: '3',
     notes: 'Bulk cup order',
     created_at: '2024-01-25T14:00:00Z',
     updated_at: '2024-01-25T14:00:00Z',
-    inventory_item: mockInventoryItems[4],
-    supplier: mockSuppliers[3],
+    branch: mockBranches[0],
+    inventory_item: mockInventoryItems[3],
+    supplier: mockSuppliers[2],
   },
   {
-    id: '9',
-    inventory_item_id: '5',
+    id: '8',
+    inventory_item_id: '4', // Paper Cups
     branch_id: 'branch-1',
     transaction_type: 'OUT',
     quantity: 250,
     notes: 'Daily service usage',
     created_at: '2024-02-13T13:10:00Z',
     updated_at: '2024-02-13T13:10:00Z',
-    inventory_item: mockInventoryItems[4],
+    branch: mockBranches[0],
+    inventory_item: mockInventoryItems[3],
   },
 ];
 

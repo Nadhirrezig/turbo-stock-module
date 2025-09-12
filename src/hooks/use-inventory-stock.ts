@@ -4,12 +4,14 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { InventoryStock, CreateStockEntryData, BaseFilters, StockStats, PaginatedResponse } from '@/lib/types';
 import { inventoryStockService } from '@/lib/api/inventory-stock-service';
 import { ServiceError } from '@/lib/api/client';
+import { useBranchContext } from '@/contexts/branch-context';
 
 interface UseInventoryStockOptions {
   initialFilters?: BaseFilters;
 }
 
 export function useInventoryStock(options: UseInventoryStockOptions = {}) {
+  const { selectedBranchId } = useBranchContext();
   const [paginatedInventoryStock, setPaginatedInventoryStock] = useState<PaginatedResponse<InventoryStock>>({
     data: [],
     pagination: {
@@ -23,6 +25,7 @@ export function useInventoryStock(options: UseInventoryStockOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BaseFilters>({
+    branch_id: selectedBranchId || undefined,
     search: '',
     page: 1,
     per_page: 5,
@@ -35,11 +38,21 @@ export function useInventoryStock(options: UseInventoryStockOptions = {}) {
     setLoading(true);
     setError(null);
     try {
-      const response = await inventoryStockService.getAll(filters);
+      // Always include the selected branch in filters
+      const filtersWithBranch = {
+        ...filters,
+        branch_id: selectedBranchId || undefined,
+      };
+
+      const response = await inventoryStockService.getAll(filtersWithBranch);
       setPaginatedInventoryStock(response);
 
       if (filters.page === 1 && !filters.search) {
-        const allResponse = await inventoryStockService.getAll({ ...filters, page: 1, per_page: 1000 });
+        const allResponse = await inventoryStockService.getAll({ ...filtersWithBranch,
+          page: 1,
+          per_page: 1000,
+          branch_id: selectedBranchId || ''  
+        });
         setAllInventoryStock(allResponse.data || []);
       }
     } catch (err) {
@@ -57,7 +70,7 @@ export function useInventoryStock(options: UseInventoryStockOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, selectedBranchId]);
 
   useEffect(() => {
     fetchStock();

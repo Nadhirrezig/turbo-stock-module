@@ -12,6 +12,7 @@ import { LoadingButton } from '@/components/shared/loading-button';
 import { Button } from '@/components/ui/button';
 import { UnsavedChangesDialogComponent } from '@/components/modals/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
+import { useBranchContext } from '@/contexts/branch-context';
 import {
   RightDrawer,
   RightDrawerContent,
@@ -33,6 +34,7 @@ interface DepartmentFormProps {
 const DepartmentForm = React.forwardRef<HTMLDivElement, DepartmentFormProps>(
   ({ open, onOpenChange, department, onSubmit, loading = false }, ref) => {
     const isEditing = Boolean(department);
+    const { selectedBranchId } = useBranchContext();
     
     const {
       register,
@@ -45,6 +47,7 @@ const DepartmentForm = React.forwardRef<HTMLDivElement, DepartmentFormProps>(
       defaultValues: {
         name: '',
         description: '',
+        branch_id: selectedBranchId || '',
       },
     });
 
@@ -68,14 +71,16 @@ const DepartmentForm = React.forwardRef<HTMLDivElement, DepartmentFormProps>(
         if (department) {
           setValue('name', department.name);
           setValue('description', department.description || '');
+          setValue('branch_id', department.branch_id);
         } else {
           reset({
             name: '',
             description: '',
+            branch_id: selectedBranchId || '',
           });
         }
       }
-    }, [open, department, setValue, reset]);
+    }, [open, department, setValue, reset, selectedBranchId]);
 
     // Handle form submission
     const handleFormSubmit = async (data: DepartmentFormData) => {

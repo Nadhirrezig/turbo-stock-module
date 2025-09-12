@@ -10,7 +10,7 @@ class UnitsService {
   private mockData: Unit[] = [...mockUnits];
 
   // Get all units with filtering and pagination
-  async getAll(filters: BaseFilters = {}): Promise<PaginatedResponse<Unit>> {
+  async getAll(filters: BaseFilters): Promise<PaginatedResponse<Unit>> {
     if (API_CONFIG.useMockData) {
       return this.getAllMock(filters);
     }
@@ -120,7 +120,7 @@ class UnitsService {
   }
 
   // Mock implementation methods
-  private async getAllMock(filters: BaseFilters = {}): Promise<PaginatedResponse<Unit>> {
+  private async getAllMock(filters: BaseFilters): Promise<PaginatedResponse<Unit>> {
     await simulateApiDelay();
     simulateApiError();
 
@@ -162,6 +162,7 @@ class UnitsService {
 
     const newUnit: Unit = {
       id: generateId(),
+      branch_id: data.branch_id,
       name: data.name,
       symbol: data.symbol,
       department_id: data.department_id,
@@ -184,6 +185,7 @@ class UnitsService {
 
     const updatedUnit: Unit = {
       ...this.mockData[index],
+      branch_id: data.branch_id,
       name: data.name,
       symbol: data.symbol,
       department_id: data.department_id,

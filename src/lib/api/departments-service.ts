@@ -10,7 +10,7 @@ class DepartmentsService {
   private mockData: Department[] = [...mockDepartments];
 
   // Get all departments with filtering and pagination
-  async getAll(filters: BaseFilters = {}): Promise<PaginatedResponse<Department>> {
+  async getAll(filters: BaseFilters): Promise<PaginatedResponse<Department>> {
     if (API_CONFIG.useMockData) {
       return this.getAllMock(filters);
     }
@@ -119,7 +119,7 @@ class DepartmentsService {
   }
 
   // Mock implementation methods
-  private async getAllMock(filters: BaseFilters = {}): Promise<PaginatedResponse<Department>> {
+  private async getAllMock(filters: BaseFilters): Promise<PaginatedResponse<Department>> {
     await simulateApiDelay();
     simulateApiError();
 
@@ -158,6 +158,7 @@ class DepartmentsService {
       id: generateId(),
       name: data.name,
       description: data.description,
+      branch_id: data.branch_id,
       created_at: getCurrentTimestamp(),
       updated_at: getCurrentTimestamp(),
     };
@@ -177,6 +178,7 @@ class DepartmentsService {
 
     const updatedDepartment: Department = {
       ...this.mockData[index],
+      branch_id: data.branch_id,
       name: data.name,
       description: data.description,
       updated_at: getCurrentTimestamp(),

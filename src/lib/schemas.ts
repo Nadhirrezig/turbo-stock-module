@@ -90,6 +90,8 @@ export const departmentSchema = z.object({
     .max(500, 'Description must not exceed 500 characters')
     .optional()
     .or(z.literal('')),
+  branch_id: z.string()
+    .min(1, 'Branch is required'),
 });
 
 // Unit validation schema - matches Laravel validation rules
@@ -102,6 +104,8 @@ export const unitSchema = z.object({
     .max(10, 'Unit symbol must not exceed 10 characters'),
   department_id: z.string()
     .min(1, 'Department is required'),
+  branch_id: z.string()
+    .min(1, 'Branch is required'),
 });
 
 // Inventory Item Category validation schema
@@ -111,6 +115,8 @@ export const inventoryItemCategorySchema = z.object({
     .max(255, 'Category name must not exceed 255 characters'),
   department_id: z.string()
     .min(1, 'Department is required'),
+  branch_id: z.string()
+    .min(1, 'Branch is required'),
   // Description field temporarily hidden to save UI space
   // description: z.string()
   //   .max(500, 'Description must not exceed 500 characters')
@@ -119,6 +125,8 @@ export const inventoryItemCategorySchema = z.object({
 
 // Supplier validation schema
 export const supplierSchema = z.object({
+  branch_id: z.string()
+    .min(1, 'Branch is required'),
   name: z.string()
     .min(1, 'Supplier name is required')
     .max(255, 'Supplier name must not exceed 255 characters'),
@@ -150,6 +158,8 @@ export const inventoryItemSchema = z.object({
     .min(1, 'Unit is required'),
   department_id: z.string()
     .min(1, 'Department is required'),
+  branch_id: z.string()
+    .min(1, 'Branch is required'),
   threshold_quantity: z.number().min(0, 'Threshold quantity must be 0 or greater'),
   // Preferred supplier removed - suppliers belong to transactions, not product definitions
   // preferred_supplier_id: z.string()
@@ -161,6 +171,8 @@ export const inventoryItemSchema = z.object({
 export const stockEntrySchema = z.object({
   inventory_item_id: z.string()
     .min(1, 'Inventory item is required'),
+  branch_id: z.string()
+    .min(1, 'Branch is required'),
   transaction_type: z.enum(['IN', 'OUT', 'WASTE', 'TRANSFER'], {
     message: 'Transaction type is required',
   }),
@@ -231,3 +243,14 @@ export type InventoryItemFormData = z.infer<typeof inventoryItemSchema>;
 export type StockEntryFormData = z.infer<typeof stockEntrySchema>;
 export type BaseFiltersData = z.infer<typeof baseFiltersSchema>;
 export type InventoryMovementFiltersData = z.infer<typeof inventoryMovementFiltersSchema>;
+
+// Branch Schema
+export const branchSchema = z.object({
+  name: z.string().min(1, 'Branch name is required').max(255, 'Branch name must not exceed 255 characters'),
+  description: z.string()
+    .max(500, 'Description must not exceed 500 characters')
+    .optional()
+    .or(z.literal('')),
+});
+
+export type BranchFormData = z.infer<typeof branchSchema>;

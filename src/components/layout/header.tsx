@@ -6,6 +6,9 @@ import { usePathname } from 'next/navigation';
 import { ChevronRight, Menu, Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { BranchSelector } from '@/components/shared/branch-selector';
+import { DepartmentSelector } from '@/components/shared/department-selector';
+import { useBranchContext } from '@/contexts/branch-context';
 
 interface BreadcrumbItem {
   label: string;
@@ -21,6 +24,7 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(
   ({ onMenuClick, className }, ref) => {
     const pathname = usePathname();
     const [isDarkMode, setIsDarkMode] = React.useState(false);
+    const { selectedBranchId, switchToBranch } = useBranchContext();
 
     // Generate breadcrumbs based on current path
     const generateBreadcrumbs = (): BreadcrumbItem[] => {
@@ -114,6 +118,15 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(
               </React.Fragment>
             ))}
           </nav>
+        </div>
+
+        {/* Center - Branch and Department Selectors */}
+        <div className="hidden lg:flex items-center space-x-4">
+          <BranchSelector 
+            selectedBranchId={selectedBranchId || undefined}
+            onBranchChange={switchToBranch}
+          />
+          <DepartmentSelector />
         </div>
 
         {/* Right side - Actions */}

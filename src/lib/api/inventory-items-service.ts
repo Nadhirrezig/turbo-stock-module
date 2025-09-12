@@ -10,7 +10,7 @@ class InventoryItemsService {
   private mockData: InventoryItem[] = [...mockInventoryItems];
 
   // Get all inventory items with filtering and pagination
-  async getAll(filters: BaseFilters = {}): Promise<PaginatedResponse<InventoryItem>> {
+  async getAll(filters: BaseFilters): Promise<PaginatedResponse<InventoryItem>> {
     if (API_CONFIG.useMockData) {
       return this.getAllMock(filters);
     }
@@ -110,7 +110,7 @@ class InventoryItemsService {
   }
 
   // Mock implementation methods
-  private async getAllMock(filters: BaseFilters = {}): Promise<PaginatedResponse<InventoryItem>> {
+  private async getAllMock(filters: BaseFilters): Promise<PaginatedResponse<InventoryItem>> {
     await simulateApiDelay();
     simulateApiError();
 
@@ -162,6 +162,7 @@ class InventoryItemsService {
       department_id: data.department_id,
       threshold_quantity: data.threshold_quantity,
       reorder_quantity: data.reorder_quantity,
+      branch_id: data.branch_id,
       created_at: getCurrentTimestamp(),
       updated_at: getCurrentTimestamp(),
       // Include relations

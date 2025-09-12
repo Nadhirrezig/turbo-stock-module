@@ -1,13 +1,36 @@
-// Core entity types based on Laravel Blade analysis
-export interface Department {
+// Utility types for better type safety
+export type TransactionType = 'IN' | 'OUT' | 'WASTE' | 'TRANSFER';
+export type PaymentMethod = 'Cash' | 'COD' | 'Bank Transfer' | 'Credit';
+export type DocumentCategory = 'contract' | 'certificate' | 'invoice';
+
+// Branch types
+export interface Branch {
   id: string;
   name: string;
   description?: string;
   created_at: string;
   updated_at: string;
+  // Optional relations
+  departments?: Department[];
+}
+
+
+
+export interface Department {
+  branch_id: string;
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+  // Relations
+  branch?: Branch;
+  units?: Unit[];
+  inventory_item_categories?: InventoryItemCategory[];
 }
 
 export interface Unit {
+  branch_id: string;
   id: string;
   name: string;
   symbol: string;
@@ -15,22 +38,25 @@ export interface Unit {
   created_at: string;
   updated_at: string;
   // Relations
+  branch?: Branch;
   department?: Department;
 }
 
 export interface InventoryItemCategory {
+  branch_id: string;
   id: string;
   name: string;
   // description?: string; // Temporarily hidden from UI to save space, but kept in data model
   department_id: string;
-  branch_id?: string;
   created_at: string;
   updated_at: string;
   // Relations
+  branch?: Branch;
   department?: Department;
 }
 
 export interface Supplier {
+  branch_id: string;
   id: string;
   name: string;
   email?: string;
@@ -39,7 +65,8 @@ export interface Supplier {
   description?: string;
   created_at: string;
   updated_at: string;
-
+  // Relations
+  branch?: Branch;
   additional_info?: SupplierAdditionalInfo;
 }
 
@@ -61,7 +88,7 @@ export interface Finance {
 }
 
 export interface Payment {
-  preferred_method: 'Cash' | 'COD' | 'Bank Transfer' | 'Credit'; // enum
+  preferred_method: PaymentMethod; // enum
   terms?: string;           // e.g., Net 30, COD terms
 }
 
@@ -84,7 +111,7 @@ export interface Document {
   name: string;
   file: File;                       // uploaded file
   type?: string;                    // pdf, image, etc.
-  category?: 'contract' | 'certificate' | 'invoice';
+  category?: DocumentCategory;
 }
 
 // Document with URL (after upload)
@@ -92,7 +119,7 @@ export interface DocumentWithUrl {
   name: string;
   url: string;
   type?: string;
-  category?: 'contract' | 'certificate' | 'invoice';
+  category?: DocumentCategory;
 }
 
 export interface Tax {
@@ -102,6 +129,7 @@ export interface Tax {
 
 
 export interface InventoryItem {
+  branch_id: string;
   id: string;
   name: string;
   inventory_item_category_id: string;
@@ -113,6 +141,7 @@ export interface InventoryItem {
   created_at: string;
   updated_at: string;
   // Relations
+  branch?: Branch;
   category?: InventoryItemCategory;
   unit?: Unit;
   department?: Department;
@@ -121,7 +150,7 @@ export interface InventoryItem {
 
 export interface InventoryStock {
   id: string;
-  inventory_item_id: string;
+  inventory_item_id: string;  
   branch_id: string;
   quantity: number;
   unit_purchase_price: number;
@@ -129,6 +158,7 @@ export interface InventoryStock {
   created_at: string;
   updated_at: string;
   // Relations
+  branch?: Branch;
   inventory_item?: InventoryItem;
 }
 
@@ -136,7 +166,7 @@ export interface InventoryMovement {
   id: string;
   inventory_item_id: string;
   branch_id: string;
-  transaction_type: 'IN' | 'OUT' | 'WASTE' | 'TRANSFER';
+  transaction_type: TransactionType;
   quantity: number;
   unit_purchase_price?: number;
   supplier_id?: string;
@@ -147,29 +177,40 @@ export interface InventoryMovement {
   created_at: string;
   updated_at: string;
   // Relations
+  branch?: Branch;
   inventory_item?: InventoryItem;
   supplier?: Supplier;
+  destination_branch?: Branch;
 }
 
 // Form types for create/edit operations
+export interface CreateBranchData extends Record<string, unknown> {
+  name: string;
+  description?: string;
+}
+
 export interface CreateDepartmentData extends Record<string, unknown> {
+  branch_id: string;
   name: string;
   description?: string;
 }
 
 export interface CreateUnitData extends Record<string, unknown> {
+  branch_id: string;
   name: string;
   symbol: string;
   department_id: string;
 }
 
 export interface CreateInventoryItemCategoryData extends Record<string, unknown> {
+  branch_id: string;
   name: string;
   department_id: string;
   // description?: string; // Temporarily hidden from UI to save space
 }
 
 export interface CreateSupplierData extends Record<string, unknown> {
+  branch_id: string;
   name: string;
   email?: string;
   phone?: string;
@@ -178,6 +219,7 @@ export interface CreateSupplierData extends Record<string, unknown> {
 }
 
 export interface CreateInventoryItemData extends Record<string, unknown> {
+  branch_id: string;
   name: string;
   inventory_item_category_id: string;
   unit_id: string;
@@ -189,8 +231,9 @@ export interface CreateInventoryItemData extends Record<string, unknown> {
 }
 
 export interface CreateStockEntryData extends Record<string, unknown> {
+  branch_id: string;
   inventory_item_id: string;
-  transaction_type: 'IN' | 'OUT' | 'WASTE' | 'TRANSFER';
+  transaction_type: TransactionType;
   quantity: number;
   unit_purchase_price?: number;
   supplier_id?: string;
@@ -255,6 +298,7 @@ export interface PaginatedResponse<T> {
 
 // Filter and search types
 export interface BaseFilters {
+  branch_id?: string;
   search?: string;
   page?: number;
   per_page?: number;
@@ -264,6 +308,7 @@ export interface BaseFilters {
 }
 
 export interface InventoryMovementFilters extends BaseFilters {
+  branch_id: string;
   transaction_type?: string;
   category?: string;
   date_range?: string;
@@ -283,4 +328,15 @@ export interface StockStats {
   lowStockItems: number;
   outOfStockItems: number;
   totalValue: number;
+}
+
+
+// Branch statistics
+export interface BranchStats {
+  totalDepartments: number;
+  totalInventoryItems: number;
+  totalSuppliers: number;
+  totalStockValue: number;
+  lowStockItems: number;
+  recentMovements: number;
 }

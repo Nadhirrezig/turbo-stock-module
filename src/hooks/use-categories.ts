@@ -5,6 +5,7 @@ import { InventoryItemCategory, CreateInventoryItemCategoryData, BaseFilters, Pa
 import { categoriesService } from '@/lib/api/categories-service';
 import { ServiceError } from '@/lib/api/client';
 import { useDepartmentContext } from '@/contexts/department-context';
+import { useBranchContext } from '@/contexts/branch-context';
 
 interface UseCategoriesOptions {
   initialFilters?: BaseFilters;
@@ -12,6 +13,7 @@ interface UseCategoriesOptions {
 
 export function useCategories(options: UseCategoriesOptions = {}) {
   const { selectedDepartmentId } = useDepartmentContext();
+  const { selectedBranchId } = useBranchContext();
   const [paginatedCategories, setPaginatedCategories] = useState<PaginatedResponse<InventoryItemCategory>>({
     data: [],
     pagination: {
@@ -25,12 +27,13 @@ export function useCategories(options: UseCategoriesOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BaseFilters>({
+    branch_id: selectedBranchId || '',
     search: '',
     page: 1,
     per_page: 5,
     sort_field: 'created_at',
     sort_direction: 'desc',
-    department_id: selectedDepartmentId || undefined,
+    department_id: selectedDepartmentId || '',
     ...options.initialFilters,
   });
 
@@ -40,19 +43,20 @@ export function useCategories(options: UseCategoriesOptions = {}) {
     setError(null);
 
     try {
-      // Always include the selected department in filters
-      const filtersWithDepartment = {
+      // Always include the selected branch and department in filters
+      const filtersWithContext = {
         ...filters,
+        branch_id: selectedBranchId || '',
         department_id: selectedDepartmentId || undefined,
       };
 
-      const response = await categoriesService.getAll(filtersWithDepartment);
+      const response = await categoriesService.getAll(filtersWithContext);
       setPaginatedCategories(response);
 
       // Also fetch all categories for local operations
       if (filters.page === 1 && !filters.search) {
         const allResponse = await categoriesService.getAll({
-          ...filtersWithDepartment,
+          ...filtersWithContext,
           page: 1,
           per_page: 1000 // Get all categories
         });
@@ -65,7 +69,7 @@ export function useCategories(options: UseCategoriesOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters, selectedDepartmentId]);
+  }, [filters, selectedBranchId, selectedDepartmentId]);
 
   // Initial fetch and refetch when filters change
   useEffect(() => {

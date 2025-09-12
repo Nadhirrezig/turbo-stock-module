@@ -4,12 +4,14 @@ import { useState, useCallback, useEffect } from 'react';
 import { Department, CreateDepartmentData, PaginatedResponse, BaseFilters } from '@/lib/types';
 import { departmentsService } from '@/lib/api/departments-service';
 import { ServiceError } from '@/lib/api/client';
+import { useBranchContext } from '@/contexts/branch-context';
 
 interface UseDepartmentsOptions {
   initialFilters?: BaseFilters;
 }
 
 export function useDepartments(options: UseDepartmentsOptions = {}) {
+  const { selectedBranchId } = useBranchContext();
   const [paginatedDepartments, setPaginatedDepartments] = useState<PaginatedResponse<Department>>({
     data: [],
     pagination: {
@@ -23,6 +25,7 @@ export function useDepartments(options: UseDepartmentsOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<BaseFilters>({
+    branch_id: selectedBranchId || undefined,
     search: '',
     page: 1,
     per_page: 5,
@@ -37,13 +40,19 @@ export function useDepartments(options: UseDepartmentsOptions = {}) {
     setError(null);
 
     try {
-      const response = await departmentsService.getAll(filters);
+      // Always include the selected branch in filters
+      const filtersWithBranch = {
+        ...filters,
+        branch_id: selectedBranchId || undefined,
+      };
+
+      const response = await departmentsService.getAll(filtersWithBranch);
       setPaginatedDepartments(response);
 
       // Also fetch all departments for dropdowns and local operations
       if (filters.page === 1 && !filters.search) {
         const allResponse = await departmentsService.getAll({
-          ...filters,
+          ...filtersWithBranch,
           page: 1,
           per_page: 1000 // Get all departments for dropdowns
         });
@@ -67,7 +76,7 @@ export function useDepartments(options: UseDepartmentsOptions = {}) {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters, selectedBranchId]);
 
   // Initial fetch and refetch when filters change
   useEffect(() => {
