@@ -36,20 +36,41 @@ export function useSuppliers(options: UseSuppliersOptions = {}) {
   });
 
   const fetchSuppliers = useCallback(async () => {
+    // Don't fetch if no branch is selected
+    if (!selectedBranchId) {
+      setPaginatedSuppliers({
+        data: [],
+        pagination: {
+          current_page: 1,
+          per_page: 5,
+          total: 0,
+          last_page: 0,
+        },
+      });
+      setAllSuppliers([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       // Always include the selected branch in filters
       const filtersWithBranch = {
         ...filters,
-        branch_id: selectedBranchId || undefined,
+        branch_id: selectedBranchId,
       };
 
       const response = await suppliersService.getAll(filtersWithBranch);
       setPaginatedSuppliers(response);
 
       if (filters.page === 1 && !filters.search) {
-        const allResponse = await suppliersService.getAll({ ...filtersWithBranch, page: 1, per_page: 1000 });
+        const allResponse = await suppliersService.getAll({ 
+          ...filtersWithBranch, 
+          page: 1, 
+          per_page: 1000,
+          branch_id: selectedBranchId
+        });
         setAllSuppliers(allResponse.data || []);
       }
     } catch (error: unknown) {

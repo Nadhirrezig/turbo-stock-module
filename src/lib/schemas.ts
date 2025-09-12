@@ -180,6 +180,7 @@ export const stockEntrySchema = z.object({
   unit_purchase_price: z.number().min(0, 'Unit purchase price must be 0 or greater').optional(),
   supplier_id: z.string().optional(),
   destination_branch_id: z.string().optional(),
+  destination_department_id: z.string().optional(),
   waste_reason: z.string()
     .max(255, 'Waste reason must not exceed 255 characters')
     .optional(),

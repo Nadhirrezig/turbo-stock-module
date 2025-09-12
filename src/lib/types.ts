@@ -238,6 +238,7 @@ export interface CreateStockEntryData extends Record<string, unknown> {
   unit_purchase_price?: number;
   supplier_id?: string;
   destination_branch_id?: string;
+  destination_department_id?: string;
   waste_reason?: string;
   notes?: string;
   expiration_date?: string;
@@ -309,6 +310,7 @@ export interface BaseFilters {
 
 export interface InventoryMovementFilters extends BaseFilters {
   branch_id: string;
+  department_id?: string;
   transaction_type?: string;
   category?: string;
   date_range?: string;

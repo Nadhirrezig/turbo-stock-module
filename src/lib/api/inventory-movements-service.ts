@@ -20,6 +20,8 @@ class InventoryMovementsService {
       if (filters.per_page) queryParams.append('per_page', filters.per_page.toString());
       if (filters.sort_field) queryParams.append('sort_field', filters.sort_field);
       if (filters.sort_direction) queryParams.append('sort_direction', filters.sort_direction);
+      if (filters.branch_id) queryParams.append('branch_id', filters.branch_id);
+      if (filters.department_id) queryParams.append('department_id', filters.department_id);
       if (filters.transaction_type) queryParams.append('transaction_type', filters.transaction_type);
       if (filters.category) queryParams.append('category', filters.category);
       if (filters.date_range) queryParams.append('date_range', filters.date_range);
@@ -91,6 +93,18 @@ class InventoryMovementsService {
     simulateApiError();
 
     let filtered = [...this.mockData];
+
+    // Filter by branch_id
+    if (filters.branch_id) {
+      filtered = filtered.filter(movement => movement.branch_id === filters.branch_id);
+    }
+
+    // Filter by department_id (through inventory item)
+    if (filters.department_id) {
+      filtered = filtered.filter(movement => 
+        movement.inventory_item?.department_id === filters.department_id
+      );
+    }
 
     if (filters.search) {
       filtered = filterBySearch(

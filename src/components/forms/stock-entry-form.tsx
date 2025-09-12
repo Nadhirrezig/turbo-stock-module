@@ -6,18 +6,22 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { stockEntrySchema, StockEntryFormData } from '@/lib/schemas';
 
 
-import { mockInventoryItems, mockSuppliers } from '@/lib/mock-data';
-import { SearchableSelectOption, InventoryItem, Supplier } from '@/lib/types';
+import { mockSuppliers } from '@/lib/mock-data';
+import { SearchableSelectOption, InventoryItem, Supplier, Branch, Department } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LoadingButton } from '@/components/shared/loading-button';
 import { Button } from '@/components/ui/button';
 import { SearchableSelect } from '@/components/shared/searchable-select';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowDown, ArrowUp, Trash2, ArrowRightLeft } from 'lucide-react';
+import { ArrowDown, ArrowUp, Trash2, ArrowRightLeft, ChevronDown } from 'lucide-react';
 import { UnsavedChangesDialogComponent } from '@/components/modals/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 import { useBranchContext } from '@/contexts/branch-context';
+import { useDepartmentContext } from '@/contexts/department-context';
+import { useInventoryItems } from '@/hooks/use-inventory-items';
+import { branchesService } from '@/lib/api/branches-service';
+import { departmentsService } from '@/lib/api/departments-service';
 import {
   RightDrawer,
   RightDrawerContent,
@@ -27,15 +31,12 @@ import {
   RightDrawerFooter,
   RightDrawerCloseButton,
 } from '@/components/modals/right-drawer';
+import { Select, SelectContent, SelectValue, SelectTrigger, SelectItem } from '../ui/select';
 
 // Adapter functions to convert entity types to SearchableSelectOption
 const inventoryItemToOption = (item: InventoryItem): SearchableSelectOption => ({
   id: item.id,
   name: item.name,
-  category: item.category,
-  unit: item.unit,
-  threshold_quantity: item.threshold_quantity,
-  reorder_quantity: item.reorder_quantity,
   created_at: item.created_at,
   updated_at: item.updated_at,
 });
@@ -61,6 +62,22 @@ interface StockEntryFormProps {
 const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
   ({ open, onOpenChange, onSubmit, loading = false }, ref) => {
     const { selectedBranchId } = useBranchContext();
+    const { selectedDepartmentId } = useDepartmentContext();
+    
+    // Fetch inventory items from API using the hook
+    const { allInventoryItems, loading: inventoryItemsLoading } = useInventoryItems();
+    
+    // We'll fetch branches and departments via API calls instead of hooks
+    
+    // State for destination branch and department selection
+    const [selectedDestinationBranchId, setSelectedDestinationBranchId] = React.useState<string>('');
+    const [selectedDestinationDepartmentId, setSelectedDestinationDepartmentId] = React.useState<string>('');
+    
+    // State for API-fetched data
+    const [availableBranches, setAvailableBranches] = React.useState<Branch[]>([]);
+    const [destinationDepartments, setDestinationDepartments] = React.useState<Department[]>([]);
+    const [loadingBranches, setLoadingBranches] = React.useState<boolean>(false);
+    const [loadingDepartments, setLoadingDepartments] = React.useState<boolean>(false);
     
     const {
       register,
@@ -101,6 +118,67 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
 
     const transactionType = watch('transaction_type');
 
+    // API call to fetch available branches
+    const fetchAvailableBranches = React.useCallback(async () => {
+      setLoadingBranches(true);
+      try {
+        const response = await branchesService.getAll({
+          page: 1,
+          per_page: 1000, // Get all branches
+          sort_field: 'name',
+          sort_direction: 'asc'
+        });
+        
+        // Filter out the current branch
+        const filteredBranches = response.data.filter(branch => branch.id !== selectedBranchId);
+        setAvailableBranches(filteredBranches);
+      } catch (error) {
+        console.error('Error fetching branches:', error);
+        setAvailableBranches([]);
+      } finally {
+        setLoadingBranches(false);
+      }
+    }, [selectedBranchId]);
+
+    // API call to fetch departments for selected destination branch
+    const fetchDepartmentsForBranch = React.useCallback(async (branchId: string) => {
+      setLoadingDepartments(true);
+      try {
+        const response = await departmentsService.getAll({
+          branch_id: branchId,
+          page: 1,
+          per_page: 1000, // Get all departments for the branch
+          sort_field: 'name',
+          sort_direction: 'asc'
+        });
+        
+        setDestinationDepartments(response.data || []);
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+        setDestinationDepartments([]);
+      } finally {
+        setLoadingDepartments(false);
+      }
+    }, []);
+
+    // Fetch branches when form opens or when TRANSFER is selected
+    React.useEffect(() => {
+      if (open && transactionType === 'TRANSFER') {
+        fetchAvailableBranches();
+      }
+    }, [open, transactionType, fetchAvailableBranches]);
+
+    // Fetch departments when destination branch is selected
+    React.useEffect(() => {
+      if (selectedDestinationBranchId) {
+        fetchDepartmentsForBranch(selectedDestinationBranchId);
+        setSelectedDestinationDepartmentId(''); // Reset department selection
+      } else {
+        setDestinationDepartments([]);
+        setSelectedDestinationDepartmentId('');
+      }
+    }, [selectedDestinationBranchId, fetchDepartmentsForBranch]);
+
     // Reset form when modal opens/closes
     React.useEffect(() => {
       if (open) {
@@ -116,13 +194,26 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
           notes: '',
           expiration_date: '',
         });
+        // Reset destination selection state
+        setSelectedDestinationBranchId('');
+        setSelectedDestinationDepartmentId('');
+        setAvailableBranches([]);
+        setDestinationDepartments([]);
       }
     }, [open, reset, selectedBranchId]);
 
     // Handle form submission
     const handleFormSubmit = async (data: StockEntryFormData) => {
       try {
-        await onSubmit(data);
+        // Prepare submission data with proper TypeScript typing
+        const submitData: StockEntryFormData = {
+          ...data,
+          // For TRANSFER transactions, include destination branch and department
+          destination_branch_id: data.transaction_type === 'TRANSFER' ? selectedDestinationBranchId : undefined,
+          destination_department_id: data.transaction_type === 'TRANSFER' ? selectedDestinationDepartmentId : undefined,
+        };
+        
+        await onSubmit(submitData);
         onOpenChange(false);
         reset();
       } catch (error) {
@@ -197,13 +288,12 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                           control={control}
                           render={({ field }) => (
                             <SearchableSelect
-                              options={mockInventoryItems.map(inventoryItemToOption)}
+                              options={allInventoryItems.map(inventoryItemToOption)}
                               value={field.value}
                               onValueChange={field.onChange}
-                              placeholder="Select inventory item..."
+                              placeholder={inventoryItemsLoading ? "Loading inventory items..." : "Select inventory item..."}
                               displayField="name"
-                              subField="category.name"
-                              disabled={isLoading}
+                              disabled={isLoading || inventoryItemsLoading}
                               error={errors.inventory_item_id?.message}
                             />
                           )}
@@ -363,26 +453,102 @@ const StockEntryForm = React.forwardRef<HTMLDivElement, StockEntryFormProps>(
                       )}
 
                       {/* Destination Branch - Required for TRANSFER transactions */}
-                      {transactionType === 'TRANSFER' && (
-                        <div className="space-y-3 lg:col-span-2">
-                          <Label htmlFor="destination_branch_id">
-                            Destination Branch <span className="text-destructive">*</span>
-                          </Label>
-                          <Input
-                            id="destination_branch_id"
-                            type="text"
-                            placeholder="e.g., Warehouse 1, Downtown Branch"
-                            {...register('destination_branch_id')}
-                            className={`text-lg ${errors.destination_branch_id ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                            disabled={isLoading}
-                          />
-                          {errors.destination_branch_id && (
-                            <p className="text-sm text-destructive">
-                              {errors.destination_branch_id.message}
+                      {transactionType === "TRANSFER" && (
+                        <div className="space-y-6 lg:col-span-2">
+                          
+                          {/* Destination Branch */}
+                          <div className="space-y-3">
+                            <Label htmlFor="destination_branch_id">
+                              Destination Branch <span className="text-destructive">*</span>
+                            </Label>
+                            <Controller
+                              name="destination_branch_id"
+                              control={control}
+                              render={({ field }) => (
+                                <Select 
+                                  disabled={isLoading || loadingBranches}
+                                  value={selectedDestinationBranchId}
+                                  onValueChange={(branchId) => {
+                                    setSelectedDestinationBranchId(branchId);
+                                    field.onChange(branchId);
+                                  }}
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue
+                                      placeholder={
+                                        loadingBranches
+                                          ? "Loading branches..."
+                                          : "Select destination branch..."
+                                      }
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {availableBranches.length === 0 && !loadingBranches ? (
+                                      <SelectItem value="" disabled>
+                                        No branches available
+                                      </SelectItem>
+                                    ) : (
+                                      availableBranches.map((branch) => (
+                                        <SelectItem key={branch.id} value={branch.id}>
+                                          {branch.name}
+                                        </SelectItem>
+                                      ))
+                                    )}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            />
+                            {errors.destination_branch_id && (
+                              <p className="text-sm text-destructive mt-1">
+                                {errors.destination_branch_id.message}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              Select a branch to load its departments
                             </p>
+                          </div>
+
+                          {/* Destination Department */}
+                          {selectedDestinationBranchId && (
+                            <div
+                              className="space-y-3 animate-in fade-in slide-in-from-top-1"
+                            >
+                              <Label htmlFor="destination_department_id">
+                                Destination Department <span className="text-destructive">*</span>
+                              </Label>
+                              <Select
+                                disabled={isLoading || loadingDepartments}
+                                value={selectedDestinationDepartmentId}
+                                onValueChange={setSelectedDestinationDepartmentId}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue
+                                    placeholder={
+                                      loadingDepartments
+                                        ? "Loading departments..."
+                                        : "Select destination department..."
+                                    }
+                                  />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {destinationDepartments.length === 0 && !loadingDepartments ? (
+                                    <SelectItem value="none" disabled>
+                                      No departments available
+                                    </SelectItem>
+                                  ) : (
+                                    destinationDepartments.map((department) => (
+                                      <SelectItem key={department.id} value={department.id}>
+                                        {department.name}
+                                      </SelectItem>
+                                    ))
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </div>
                           )}
                         </div>
                       )}
+
 
                       {/* Expiration Date - Optional for IN transactions */}
                       {transactionType === 'IN' && (

@@ -39,6 +39,22 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
 
   // Fetch inventory items from service
   const fetchInventoryItems = useCallback(async () => {
+    // Don't fetch if no branch or department is selected
+    if (!selectedBranchId || !selectedDepartmentId) {
+      setPaginatedInventoryItems({
+        data: [],
+        pagination: {
+          current_page: 1,
+          per_page: 5,
+          total: 0,
+          last_page: 0,
+        },
+      });
+      setAllInventoryItems([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -46,8 +62,8 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
       // Always include the selected branch and department in filters
       const filtersWithContext = {
         ...filters,
-        branch_id: selectedBranchId || undefined,
-        department_id: selectedDepartmentId || undefined,
+        branch_id: selectedBranchId,
+        department_id: selectedDepartmentId,
       };
 
       const response = await inventoryItemsService.getAll(filtersWithContext);
@@ -58,7 +74,9 @@ export function useInventoryItems(options: UseInventoryItemsOptions = {}) {
         const allResponse = await inventoryItemsService.getAll({
           ...filtersWithContext,
           page: 1,
-          per_page: 1000 // TODO: REMOVE - This fetches 1000 records unnecessarily!
+          per_page: 1000, // TODO: REMOVE - This fetches 1000 records unnecessarily!
+          branch_id: selectedBranchId,
+          department_id: selectedDepartmentId
         });
         setAllInventoryItems(allResponse.data);
       }

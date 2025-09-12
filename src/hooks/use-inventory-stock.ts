@@ -38,14 +38,30 @@ export function useInventoryStock(options: UseInventoryStockOptions = {}) {
   });
 
   const fetchStock = useCallback(async () => {
+    // Don't fetch if no branch or department is selected
+    if (!selectedBranchId || !selectedDepartmentId) {
+      setPaginatedInventoryStock({
+        data: [],
+        pagination: {
+          current_page: 1,
+          per_page: 5,
+          total: 0,
+          last_page: 0,
+        },
+      });
+      setAllInventoryStock([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       // Always include the selected branch and department in filters
       const filtersWithContext = {
         ...filters,
-        branch_id: selectedBranchId || undefined,
-        department_id: selectedDepartmentId || undefined,
+        branch_id: selectedBranchId,
+        department_id: selectedDepartmentId,
       };
 
       const response = await inventoryStockService.getAll(filtersWithContext);

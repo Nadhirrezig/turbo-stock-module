@@ -20,6 +20,8 @@ class InventoryStockService {
       if (filters.per_page) queryParams.append('per_page', filters.per_page.toString());
       if (filters.sort_field) queryParams.append('sort_field', filters.sort_field);
       if (filters.sort_direction) queryParams.append('sort_direction', filters.sort_direction);
+      if (filters.branch_id) queryParams.append('branch_id', filters.branch_id);
+      if (filters.department_id) queryParams.append('department_id', filters.department_id);
 
       const response = await apiClient.get<PaginatedResponse<InventoryStock>>(
         `${this.endpoint}?${queryParams.toString()}`
@@ -70,6 +72,18 @@ class InventoryStockService {
     await simulateApiDelay();
     simulateApiError();
     let filtered = [...this.mockData];
+
+    // Filter by branch_id
+    if (filters.branch_id) {
+      filtered = filtered.filter(stock => stock.branch_id === filters.branch_id);
+    }
+
+    // Filter by department_id (through inventory item)
+    if (filters.department_id) {
+      filtered = filtered.filter(stock => 
+        stock.inventory_item?.department_id === filters.department_id
+      );
+    }
 
     if (filters.search) {
       filtered = filterBySearch(filtered, filters.search, []);
