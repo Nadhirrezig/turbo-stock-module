@@ -53,13 +53,13 @@ export function BranchSelector({
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "flex items-center justify-between space-x-2",
-          "w-32 sm:w-full", // w-32 for mobile, w-full for desktop
+          "w-full", // Always full width to work in both header and sidebar
           "truncate"
         )}
       >
         <div className="flex items-center space-x-2 min-w-0">
           <MapPin className="h-4 w-4 shrink-0" />
-          <span className="text-sm font-medium truncate max-w-[80px] sm:max-w-none">
+          <span className="text-sm font-medium truncate">
             {selectedBranch?.name || defaultBranch?.name || 'Select Branch'}
           </span>
         </div>
@@ -77,14 +77,14 @@ export function BranchSelector({
           />
 
           {/* Dropdown */}
-          <div className="absolute top-full left-0 mt-1 w-32 sm:w-full bg-background border border-border rounded-xl shadow-md z-20 overflow-hidden">
+          <div className="absolute top-full left-0 mt-1 w-full bg-background border border-border rounded-xl shadow-md z-20 overflow-hidden">
             <div className="py-1">
               {allBranches.map((branch) => (
                 <button
                   key={branch.id}
                   onClick={() => handleBranchSelect(branch.id)}
                   className={cn(
-                    "w-full px-3 py-2 sm:py-2.5 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors",
+                    "w-full px-3 py-2.5 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors",
                     selectedBranchId === branch.id && "bg-accent text-accent-foreground border-l-2 border-primary"
                   )}
                 >

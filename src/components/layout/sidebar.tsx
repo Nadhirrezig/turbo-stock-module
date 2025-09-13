@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DepartmentSelector } from '@/components/shared/department-selector';
+import { BranchSelector } from '@/components/shared/branch-selector';
+import { useBranchContext } from '@/contexts/branch-context';
 
 interface SidebarItem {
   id: string;
@@ -113,6 +115,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
   ({ className }, ref) => {
     const pathname = usePathname();
     const [expandedItems, setExpandedItems] = React.useState<string[]>(['inventory']);
+    const { selectedBranchId, switchToBranch } = useBranchContext();
     // Department context is used by DepartmentSelector component internally
 
     const toggleExpanded = (itemId: string) => {
@@ -223,6 +226,15 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
               Blink Stock
             </span>
           </Link>
+        </div>
+
+        {/* Branch Selector - Mobile only */}
+        <div className="md:hidden px-3 py-2 border-b border-border">
+          <BranchSelector 
+            selectedBranchId={selectedBranchId || undefined}
+            onBranchChange={switchToBranch}
+            className="w-full"
+          />
         </div>
 
         {/* Navigation */}

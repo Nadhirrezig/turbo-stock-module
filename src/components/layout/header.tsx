@@ -119,20 +119,12 @@ const Header = React.forwardRef<HTMLDivElement, HeaderProps>(
           </nav>
         </div>
 
-        {/* Center - Branch and Department Selectors */}
-        <div className="flex items-center space-x-2 lg:space-x-4">
-          <div className="hidden sm:block">
-            <BranchSelector 
-              selectedBranchId={selectedBranchId || undefined}
-              onBranchChange={switchToBranch}
-            />
-          </div>
-          <div className="sm:hidden ">
-            <BranchSelector 
-              selectedBranchId={selectedBranchId || undefined}
-              onBranchChange={switchToBranch}
-            />
-          </div>
+        {/* Center - Branch Selector (Desktop only) */}
+        <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
+          <BranchSelector 
+            selectedBranchId={selectedBranchId || undefined}
+            onBranchChange={switchToBranch}
+          />
         </div>
 
         {/* Right side - Actions */}
